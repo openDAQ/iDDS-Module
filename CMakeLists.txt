@@ -15,3 +15,4 @@ setup_repo(${REPO_OPTION_PREFIX})
 
 add_subdirectory(external)
 add_subdirectory(idds_wrapper)
+add_subdirectory(examples)
