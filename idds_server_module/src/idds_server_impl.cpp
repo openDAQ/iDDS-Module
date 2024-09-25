@@ -10,7 +10,7 @@ BEGIN_NAMESPACE_OPENDAQ_IDDS_SERVER_MODULE
 using namespace daq;
 
 iDDSServerImpl::iDDSServerImpl(DevicePtr rootDevice, const ContextPtr& context)
-    : Server("OpenDAQiDDS", config, rootDevice, context, nullptr)
+    : Server("OpenDAQiDDS", config, rootDevice, context)
     //, iDDSServer()
 {
     //iDDSServer.start();
