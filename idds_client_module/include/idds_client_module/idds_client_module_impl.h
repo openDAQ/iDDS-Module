@@ -17,7 +17,7 @@
 #pragma once
 #include <idds_client_module/common.h>
 #include <opendaq/module_impl.h>
-#include <idds/idds_server.h>
+#include <iDDSDevice.h>
 
 BEGIN_NAMESPACE_OPENDAQ_IDDS_CLIENT_MODULE
 
@@ -32,7 +32,7 @@ public:
                              const PropertyObjectPtr& config) override;
 
 private:
-    daq::idds::iDDSServer iDDSWrapper;
+    //daq::idds::iDDSServer iDDSWrapper;
 };
 
 END_NAMESPACE_OPENDAQ_IDDS_CLIENT_MODULE

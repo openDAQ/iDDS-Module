@@ -1,10 +1,13 @@
-set(OPENDDS_ENABLE_TESTS OFF)
+# Enable position-independent code (PIC) for OpenDDS
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-# FetchContent is used to download and make OpenDDS available in your project
+option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
+
+# Fetch OpenDDS
 FetchContent_Declare(
     OpenDDS
     GIT_REPOSITORY https://github.com/OpenDDS/OpenDDS.git
-    GIT_TAG        53414662d60f5e222aad9ca4383da0d856a577df  # Specific commit
+    GIT_TAG        53414662d60f5e222aad9ca4383da0d856a577df
     GIT_PROGRESS   ON
 )
 
@@ -13,10 +16,9 @@ FetchContent_MakeAvailable(OpenDDS)
 # Run the OpenDDS configure and setenv scripts (TBD)
 if (UNIX)
     if (EXISTS "${opendds_SOURCE_DIR}/configure")
-        message(STATUS "Running OpenDDS configure script...")
-
+        message(STATUS "Daniel : OpenDDS configure script was found!")
         execute_process(
-            COMMAND ${CMAKE_COMMAND} -E env sh ${opendds_SOURCE_DIR}/configure
+            COMMAND ${CMAKE_COMMAND} -E env sh ${opendds_SOURCE_DIR}/configure --macros='shared_libs_only=1'
             WORKING_DIRECTORY ${opendds_SOURCE_DIR}
             RESULT_VARIABLE CONFIGURE_RESULT
             OUTPUT_VARIABLE CONFIGURE_OUTPUT
