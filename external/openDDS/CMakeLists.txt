@@ -1,8 +1,3 @@
-# Enable position-independent code (PIC) for OpenDDS
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
-
 # Fetch OpenDDS
 FetchContent_Declare(
     OpenDDS
@@ -12,37 +7,3 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(OpenDDS)
-
-# Run the OpenDDS configure and setenv scripts (TBD)
-if (UNIX)
-    if (EXISTS "${opendds_SOURCE_DIR}/configure")
-        message(STATUS "Daniel : OpenDDS configure script was found!")
-        execute_process(
-            COMMAND ${CMAKE_COMMAND} -E env sh ${opendds_SOURCE_DIR}/configure --macros='shared_libs_only=1'
-            WORKING_DIRECTORY ${opendds_SOURCE_DIR}
-            RESULT_VARIABLE CONFIGURE_RESULT
-            OUTPUT_VARIABLE CONFIGURE_OUTPUT
-            ERROR_VARIABLE CONFIGURE_ERROR
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-        )
-
-        if (CONFIGURE_RESULT)
-            message(FATAL_ERROR "OpenDDS configure failed with error: ${CONFIGURE_ERROR}")
-        else()
-            message(STATUS "OpenDDS configure completed successfully.")
-        endif()
-
-    else()
-        message(FATAL_ERROR "OpenDDS configure script not found!")
-    endif()
-endif()
-
-if (EXISTS "${CMAKE_BINARY_DIR}/_deps/opendds-src/setenv.sh")
-    execute_process(
-        COMMAND ${CMAKE_COMMAND} -E env sh ${CMAKE_BINARY_DIR}/_deps/opendds-src/setenv.sh
-        OUTPUT_VARIABLE OPENDDS_ENV_SETUP_OUTPUT
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-else()
-    message(FATAL_ERROR "setenv.sh script not found. Make sure OpenDDS is properly configured.")
-endif()
