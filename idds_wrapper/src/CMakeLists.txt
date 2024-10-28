@@ -8,7 +8,7 @@ find_package(OpenDDS REQUIRED)
 include(opendds_testing)
 
 # IDL TypeSupport Library
-add_library(opendaq_idl)
+add_library(opendaq_idl SHARED)
 opendds_target_sources(opendaq_idl PUBLIC "Messenger.idl")
 target_link_libraries(opendaq_idl PUBLIC OpenDDS::Dcps)
 
@@ -20,7 +20,7 @@ set(opendds_libs
 )
 
 # iDDSWrapper Library
-add_library(idds_wrapper
+add_library(idds_wrapper SHARED
   iDDSDevice.cpp
   DataReaderListenerImpl.cpp
   CommandListenerImpl.cpp

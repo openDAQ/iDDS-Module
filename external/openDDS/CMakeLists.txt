@@ -1,4 +1,5 @@
-# Fetch OpenDDS
+include(FetchContent)
+
 FetchContent_Declare(
     OpenDDS
     GIT_REPOSITORY https://github.com/OpenDDS/OpenDDS.git
@@ -6,4 +7,5 @@ FetchContent_Declare(
     GIT_PROGRESS   ON
 )
 
+set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libraries" FORCE)
 FetchContent_MakeAvailable(OpenDDS)
