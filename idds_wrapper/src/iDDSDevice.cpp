@@ -5,7 +5,7 @@
 // Constants.
 //--------------------------------------------------------------------------------------------------
 static const int hello_interval = 5; // seconds
-static const char node_advertiser_topic[] = "idds_hello";
+static const char node_advertiser_topic[] = "AboutNode";
 
 // Constructor
 iDDSDevice::iDDSDevice(const iDDSNodeUniqueID node_id) : node_id(node_id),
@@ -335,7 +335,7 @@ int iDDSDevice::ListenForNodeAdvertisementMessages()
     // Create Topic
     CORBA::String_var type_name = ts->get_type_name();
     DDS::Topic_var topic =
-        participant->create_topic("idds_hello",
+        participant->create_topic(node_advertiser_topic,
                                   type_name,
                                   TOPIC_QOS_DEFAULT,
                                   0,
@@ -563,7 +563,7 @@ int iDDSDevice::SendAdvertisementMessage()
         // Create Topic
         CORBA::String_var type_name = ts->get_type_name();
         DDS::Topic_var topic =
-            participant->create_topic("idds_hello",
+            participant->create_topic(node_advertiser_topic,
                                       type_name,
                                       TOPIC_QOS_DEFAULT,
                                       0,
