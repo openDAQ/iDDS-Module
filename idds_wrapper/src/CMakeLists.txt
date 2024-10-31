@@ -19,14 +19,37 @@ set(opendds_libs
   opendaq_idl
 )
 
-# iDDSWrapper Library
-add_library(idds_wrapper SHARED
-  iDDSDevice.cpp
-  DataReaderListenerImpl.cpp
-  CommandListenerImpl.cpp
+set(SRC_Cpp iDDSDevice.cpp
+            DataReaderListenerImpl.cpp
+            CommandListenerImpl.cpp
 )
+
+set(SRC_PublicHeaders iDDSDevice.h
+                      DataReaderListenerImpl.h
+                      CommandListenerImpl.h
+)
+
+set(SRC_PrivateHeaders
+)
+
+prepend_include(${TARGET_FOLDER_NAME} SRC_PrivateHeaders)
+prepend_include(${TARGET_FOLDER_NAME} SRC_PublicHeaders)
+
+add_library(${PROJECT_NAME} SHARED
+    ${SRC_Cpp}
+    ${SRC_PublicHeaders}
+    ${SRC_PrivateHeaders}
+)
+
 target_include_directories(idds_wrapper PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(idds_wrapper PUBLIC ${opendds_libs})
+
+target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+                                               $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/../include>
+                                               $<INSTALL_INTERFACE:include>
+)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${SRC_PublicHeaders}")
 
 opendaq_set_module_properties(${LIB_NAME} ${PROJECT_VERSION_MAJOR})
 create_version_header(${LIB_NAME})

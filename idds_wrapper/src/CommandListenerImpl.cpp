@@ -7,9 +7,7 @@
 
 #include <ace/Log_Msg.h>
 #include <ace/OS_NS_stdlib.h>
-
-#include "CommandListenerImpl.h"
-
+#include <idds_wrapper/CommandListenerImpl.h>
 #include <iostream>
 
 void CommandListenerImpl::on_requested_deadline_missed(

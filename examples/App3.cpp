@@ -1,4 +1,4 @@
-#include "iDDSDevice.h"
+#include <idds_wrapper/iDDSDevice.h>
 #include <iostream>
 
 int main() {

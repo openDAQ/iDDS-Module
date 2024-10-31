@@ -7,9 +7,7 @@
 
 #include <ace/Log_Msg.h>
 #include <ace/OS_NS_stdlib.h>
-
-#include "DataReaderListenerImpl.h"
-
+#include <idds_wrapper/DataReaderListenerImpl.h>
 #include <iostream>
 
 void DataReaderListenerImpl::on_requested_deadline_missed(
