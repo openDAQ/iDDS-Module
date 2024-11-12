@@ -30,6 +30,7 @@ public:
     DevicePtr onCreateDevice(const StringPtr& connectionString,
                              const ComponentPtr& parent,
                              const PropertyObjectPtr& config) override;
+    DeviceTypePtr createDeviceType();
 
 private:
     //daq::idds::iDDSServer iDDSWrapper;

@@ -24,7 +24,8 @@ DictPtr<IString, IDeviceType> iDDSClientModule::onGetAvailableDeviceTypes()
 {
     auto result = Dict<IString, IDeviceType>();
 
-    //TBD: Add device types here
+    auto deviceType = createDeviceType();
+    result.set(deviceType.getId(), deviceType);
 
     return result;
 }
@@ -46,7 +47,19 @@ DevicePtr iDDSClientModule::onCreateDevice(const StringPtr& connectionString,
     )));
     obj->addProperty(sendMessageProperty);
 
+    obj.setPropertyValue("SendMessage", sendMessage);
+
     return obj;
+}
+
+DeviceTypePtr iDDSClientModule::createDeviceType()
+{
+    return DeviceTypeBuilder()
+        .setId("OpenDAQIDDSDevice")
+        .setName("Device")
+        .setDescription("iDDS device")
+        .setConnectionStringPrefix("daq.idds")
+        .build();
 }
 
 END_NAMESPACE_OPENDAQ_IDDS_CLIENT_MODULE
