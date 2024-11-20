@@ -31,6 +31,7 @@ public:
     using iDDSNodeUniqueID = std::string;
 
     /// Constructor
+    iDDSDevice();
     explicit iDDSDevice(const iDDSNodeUniqueID node_id);
 
     /// Destructor

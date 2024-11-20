@@ -4,22 +4,31 @@
 #include <coreobjects/property_factory.h>
 #include <opendaq/server_type_factory.h>
 #include <opendaq/custom_log.h>
+#include <iostream>
 
 BEGIN_NAMESPACE_OPENDAQ_IDDS_SERVER_MODULE
 
 using namespace daq;
 
-iDDSServerImpl::iDDSServerImpl(DevicePtr rootDevice, const ContextPtr& context)
+iDDSServerImpl::iDDSServerImpl(const DevicePtr& rootDevice,
+                               const PropertyObjectPtr& config,
+                               const ContextPtr& context)
     : Server("OpenDAQiDDS", config, rootDevice, context)
-    //, iDDSServer()
+    , iDDSServer("Node1")
+    , context(context)
 {
     //iDDSServer.start();
+    std::cout << "Daniel debug: iDDSServerImpl::iDDSServerImpl" << std::endl;
+}
+
+iDDSServerImpl::~iDDSServerImpl()
+{
 }
 
 ServerTypePtr iDDSServerImpl::createType()
 {
     return ServerType(
-        "iDDS",
+        "OpenDAQiDDS",
         "iDDS",
         "iDDS server module");
 }
@@ -27,16 +36,14 @@ ServerTypePtr iDDSServerImpl::createType()
 void iDDSServerImpl::onStopServer()
 {
     //iDDSServer.stop();
+    std::cout << "Daniel debug: destructor called" << std::endl;
 }
 
 OPENDAQ_DEFINE_CLASS_FACTORY_WITH_INTERFACE(
-    INTERNAL_FACTORY,
-    iDDSServer,
-    daq::IServer,
-    daq::DevicePtr,
-    rootDevice,
-    const ContextPtr&,
-    context
-    )
+    INTERNAL_FACTORY, iDDSServer, daq::IServer,
+    daq::DevicePtr, rootDevice,
+    PropertyObjectPtr, config,
+    const ContextPtr&, context
+)
 
 END_NAMESPACE_OPENDAQ_IDDS_SERVER_MODULE

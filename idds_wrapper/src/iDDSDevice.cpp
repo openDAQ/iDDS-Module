@@ -8,6 +8,15 @@ static const int hello_interval = 5; // seconds
 static const char node_advertiser_topic[] = "AboutNode";
 
 // Constructor
+iDDSDevice::iDDSDevice() : node_id("defaultNode"),
+                           listenerNodeAdvertisement_impl(new DataReaderListenerImpl),
+                           listenerNodeAdvertisement(listenerNodeAdvertisement_impl),
+                           listenerCommand_impl(new CommandListenerImpl),
+                           listenerCommand(listenerCommand_impl)
+{
+    SetupiDDSDevice();
+}
+
 iDDSDevice::iDDSDevice(const iDDSNodeUniqueID node_id) : node_id(node_id),
                                                          listenerNodeAdvertisement_impl(new DataReaderListenerImpl),
                                                          listenerNodeAdvertisement(listenerNodeAdvertisement_impl),
