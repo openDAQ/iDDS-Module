@@ -40,6 +40,12 @@ public:
     /// Starts the iDDS server spawning the advertiser and listener threads
     void StartServer();
 
+    ///Start NodeAdvertiser thread
+    void Advertise();
+
+    ///Start ListenForNodeAdvertisementMessages thread
+    void ListenForAdvertise();
+
     /// Returns a vector of available iDDS devices
     std::vector<iDDSNodeUniqueID> GetAvailableIDDSDevices();
 
@@ -65,6 +71,8 @@ private:
     /// Helper method to send advertisement message
     int SendAdvertisementMessage();
 
+    /// Create Node Advertiser Topic
+    int CreateNodeAdvertiserTopic();
 private:
     iDDSNodeUniqueID node_id;
     std::vector<std::string> received_messages;
@@ -83,6 +91,11 @@ private:
     CommandListenerImpl* listenerCommand_impl;
     DDS::DataReaderListener_var listenerCommand;
 
+    //NodeAdvertiser
+    DDS::Topic_var NodeAdvertiserTopic;
+    DDS::Publisher_var NodeAdvertiserPublisher;
+    DDS::DataWriter_var NodeAdvertiserWriter;
+    Messenger::iDDSHelloMsgDataWriter_var iDDSHelloMsg_writer;
 };
 
 #endif // IDDSDEVICE_H

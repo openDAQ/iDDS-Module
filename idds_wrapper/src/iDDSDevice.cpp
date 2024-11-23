@@ -4,7 +4,7 @@
 //--------------------------------------------------------------------------------------------------
 // Constants.
 //--------------------------------------------------------------------------------------------------
-static const int hello_interval = 5; // seconds
+static const int hello_interval = 1; // seconds
 static const char node_advertiser_topic[] = "AboutNode";
 
 // Constructor
@@ -60,12 +60,8 @@ iDDSDevice::~iDDSDevice()
 int iDDSDevice::SetupiDDSDevice()
 {
     // Initialize DomainParticipantFactory
-    dpf = TheServiceParticipant->get_domain_participant_factory();
-
-    // Set up the default info repo
-    const char *repo_ior = "file://simple.ior";
-    OpenDDS::DCPS::Service_Participant *service_participant = TheServiceParticipant;
-    service_participant->set_repo_ior(repo_ior, OpenDDS::DCPS::Discovery::DEFAULT_REPO);
+    TheServiceParticipant->default_configuration_file(ACE_TEXT("rtps.ini"));
+    DDS::DomainParticipantFactory_var dpf = TheServiceParticipant->get_domain_participant_factory();
 
     // Create DomainParticipant
     participant =
@@ -81,7 +77,92 @@ int iDDSDevice::SetupiDDSDevice()
                          1);
     }
 
+    CreateNodeAdvertiserTopic();
+
     return 0;
+}
+
+/// Create Node Advertiser Topic
+int iDDSDevice::CreateNodeAdvertiserTopic()
+{
+    try
+    {
+        // Register TypeSupport (Messenger::iDDSHelloMsg)
+        Messenger::iDDSHelloMsgTypeSupport_var ts =
+            new Messenger::iDDSHelloMsgTypeSupportImpl;
+
+        if (ts->register_type(participant, "") != DDS::RETCODE_OK)
+        {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("ERROR: %N:%l: main() -")
+                                  ACE_TEXT(" register_type failed!\n")),
+                             1);
+        }
+
+        // Create Topic
+        CORBA::String_var type_name = ts->get_type_name();
+        NodeAdvertiserTopic =
+            participant->create_topic(node_advertiser_topic,
+                                      type_name,
+                                      TOPIC_QOS_DEFAULT,
+                                      0,
+                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+        if (!NodeAdvertiserTopic)
+        {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("ERROR: %N:%l: main() -")
+                                  ACE_TEXT(" create_topic failed!\n")),
+                             1);
+        }
+
+        // Create Publisher
+        NodeAdvertiserPublisher =
+            participant->create_publisher(PUBLISHER_QOS_DEFAULT,
+                                          0,
+                                          OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+        if (!NodeAdvertiserPublisher)
+        {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("ERROR: %N:%l: main() -")
+                                  ACE_TEXT(" create_publisher failed!\n")),
+                             1);
+        }
+
+        // Create DataWriter
+        NodeAdvertiserWriter =
+            NodeAdvertiserPublisher->create_datawriter(NodeAdvertiserTopic,
+                                         DATAWRITER_QOS_DEFAULT,
+                                         0,
+                                         OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+        if (!NodeAdvertiserWriter)
+        {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("ERROR: %N:%l: main() -")
+                                  ACE_TEXT(" create_datawriter failed!\n")),
+                             1);
+        }
+
+        iDDSHelloMsg_writer =
+            Messenger::iDDSHelloMsgDataWriter::_narrow(NodeAdvertiserWriter);
+
+        if (!iDDSHelloMsg_writer)
+        {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("ERROR: %N:%l: main() -")
+                                  ACE_TEXT(" _narrow failed!\n")),
+                             1);
+        }
+
+        return 0;
+    }
+    catch (const CORBA::Exception &e)
+    {
+        e._tao_print_exception("Exception caught in main():");
+        return 1;
+    }
 }
 
 // StartServer method
@@ -93,6 +174,18 @@ void iDDSDevice::StartServer()
     advertiser_thread = std::thread(&iDDSDevice::NodeAdvertiser, this);
     listener_thread = std::thread(&iDDSDevice::ListenForNodeAdvertisementMessages, this);
     command_listener_thread = std::thread(&iDDSDevice::ListenForCommandMessages, this);
+}
+
+//Start NodeAdvertiser thread
+void iDDSDevice::Advertise()
+{
+    advertiser_thread = std::thread(&iDDSDevice::NodeAdvertiser, this);
+}
+
+//Start ListenForNodeAdvertisementMessages thread
+void iDDSDevice::ListenForAdvertise()
+{
+    listener_thread = std::thread(&iDDSDevice::ListenForNodeAdvertisementMessages, this);
 }
 
 // GetAvailableIDDSDevices method
@@ -191,8 +284,8 @@ int iDDSDevice::SendIDDSMessage(const iDDSNodeUniqueID destination_node_id, cons
         DDS::WaitSet_var ws = new DDS::WaitSet;
         ws->attach_condition(condition);
 
-        //ACE_DEBUG((LM_DEBUG,
-        //           ACE_TEXT("Block until subscriber is available\n")));
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("Block until subscriber is available\n")));
 
         while (true)
         {
@@ -221,8 +314,8 @@ int iDDSDevice::SendIDDSMessage(const iDDSNodeUniqueID destination_node_id, cons
             }
         }
 
-        //ACE_DEBUG((LM_DEBUG,
-        //           ACE_TEXT("Subscriber is available\n")));
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("Subscriber is available\n")));
 
         ws->detach_condition(condition);
 
@@ -553,93 +646,25 @@ int iDDSDevice::ListenForCommandMessages()
     return 0;
 }
 
+// Helper method to send advertisement message
 int iDDSDevice::SendAdvertisementMessage()
 {
     try
     {
-        // Register TypeSupport (Messenger::iDDSHelloMsg)
-        Messenger::iDDSHelloMsgTypeSupport_var ts =
-            new Messenger::iDDSHelloMsgTypeSupportImpl;
-
-        if (ts->register_type(participant, "") != DDS::RETCODE_OK)
-        {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("ERROR: %N:%l: main() -")
-                                  ACE_TEXT(" register_type failed!\n")),
-                             1);
-        }
-
-        // Create Topic
-        CORBA::String_var type_name = ts->get_type_name();
-        DDS::Topic_var topic =
-            participant->create_topic(node_advertiser_topic,
-                                      type_name,
-                                      TOPIC_QOS_DEFAULT,
-                                      0,
-                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-        if (!topic)
-        {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("ERROR: %N:%l: main() -")
-                                  ACE_TEXT(" create_topic failed!\n")),
-                             1);
-        }
-
-        // Create Publisher
-        DDS::Publisher_var publisher =
-            participant->create_publisher(PUBLISHER_QOS_DEFAULT,
-                                          0,
-                                          OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-        if (!publisher)
-        {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("ERROR: %N:%l: main() -")
-                                  ACE_TEXT(" create_publisher failed!\n")),
-                             1);
-        }
-
-        // Create DataWriter
-        DDS::DataWriter_var writer =
-            publisher->create_datawriter(topic,
-                                         DATAWRITER_QOS_DEFAULT,
-                                         0,
-                                         OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-        if (!writer)
-        {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("ERROR: %N:%l: main() -")
-                                  ACE_TEXT(" create_datawriter failed!\n")),
-                             1);
-        }
-
-        Messenger::iDDSHelloMsgDataWriter_var iDDSHelloMsg_writer =
-            Messenger::iDDSHelloMsgDataWriter::_narrow(writer);
-
-        if (!iDDSHelloMsg_writer)
-        {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("ERROR: %N:%l: main() -")
-                                  ACE_TEXT(" _narrow failed!\n")),
-                             1);
-        }
-
         // Block until Subscriber is available
-        DDS::StatusCondition_var condition = writer->get_statuscondition();
+        DDS::StatusCondition_var condition = NodeAdvertiserWriter->get_statuscondition();
         condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
 
         DDS::WaitSet_var ws = new DDS::WaitSet;
         ws->attach_condition(condition);
 
-        //ACE_DEBUG((LM_DEBUG,
-        //           ACE_TEXT("Block until subscriber is available\n")));
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("Block until subscriber is available\n")));
 
         while (true)
         {
             DDS::PublicationMatchedStatus matches;
-            if (writer->get_publication_matched_status(matches) != ::DDS::RETCODE_OK)
+            if (NodeAdvertiserWriter->get_publication_matched_status(matches) != ::DDS::RETCODE_OK)
             {
                 ACE_ERROR_RETURN((LM_ERROR,
                                   ACE_TEXT("ERROR: %N:%l: main() -")
@@ -663,8 +688,8 @@ int iDDSDevice::SendAdvertisementMessage()
             }
         }
 
-        //ACE_DEBUG((LM_DEBUG,
-        //           ACE_TEXT("Subscriber is available\n")));
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("Subscriber is available\n")));
 
         ws->detach_condition(condition);
 
