@@ -60,9 +60,6 @@ private:
     /// Advertise node thread
     void NodeAdvertiser();
 
-    /// Listen for Command Messages
-    int ListenForCommandMessages();
-
     /// Method to setup OpenDDS domain participant factory
     int SetupiDDSDevice();
 
@@ -71,6 +68,10 @@ private:
 
     /// Create Node Advertiser Topic
     int CreateNodeAdvertiserTopic();
+
+    /// Create Message Topic
+    int CreateMessageTopic();
+
 private:
     iDDSNodeUniqueID node_id;
     std::vector<std::string> received_messages;
@@ -88,7 +89,7 @@ private:
     CommandListenerImpl* listenerCommand_impl;
     DDS::DataReaderListener_var listenerCommand;
 
-    //NodeAdvertiser
+    //NodeAdvertiser Topic
     DDS::Topic_var NodeAdvertiserTopic;
     DDS::Publisher_var NodeAdvertiserPublisher;
     DDS::DataWriter_var NodeAdvertiserWriter;
@@ -96,7 +97,13 @@ private:
     DDS::Subscriber_var NodeAdvertiserSubscriber;
     DDS::DataReader_var NodeAdvertiserReader;
 
-    std::mutex NodeAdvertiser_mutex;
+    //Message Topic
+    DDS::Topic_var MessageTopic;
+    DDS::Publisher_var MessagePublisher;
+    DDS::DataWriter_var MessageWriter;
+    Messenger::iDDSControlMsgDataWriter_var iDDSMessage_writer;
+    DDS::Subscriber_var MessageSubscriber;
+    DDS::DataReader_var MessageReader;
 };
 
 #endif // IDDSDEVICE_H
