@@ -39,11 +39,6 @@ iDDSDevice::~iDDSDevice()
             advertiser_thread.join();
         }
 
-        if (listener_thread.joinable())
-        {
-            listener_thread.join();
-        }
-
         if (command_listener_thread.joinable())
         {
             command_listener_thread.join();
@@ -130,7 +125,6 @@ int iDDSDevice::CreateNodeAdvertiserTopic()
                              1);
         }
 
-        // Create DataWriter
         NodeAdvertiserWriter =
             NodeAdvertiserPublisher->create_datawriter(NodeAdvertiserTopic,
                                          DATAWRITER_QOS_DEFAULT,
@@ -156,6 +150,37 @@ int iDDSDevice::CreateNodeAdvertiserTopic()
                              1);
         }
 
+        // Create Subscriber
+        NodeAdvertiserSubscriber = participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
+                                       0,
+                                       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+        if (!NodeAdvertiserSubscriber)
+        {
+            ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("ERROR: %N:%l: main() -")
+                              ACE_TEXT(" create_subscriber failed!\n")),
+                         1);
+        }
+
+        DDS::DataReaderQos reader_qos;
+        NodeAdvertiserSubscriber->get_default_datareader_qos(reader_qos);
+        reader_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+
+        NodeAdvertiserReader =
+            NodeAdvertiserSubscriber->create_datareader(NodeAdvertiserTopic,
+                                      reader_qos,
+                                      listenerNodeAdvertisement,
+                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+        if (!NodeAdvertiserReader)
+        {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("ERROR: %N:%l: main() -")
+                                  ACE_TEXT(" create_datareader failed!\n")),
+                             1);
+        }
+
         return 0;
     }
     catch (const CORBA::Exception &e)
@@ -172,7 +197,6 @@ void iDDSDevice::StartServer()
     m_bRunning = true;
 
     advertiser_thread = std::thread(&iDDSDevice::NodeAdvertiser, this);
-    listener_thread = std::thread(&iDDSDevice::ListenForNodeAdvertisementMessages, this);
     command_listener_thread = std::thread(&iDDSDevice::ListenForCommandMessages, this);
 }
 
@@ -180,12 +204,6 @@ void iDDSDevice::StartServer()
 void iDDSDevice::Advertise()
 {
     advertiser_thread = std::thread(&iDDSDevice::NodeAdvertiser, this);
-}
-
-//Start ListenForNodeAdvertisementMessages thread
-void iDDSDevice::ListenForAdvertise()
-{
-    listener_thread = std::thread(&iDDSDevice::ListenForNodeAdvertisementMessages, this);
 }
 
 // GetAvailableIDDSDevices method
@@ -411,126 +429,12 @@ void iDDSDevice::NodeAdvertiser()
 
     while (m_bRunning)
     {
-        std::this_thread::sleep_for(std::chrono::seconds(hello_interval)); // Wait for 5 seconds
+        std::this_thread::sleep_for(std::chrono::seconds(hello_interval));
         if (m_bRunning)
         {
             SendAdvertisementMessage();
         }
     }
-}
-
-// ListenForNodeAdvertisementMessages method
-int iDDSDevice::ListenForNodeAdvertisementMessages()
-{
-    // Register TypeSupport (Messenger::iDDSHelloMsg)
-    Messenger::iDDSHelloMsgTypeSupport_var ts =
-        new Messenger::iDDSHelloMsgTypeSupportImpl;
-
-    if (ts->register_type(participant, "") != DDS::RETCODE_OK)
-    {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                              ACE_TEXT(" register_type failed!\n")),
-                         1);
-    }
-
-    // Create Topic
-    CORBA::String_var type_name = ts->get_type_name();
-    DDS::Topic_var topic =
-        participant->create_topic(node_advertiser_topic,
-                                  type_name,
-                                  TOPIC_QOS_DEFAULT,
-                                  0,
-                                  OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (!topic)
-    {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                              ACE_TEXT(" create_topic failed!\n")),
-                         1);
-    }
-
-    // Create Subscriber
-    DDS::Subscriber_var subscriber =
-        participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
-                                       0,
-                                       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (!subscriber)
-    {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                              ACE_TEXT(" create_subscriber failed!\n")),
-                         1);
-    }
-
-    DDS::DataReaderQos reader_qos;
-    subscriber->get_default_datareader_qos(reader_qos);
-    reader_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-
-    DDS::DataReader_var reader =
-        subscriber->create_datareader(topic,
-                                      reader_qos,
-                                      listenerNodeAdvertisement,
-                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (!reader)
-    {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                              ACE_TEXT(" create_datareader failed!\n")),
-                         1);
-    }
-
-    Messenger::iDDSHelloMsgDataReader_var reader_i =
-        Messenger::iDDSHelloMsgDataReader::_narrow(reader);
-
-    if (!reader_i)
-    {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                              ACE_TEXT(" _narrow failed!\n")),
-                         1);
-    }
-
-    // Block until Publisher completes
-    DDS::StatusCondition_var condition = reader->get_statuscondition();
-    condition->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
-
-    DDS::WaitSet_var ws = new DDS::WaitSet;
-    ws->attach_condition(condition);
-
-    while (true)
-    {
-        DDS::SubscriptionMatchedStatus matches;
-        if (reader->get_subscription_matched_status(matches) != DDS::RETCODE_OK)
-        {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("ERROR: %N:%l: main() -")
-                                  ACE_TEXT(" get_subscription_matched_status failed!\n")),
-                             1);
-        }
-
-        if (matches.current_count == 0 && matches.total_count > 0)
-        {
-            break;
-        }
-
-        DDS::ConditionSeq conditions;
-        DDS::Duration_t timeout = {60, 0};
-        if (ws->wait(conditions, timeout) != DDS::RETCODE_OK)
-        {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("ERROR: %N:%l: main() -")
-                                  ACE_TEXT(" wait failed!\n")),
-                             1);
-        }
-    }
-
-    ws->detach_condition(condition);
-
-    return 0;
 }
 
 int iDDSDevice::ListenForCommandMessages()
@@ -651,48 +555,6 @@ int iDDSDevice::SendAdvertisementMessage()
 {
     try
     {
-        // Block until Subscriber is available
-        DDS::StatusCondition_var condition = NodeAdvertiserWriter->get_statuscondition();
-        condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
-
-        DDS::WaitSet_var ws = new DDS::WaitSet;
-        ws->attach_condition(condition);
-
-        ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("Block until subscriber is available\n")));
-
-        while (true)
-        {
-            DDS::PublicationMatchedStatus matches;
-            if (NodeAdvertiserWriter->get_publication_matched_status(matches) != ::DDS::RETCODE_OK)
-            {
-                ACE_ERROR_RETURN((LM_ERROR,
-                                  ACE_TEXT("ERROR: %N:%l: main() -")
-                                      ACE_TEXT(" get_publication_matched_status failed!\n")),
-                                 1);
-            }
-
-            if (matches.current_count >= 1)
-            {
-                break;
-            }
-
-            DDS::ConditionSeq conditions;
-            DDS::Duration_t timeout = {60, 0};
-            if (ws->wait(conditions, timeout) != DDS::RETCODE_OK)
-            {
-                ACE_ERROR_RETURN((LM_ERROR,
-                                  ACE_TEXT("ERROR: %N:%l: main() -")
-                                      ACE_TEXT(" wait failed!\n")),
-                                 1);
-            }
-        }
-
-        ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("Subscriber is available\n")));
-
-        ws->detach_condition(condition);
-
         // Write samples
         Messenger::iDDSHelloMsg message;
         message.timestamp = 0;
@@ -714,14 +576,14 @@ int iDDSDevice::SendAdvertisementMessage()
         }
 
         // Wait for samples to be acknowledged
-        DDS::Duration_t timeout = {30, 0};
-        if (iDDSHelloMsg_writer->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK)
-        {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("ERROR: %N:%l: main() -")
-                                  ACE_TEXT(" wait_for_acknowledgments failed!\n")),
-                             1);
-        }
+        //DDS::Duration_t timeout = {30, 0};
+        //if (iDDSHelloMsg_writer->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK)
+        //{
+        //    ACE_ERROR_RETURN((LM_ERROR,
+        //                      ACE_TEXT("ERROR: %N:%l: main() -")
+        //                          ACE_TEXT(" wait_for_acknowledgments failed!\n")),
+        //                     1);
+        //}
     }
     catch (const CORBA::Exception &e)
     {

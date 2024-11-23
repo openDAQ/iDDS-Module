@@ -2,6 +2,7 @@
 #define IDDSDEVICE_H
 
 #include "MessengerTypeSupportImpl.h"
+#include "MessengerC.h"
 #include "DataReaderListenerImpl.h"
 #include "CommandListenerImpl.h"
 
@@ -59,9 +60,6 @@ private:
     /// Advertise node thread
     void NodeAdvertiser();
 
-    /// Listen for Node Advertisement essages
-    int ListenForNodeAdvertisementMessages();
-
     /// Listen for Command Messages
     int ListenForCommandMessages();
 
@@ -78,7 +76,6 @@ private:
     std::vector<std::string> received_messages;
 
     std::thread advertiser_thread;
-    std::thread listener_thread;
     std::thread command_listener_thread;
     bool m_bRunning;
 
@@ -96,6 +93,10 @@ private:
     DDS::Publisher_var NodeAdvertiserPublisher;
     DDS::DataWriter_var NodeAdvertiserWriter;
     Messenger::iDDSHelloMsgDataWriter_var iDDSHelloMsg_writer;
+    DDS::Subscriber_var NodeAdvertiserSubscriber;
+    DDS::DataReader_var NodeAdvertiserReader;
+
+    std::mutex NodeAdvertiser_mutex;
 };
 
 #endif // IDDSDEVICE_H
