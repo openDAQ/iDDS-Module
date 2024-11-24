@@ -319,12 +319,6 @@ void iDDSDevice::StartServer()
     advertiser_thread = std::thread(&iDDSDevice::NodeAdvertiser, this);
 }
 
-//Start NodeAdvertiser thread
-void iDDSDevice::Advertise()
-{
-    advertiser_thread = std::thread(&iDDSDevice::NodeAdvertiser, this);
-}
-
 // GetAvailableIDDSDevices method
 std::vector<iDDSDevice::iDDSNodeUniqueID> iDDSDevice::GetAvailableIDDSDevices()
 {
@@ -475,7 +469,7 @@ void iDDSDevice::PrintReceivedIDDSMessages()
 void iDDSDevice::NodeAdvertiser()
 {
     // Placeholder implementation
-    std::cout << "Node advertiser started." << std::endl;
+    std::cout << "[iDDS_Wrapper] Node advertiser started" << std::endl;
 
     while (m_bRunning)
     {
@@ -486,47 +480,6 @@ void iDDSDevice::NodeAdvertiser()
         }
     }
 }
-/*
-int iDDSDevice::ListenForCommandMessages()
-{
-    // Block until Publisher completes
-    DDS::StatusCondition_var condition = reader->get_statuscondition();
-    condition->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
-
-    DDS::WaitSet_var ws = new DDS::WaitSet;
-    ws->attach_condition(condition);
-
-    while (true)
-    {
-        DDS::SubscriptionMatchedStatus matches;
-        if (reader->get_subscription_matched_status(matches) != DDS::RETCODE_OK)
-        {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("ERROR: %N:%l: main() -")
-                                  ACE_TEXT(" get_subscription_matched_status failed!\n")),
-                             1);
-        }
-
-        if (matches.current_count == 0 && matches.total_count > 0)
-        {
-            break;
-        }
-
-        DDS::ConditionSeq conditions;
-        DDS::Duration_t timeout = {60, 0};
-        if (ws->wait(conditions, timeout) != DDS::RETCODE_OK)
-        {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("ERROR: %N:%l: main() -")
-                                  ACE_TEXT(" wait failed!\n")),
-                             1);
-        }
-    }
-
-    ws->detach_condition(condition);
-
-    return 0;
-}*/
 
 // Helper method to send advertisement message
 int iDDSDevice::SendAdvertisementMessage()

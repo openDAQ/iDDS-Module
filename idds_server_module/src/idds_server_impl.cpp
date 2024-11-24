@@ -18,7 +18,6 @@ iDDSServerImpl::iDDSServerImpl(const DevicePtr& rootDevice,
     , context(context)
 {
     iDDSServer.StartServer();
-    std::cout << "Daniel debug: iDDSServerImpl::iDDSServerImpl" << std::endl;
 }
 
 iDDSServerImpl::~iDDSServerImpl()
@@ -36,7 +35,7 @@ ServerTypePtr iDDSServerImpl::createType()
 void iDDSServerImpl::onStopServer()
 {
     //iDDSServer.stop();
-    std::cout << "Daniel debug: destructor called" << std::endl;
+    std::cout << "Desctructor called" << std::endl;
 }
 
 OPENDAQ_DEFINE_CLASS_FACTORY_WITH_INTERFACE(

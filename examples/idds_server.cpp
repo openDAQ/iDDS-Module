@@ -8,7 +8,7 @@ int main()
 {
     const auto instance = Instance();
 
-    // Start an OpcUa server
+    // Start an idds server
     instance.addServer("OpenDAQiDDS", nullptr);
 
     // Wait for user input

@@ -16,7 +16,7 @@ iDDSClientModule::iDDSClientModule(ContextPtr context)
             daq::VersionInfo(IDDS_CL_MODULE_MAJOR_VERSION, IDDS_CL_MODULE_MINOR_VERSION, IDDS_CL_MODULE_PATCH_VERSION),
             std::move(context),
             "OpenDAQiDDSClientModule")
-      //iDDSWrapper()
+    , iDDSClient("iDDSClient1")
 {
 }
 
@@ -36,21 +36,45 @@ DevicePtr iDDSClientModule::onCreateDevice(const StringPtr& connectionString,
 {
     DevicePtr obj(createWithImplementation<IDevice, Device>(context, parent, "iDDSDevice"));
 
-    //iDDSWrapper.addTopic("openDaq");
-    //iDDSWrapper.start()
+    //Start iDDS device
+    iDDSClient.StartServer();
 
+    //Send Message Function
     auto sendMessageProp = FunctionProperty(
             "sendMessage", FunctionInfo(ctString, List<IArgumentInfo>(ArgumentInfo("Message", ctString))));
         FunctionPtr sendMessageCallback = Function(
-            [](ListPtr<IBaseObject> args)
+            [this](ListPtr<IBaseObject> args)
             {
                 std::string message = args[0];
                 std::cout << "Message sent: " << message << std::endl;
+                iDDSClient.SendIDDSMessage("iDDSServer1", message);
                 return 0;
             });
 
     obj.addProperty(sendMessageProp);
     obj.setPropertyValue("sendMessage", sendMessageCallback);
+
+    //GetAvailableDevices Function
+    auto getAvailableDevicesProp = FunctionProperty(
+            "getAvailableDevices", ProcedureInfo());
+        ProcedurePtr getAvailableDevicesCallback = [this](){
+                std::cout << "Available iDDS devices: " << std::endl;
+                //return iDDSClient.GetAvailableIDDSDevices();
+            };
+
+    obj.addProperty(getAvailableDevicesProp);
+    obj.setPropertyValue("getAvailableDevices", Procedure(
+        [this]()
+        {
+                auto vec = iDDSClient.GetAvailableIDDSDevices();
+                std::cout << "Available iDDS devices: " << std::endl;
+                for (const auto& id : vec)
+                {
+                    std::cout << " - " << id << std::endl;
+                }
+                return iDDSClient.GetAvailableIDDSDevices();
+        }
+    ));
 
     return obj;
 }
