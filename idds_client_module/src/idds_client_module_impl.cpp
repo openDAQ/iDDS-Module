@@ -31,23 +31,26 @@ DictPtr<IString, IDeviceType> iDDSClientModule::onGetAvailableDeviceTypes()
 }
 
 DevicePtr iDDSClientModule::onCreateDevice(const StringPtr& connectionString,
-                                                         const ComponentPtr& parent,
-                                                         const PropertyObjectPtr& /*config*/)
+                                           const ComponentPtr& parent,
+                                           const PropertyObjectPtr& /*config*/)
 {
     DevicePtr obj(createWithImplementation<IDevice, Device>(context, parent, "iDDSDevice"));
 
     //iDDSWrapper.addTopic("openDaq");
     //iDDSWrapper.start()
 
-    ProcedurePtr sendMessage = []() {
-        //iDDSWrapper.sendMessage("openDaq", "Hello from openDaq");
-    };
-    PropertyPtr sendMessageProperty = FunctionProperty("SendMessage", ProcedureInfo(List<IArgumentInfo>(
-            ArgumentInfo("message", ctString)
-    )));
-    obj->addProperty(sendMessageProperty);
+    auto sendMessageProp = FunctionProperty(
+            "sendMessage", FunctionInfo(ctString, List<IArgumentInfo>(ArgumentInfo("Message", ctString))));
+        FunctionPtr sendMessageCallback = Function(
+            [](ListPtr<IBaseObject> args)
+            {
+                std::string message = args[0];
+                std::cout << "Message sent: " << message << std::endl;
+                return 0;
+            });
 
-    obj.setPropertyValue("SendMessage", sendMessage);
+    obj.addProperty(sendMessageProp);
+    obj.setPropertyValue("sendMessage", sendMessageCallback);
 
     return obj;
 }
@@ -55,8 +58,8 @@ DevicePtr iDDSClientModule::onCreateDevice(const StringPtr& connectionString,
 DeviceTypePtr iDDSClientModule::createDeviceType()
 {
     return DeviceTypeBuilder()
-        .setId("OpenDAQIDDSDevice")
-        .setName("Device")
+        .setId("OpenDAQiDDS")
+        .setName("iDDSClientDevice")
         .setDescription("iDDS device")
         .setConnectionStringPrefix("daq.idds")
         .build();

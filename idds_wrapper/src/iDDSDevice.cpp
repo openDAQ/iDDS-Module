@@ -1,5 +1,6 @@
 #include <idds_wrapper/iDDSDevice.h>
 #include <iostream>
+#include <fstream>
 
 //--------------------------------------------------------------------------------------------------
 // Constants.
@@ -7,6 +8,7 @@
 static const int hello_interval = 1; // seconds
 static const char node_advertiser_topic[] = "AboutNode";
 static const char message_topic[] = "Message";
+static const char rtps_file[] = "rtps.ini";
 
 // Constructor
 iDDSDevice::iDDSDevice() : node_id("defaultNode"),
@@ -50,8 +52,19 @@ iDDSDevice::~iDDSDevice()
 /// Initialize Domain Factory and Participant
 int iDDSDevice::SetupiDDSDevice()
 {
+    // Check RTPS ini file exists
+    std::ifstream file(rtps_file);
+    if (!file.good())
+    {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("ERROR: %N:%l:")
+                              ACE_TEXT("RTPS configuration file was not found!\n")),
+                         1);
+        return 0;
+    }
+
     // Initialize DomainParticipantFactory
-    TheServiceParticipant->default_configuration_file(ACE_TEXT("rtps.ini"));
+    TheServiceParticipant->default_configuration_file(ACE_TEXT(rtps_file));
     DDS::DomainParticipantFactory_var dpf = TheServiceParticipant->get_domain_participant_factory();
 
     // Create DomainParticipant

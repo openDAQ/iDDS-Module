@@ -24,3 +24,11 @@ target_link_libraries(idds_server_module_example PUBLIC daq::opendaq
                                       PUBLIC idds_wrapper
 
 )
+
+add_executable(idds_client_module_example
+  idds_client.cpp
+)
+target_link_libraries(idds_client_module_example PUBLIC daq::opendaq
+                                      PUBLIC idds_wrapper
+
+)

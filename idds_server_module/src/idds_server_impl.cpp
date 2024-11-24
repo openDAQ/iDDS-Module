@@ -14,10 +14,10 @@ iDDSServerImpl::iDDSServerImpl(const DevicePtr& rootDevice,
                                const PropertyObjectPtr& config,
                                const ContextPtr& context)
     : Server("OpenDAQiDDS", config, rootDevice, context)
-    , iDDSServer("Node1")
+    , iDDSServer("iDDSServer1")
     , context(context)
 {
-    //iDDSServer.start();
+    iDDSServer.StartServer();
     std::cout << "Daniel debug: iDDSServerImpl::iDDSServerImpl" << std::endl;
 }
 
