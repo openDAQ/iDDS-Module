@@ -36,7 +36,6 @@ add_subdirectory(external)
 add_subdirectory(idds_wrapper)
 add_subdirectory(idds_server_module)
 add_subdirectory(idds_client_module)
-add_subdirectory(Messenger)
 
 # Copy rtps.ini to the bin directory
 add_custom_command(
