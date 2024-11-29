@@ -2,6 +2,7 @@
 #define IDDSDEVICE_H
 
 #include "MessengerTypeSupportImpl.h"
+#include "MessengerC.h"
 #include "DataReaderListenerImpl.h"
 #include "CommandListenerImpl.h"
 
@@ -31,6 +32,7 @@ public:
     using iDDSNodeUniqueID = std::string;
 
     /// Constructor
+    iDDSDevice();
     explicit iDDSDevice(const iDDSNodeUniqueID node_id);
 
     /// Destructor
@@ -52,24 +54,23 @@ private:
     /// Advertise node thread
     void NodeAdvertiser();
 
-    /// Listen for Node Advertisement essages
-    int ListenForNodeAdvertisementMessages();
-
-    /// Listen for Command Messages
-    int ListenForCommandMessages();
-
     /// Method to setup OpenDDS domain participant factory
     int SetupiDDSDevice();
 
     /// Helper method to send advertisement message
     int SendAdvertisementMessage();
 
+    /// Create Node Advertiser Topic
+    int CreateNodeAdvertiserTopic();
+
+    /// Create Message Topic
+    int CreateMessageTopic();
+
 private:
     iDDSNodeUniqueID node_id;
     std::vector<std::string> received_messages;
 
     std::thread advertiser_thread;
-    std::thread listener_thread;
     std::thread command_listener_thread;
     bool m_bRunning;
 
@@ -82,6 +83,21 @@ private:
     CommandListenerImpl* listenerCommand_impl;
     DDS::DataReaderListener_var listenerCommand;
 
+    //NodeAdvertiser Topic
+    DDS::Topic_var NodeAdvertiserTopic;
+    DDS::Publisher_var NodeAdvertiserPublisher;
+    DDS::DataWriter_var NodeAdvertiserWriter;
+    Messenger::iDDSHelloMsgDataWriter_var iDDSHelloMsg_writer;
+    DDS::Subscriber_var NodeAdvertiserSubscriber;
+    DDS::DataReader_var NodeAdvertiserReader;
+
+    //Message Topic
+    DDS::Topic_var MessageTopic;
+    DDS::Publisher_var MessagePublisher;
+    DDS::DataWriter_var MessageWriter;
+    Messenger::iDDSControlMsgDataWriter_var iDDSMessage_writer;
+    DDS::Subscriber_var MessageSubscriber;
+    DDS::DataReader_var MessageReader;
 };
 
 #endif // IDDSDEVICE_H
