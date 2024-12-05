@@ -9,7 +9,7 @@ include(opendds_testing)
 
 # IDL TypeSupport Library
 add_library(opendaq_idl SHARED)
-opendds_target_sources(opendaq_idl PUBLIC "Messenger.idl")
+opendds_target_sources(opendaq_idl PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../idl/iDDS.idl")
 target_link_libraries(opendaq_idl PUBLIC OpenDDS::Dcps)
 
 set(opendds_libs
