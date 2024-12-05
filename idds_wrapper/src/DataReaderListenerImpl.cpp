@@ -36,8 +36,8 @@ void DataReaderListenerImpl::on_liveliness_changed(
 
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 {
-  Messenger::iDDSHelloMsgDataReader_var reader_i =
-      Messenger::iDDSHelloMsgDataReader::_narrow(reader);
+  RealTimeBackbone::AboutNodeDataReader_var reader_i =
+      RealTimeBackbone::AboutNodeDataReader::_narrow(reader);
 
   if (!reader_i)
   {
@@ -47,7 +47,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     ACE_OS::exit(1);
   }
 
-  Messenger::iDDSHelloMsg message;
+  RealTimeBackbone::AboutNode message;
   DDS::SampleInfo info;
 
   const DDS::ReturnCode_t error = reader_i->take_next_sample(message, info);
@@ -58,9 +58,8 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     {
       // Debugging version of unique_id comparison
       auto it = std::find_if(message_vector.begin(), message_vector.end(),
-                             [&message](const Messenger::iDDSHelloMsg &msg)
-                             {
-                              return std::strcmp(msg.unique_id.in(), message.unique_id.in()) == 0;
+                             [&message](const RealTimeBackbone::AboutNode &msg){
+                                return std::strcmp(msg.logicalNodeID.in(), message.logicalNodeID.in()) == 0;
                              });
 
       // If unique_id is not found, append the new message to the vector
@@ -90,7 +89,7 @@ void DataReaderListenerImpl::on_sample_lost(
 {
 }
 
-std::vector<Messenger::iDDSHelloMsg> DataReaderListenerImpl::get_message_vector()
+std::vector<RealTimeBackbone::AboutNode> DataReaderListenerImpl::get_message_vector()
 {
   return message_vector;
 }

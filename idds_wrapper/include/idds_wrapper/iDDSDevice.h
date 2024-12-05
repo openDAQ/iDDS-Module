@@ -1,8 +1,8 @@
 #ifndef IDDSDEVICE_H
 #define IDDSDEVICE_H
 
-#include "MessengerTypeSupportImpl.h"
-#include "MessengerC.h"
+#include "iDDSTypeSupportImpl.h"
+#include "iDDSC.h"
 #include "DataReaderListenerImpl.h"
 #include "CommandListenerImpl.h"
 
@@ -83,11 +83,11 @@ private:
     CommandListenerImpl* listenerCommand_impl;
     DDS::DataReaderListener_var listenerCommand;
 
-    //NodeAdvertiser Topic
+    //AboutNode Topic
     DDS::Topic_var NodeAdvertiserTopic;
     DDS::Publisher_var NodeAdvertiserPublisher;
     DDS::DataWriter_var NodeAdvertiserWriter;
-    Messenger::iDDSHelloMsgDataWriter_var iDDSHelloMsg_writer;
+    RealTimeBackbone::AboutNodeDataWriter_var AboutNode_writer;
     DDS::Subscriber_var NodeAdvertiserSubscriber;
     DDS::DataReader_var NodeAdvertiserReader;
 
@@ -95,7 +95,7 @@ private:
     DDS::Topic_var MessageTopic;
     DDS::Publisher_var MessagePublisher;
     DDS::DataWriter_var MessageWriter;
-    Messenger::iDDSControlMsgDataWriter_var iDDSMessage_writer;
+    RealTimeBackbone::MessageDataWriter_var Message_writer;
     DDS::Subscriber_var MessageSubscriber;
     DDS::DataReader_var MessageReader;
 };

@@ -92,9 +92,9 @@ int iDDSDevice::CreateNodeAdvertiserTopic()
 {
     try
     {
-        // Register TypeSupport (Messenger::iDDSHelloMsg)
-        Messenger::iDDSHelloMsgTypeSupport_var ts =
-            new Messenger::iDDSHelloMsgTypeSupportImpl;
+        // Register TypeSupport (RealTimeBackbone::AboutNode)
+        RealTimeBackbone::AboutNodeTypeSupport_var ts =
+            new RealTimeBackbone::AboutNodeTypeSupportImpl;
 
         if (ts->register_type(participant, "") != DDS::RETCODE_OK)
         {
@@ -149,10 +149,10 @@ int iDDSDevice::CreateNodeAdvertiserTopic()
                              1);
         }
 
-        iDDSHelloMsg_writer =
-            Messenger::iDDSHelloMsgDataWriter::_narrow(NodeAdvertiserWriter);
+        AboutNode_writer =
+            RealTimeBackbone::AboutNodeDataWriter::_narrow(NodeAdvertiserWriter);
 
-        if (!iDDSHelloMsg_writer)
+        if (!AboutNode_writer)
         {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("ERROR: %N:%l: main() -")
@@ -205,9 +205,9 @@ int iDDSDevice::CreateMessageTopic()
 {
     try
     {
-        // Register TypeSupport (Messenger::iDDSControlMsg)
-        Messenger::iDDSControlMsgTypeSupport_var ts =
-            new Messenger::iDDSControlMsgTypeSupportImpl;
+        // Register TypeSupport (RealTimeBackbone::iDDSControlMsg)
+        RealTimeBackbone::MessageTypeSupport_var ts =
+            new RealTimeBackbone::MessageTypeSupportImpl;
 
         if (ts->register_type(participant, "") != DDS::RETCODE_OK)
         {
@@ -259,9 +259,9 @@ int iDDSDevice::CreateMessageTopic()
                              1);
         }
 
-        iDDSMessage_writer = Messenger::iDDSControlMsgDataWriter::_narrow(MessageWriter);
+        Message_writer = RealTimeBackbone::MessageDataWriter::_narrow(MessageWriter);
 
-        if (!iDDSMessage_writer)
+        if (!Message_writer)
         {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("ERROR: %N:%l: main() -")
@@ -322,12 +322,15 @@ void iDDSDevice::StartServer()
 // GetAvailableIDDSDevices method
 std::vector<iDDSDevice::iDDSNodeUniqueID> iDDSDevice::GetAvailableIDDSDevices()
 {
-    std::vector<Messenger::iDDSHelloMsg> vec = listenerNodeAdvertisement_impl->get_message_vector();
+    std::vector<RealTimeBackbone::AboutNode> vec = listenerNodeAdvertisement_impl->get_message_vector();
     std::vector<iDDSNodeUniqueID> available_devices;
 
     for (const auto &msg : vec)
     {
-        available_devices.push_back(msg.unique_id.in());
+        std::string strRealNodeId = (std::string) msg.realNodeID.manufacturer.in() + "_" +
+                                    (std::string) msg.realNodeID.productType.in() + "_" +
+                                    (std::string) msg.realNodeID.serialNumber.in();
+        available_devices.push_back(strRealNodeId);
     }
 
     // Placeholder implementation
@@ -382,37 +385,30 @@ int iDDSDevice::SendIDDSMessage(const iDDSNodeUniqueID destination_node_id, cons
         ws->detach_condition(condition);
 
         // Write samples
-        Messenger::iDDSControlMsg message;
-        message.timestamp = 0;
-        message.tid = 0;
-        message.from = node_id.c_str();
-        message.to = destination_node_id.c_str();
-
-        // The string you want to insert into the command sequence
-        const char *command_string = message_.c_str();
-
-        // Determine the length of the string
-        size_t string_length = std::strlen(command_string);
+        RealTimeBackbone::Message message;
+        message.targetLogicalNodeID = destination_node_id.c_str();
+        message.sourceLogicalNodeID = node_id.c_str();
 
         // Make sure the string length does not exceed the max length
-        if (string_length > Messenger::IDDS_COMMAND_MAX_LENGTH)
+        if (message_.size() > RealTimeBackbone::MAXIMUM_MESSAGE_BODY_LENGTH)
         {
             // Handle the error: string is too long to fit into the iDDSCommand
             std::cerr << "Error: Command string is too long!" << std::endl;
             return 1;
         }
+        else
+        {
+            message.messageBody = message_.c_str();
+        }
 
-        // Create and set the length of the iDDSCommand sequence
-        Messenger::iDDSCommand command;
-        command.length(static_cast<CORBA::ULong>(string_length));
+        message.myReferenceNumber = 0;
+        message.yourReferenceNumber = 0;
+        message.time.seconds = 0;
+        message.time.nanoseconds = 0;
+        message.fragmentNumber = 0;
+        message.moreFragments = false;
 
-        // Copy the string into the command sequence
-        std::memcpy(command.get_buffer(), command_string, string_length);
-
-        // Assign the sequence to the command field of the control message
-        message.command = command;
-
-        DDS::ReturnCode_t error = iDDSMessage_writer->write(message, DDS::HANDLE_NIL);
+        DDS::ReturnCode_t error = Message_writer->write(message, DDS::HANDLE_NIL);
 
         if (error != DDS::RETCODE_OK)
         {
@@ -424,7 +420,7 @@ int iDDSDevice::SendIDDSMessage(const iDDSNodeUniqueID destination_node_id, cons
 
         // Wait for samples to be acknowledged
         DDS::Duration_t timeout = {30, 0};
-        if (iDDSMessage_writer->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK)
+        if (Message_writer->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK)
         {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("ERROR: %N:%l: main() -")
@@ -447,19 +443,20 @@ void iDDSDevice::PrintReceivedIDDSMessages()
     // Placeholder implementation
     int i = 0;
 
-    std::vector<Messenger::iDDSControlMsg> vec = listenerCommand_impl->get_message_vector();
+    std::vector<RealTimeBackbone::Message> vec = listenerCommand_impl->get_message_vector();
 
-    for (Messenger::iDDSControlMsg msg : vec)
+    for (RealTimeBackbone::Message msg : vec)
     {
         std::cout << "#" << i++ << " - ";
-        std::cout << "from: = " << msg.from;
-        std::cout << "; to: = " << msg.to << std::endl;
+        std::cout << "from: = " << msg.sourceLogicalNodeID;
+        std::cout << "; to: = " << msg.targetLogicalNodeID << std::endl;
 
-        // Printing the command sequence
-        if (msg.command.length() > 0) {
-            std::string command_str(reinterpret_cast<const char*>(msg.command.get_buffer()), msg.command.length());
-            std::cout << "message: = " << command_str << std::endl;
-        } else {
+        // Printing the message
+        if (static_cast<std::string>(msg.messageBody).size() > 0) {
+            std::cout << "message: = " << msg.messageBody << std::endl;
+        }
+        else
+        {
             std::cout << "message: = [empty]" << std::endl;
         }
     }
@@ -487,16 +484,21 @@ int iDDSDevice::SendAdvertisementMessage()
     try
     {
         // Write samples
-        Messenger::iDDSHelloMsg message;
-        message.timestamp = 0;
-        message.unique_id = node_id.c_str();
-        message.manufacturer = "OpenDAQ";
-        message.model = "model";
-        message.serial_number = "serial_number";
-        message.logical_id = node_id.c_str();
-        message.tags = "tags";
+        RealTimeBackbone::AboutNode nodeAdvertisementMessage;
+        nodeAdvertisementMessage.realNodeID.manufacturer = "OpenDAQ";
+        nodeAdvertisementMessage.realNodeID.productType = "model";
+        nodeAdvertisementMessage.realNodeID.serialNumber = "serial_number";
+        nodeAdvertisementMessage.buildStandard.hardwareVersion = "1.0";
+        nodeAdvertisementMessage.buildStandard.softwareVersion = "1.0";
+        nodeAdvertisementMessage.operationalStatus = RealTimeBackbone::OpStatusReady;
+        nodeAdvertisementMessage.statusReason = "statusReason";
+        nodeAdvertisementMessage.logicalNodeID = node_id.c_str();
+        nodeAdvertisementMessage.domainID = 42;
+        nodeAdvertisementMessage.ipAddress = "127.0.0.1";
+        nodeAdvertisementMessage.time.seconds = 0;
+        nodeAdvertisementMessage.time.nanoseconds = 0;
 
-        DDS::ReturnCode_t error = iDDSHelloMsg_writer->write(message, DDS::HANDLE_NIL);
+        DDS::ReturnCode_t error = AboutNode_writer->write(nodeAdvertisementMessage, DDS::HANDLE_NIL);
 
         if (error != DDS::RETCODE_OK)
         {
@@ -508,7 +510,7 @@ int iDDSDevice::SendAdvertisementMessage()
 
         // Wait for samples to be acknowledged
         //DDS::Duration_t timeout = {30, 0};
-        //if (iDDSHelloMsg_writer->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK)
+        //if (AboutNode_writer->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK)
         //{
         //    ACE_ERROR_RETURN((LM_ERROR,
         //                      ACE_TEXT("ERROR: %N:%l: main() -")
