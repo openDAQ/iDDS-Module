@@ -5,7 +5,8 @@
 //--------------------------------------------------------------------------------------------------
 // Constants.
 //--------------------------------------------------------------------------------------------------
-static const int hello_interval = 1; // seconds
+static const int c_nAdveritisementInterval = 1; // seconds
+static const int c_nDomainID = 0;
 static const char node_advertiser_topic[] = "AboutNode";
 static const char message_topic[] = "Message";
 static const char rtps_file[] = "rtps.ini";
@@ -20,11 +21,24 @@ iDDSDevice::iDDSDevice() : node_id("defaultNode"),
     SetupiDDSDevice();
 }
 
-iDDSDevice::iDDSDevice(const iDDSNodeUniqueID node_id) : node_id(node_id),
+iDDSDevice::iDDSDevice(const std::string node_id) : node_id(node_id),
                                                          listenerNodeAdvertisement_impl(new DataReaderListenerImpl),
                                                          listenerNodeAdvertisement(listenerNodeAdvertisement_impl),
                                                          listenerCommand_impl(new CommandListenerImpl),
                                                          listenerCommand(listenerCommand_impl)
+{
+    SetupiDDSDevice();
+}
+
+iDDSDevice::iDDSDevice(const std::string node_id, const std::string manufacturer, const std::string productType,
+                       const std::string serialNumber, const std::string hwVersion, const std::string swVersion,
+                       const std::string ipAddress) : node_id(node_id), manufacturer(manufacturer), productType(productType),
+                                                      serialNumber(serialNumber), hwVersion(hwVersion), swVersion(swVersion),
+                                                      ipAddress(ipAddress),
+                                                      listenerNodeAdvertisement_impl(new DataReaderListenerImpl),
+                                                      listenerNodeAdvertisement(listenerNodeAdvertisement_impl),
+                                                      listenerCommand_impl(new CommandListenerImpl),
+                                                      listenerCommand(listenerCommand_impl)
 {
     SetupiDDSDevice();
 }
@@ -69,7 +83,7 @@ int iDDSDevice::SetupiDDSDevice()
 
     // Create DomainParticipant
     participant =
-        dpf->create_participant(42,
+        dpf->create_participant(c_nDomainID,
                                 PARTICIPANT_QOS_DEFAULT,
                                 0,
                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -320,10 +334,10 @@ void iDDSDevice::StartServer()
 }
 
 // GetAvailableIDDSDevices method
-std::vector<iDDSDevice::iDDSNodeUniqueID> iDDSDevice::GetAvailableIDDSDevices()
+std::vector<std::string> iDDSDevice::GetAvailableIDDSDevices()
 {
     std::vector<RealTimeBackbone::AboutNode> vec = listenerNodeAdvertisement_impl->get_message_vector();
-    std::vector<iDDSNodeUniqueID> available_devices;
+    std::vector<std::string> available_devices;
 
     for (const auto &msg : vec)
     {
@@ -336,7 +350,7 @@ std::vector<iDDSDevice::iDDSNodeUniqueID> iDDSDevice::GetAvailableIDDSDevices()
 }
 
 // SendIDDSMessage method
-int iDDSDevice::SendIDDSMessage(const iDDSNodeUniqueID destination_node_id, const std::string message_)
+int iDDSDevice::SendIDDSMessage(const std::string destination_node_id, const std::string message_)
 {
     try
     {
@@ -468,7 +482,7 @@ void iDDSDevice::NodeAdvertiser()
 
     while (m_bRunning)
     {
-        std::this_thread::sleep_for(std::chrono::seconds(hello_interval));
+        std::this_thread::sleep_for(std::chrono::seconds(c_nAdveritisementInterval));
         if (m_bRunning)
         {
             SendAdvertisementMessage();
@@ -491,7 +505,7 @@ int iDDSDevice::SendAdvertisementMessage()
         nodeAdvertisementMessage.operationalStatus = RealTimeBackbone::OpStatusReady;
         nodeAdvertisementMessage.statusReason = "statusReason";
         nodeAdvertisementMessage.logicalNodeID = node_id.c_str();
-        nodeAdvertisementMessage.domainID = 42;
+        nodeAdvertisementMessage.domainID = c_nDomainID;
         nodeAdvertisementMessage.ipAddress = "127.0.0.1";
         nodeAdvertisementMessage.time.seconds = 0;
         nodeAdvertisementMessage.time.nanoseconds = 0;

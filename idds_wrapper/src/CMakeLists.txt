@@ -20,11 +20,13 @@ set(opendds_libs
 )
 
 set(SRC_Cpp iDDSDevice.cpp
+            iDDSDeviceBuilder.cpp
             DataReaderListenerImpl.cpp
             CommandListenerImpl.cpp
 )
 
 set(SRC_PublicHeaders iDDSDevice.h
+                      iDDSDeviceBuilder.h
                       DataReaderListenerImpl.h
                       CommandListenerImpl.h
 )
