@@ -327,9 +327,7 @@ std::vector<iDDSDevice::iDDSNodeUniqueID> iDDSDevice::GetAvailableIDDSDevices()
 
     for (const auto &msg : vec)
     {
-        std::string strRealNodeId = (std::string) msg.realNodeID.manufacturer.in() + "_" +
-                                    (std::string) msg.realNodeID.productType.in() + "_" +
-                                    (std::string) msg.realNodeID.serialNumber.in();
+        std::string strRealNodeId = (std::string) msg.logicalNodeID.in();
         available_devices.push_back(strRealNodeId);
     }
 
