@@ -11,25 +11,6 @@ static const char node_advertiser_topic[] = "AboutNode";
 static const char message_topic[] = "Message";
 static const char rtps_file[] = "rtps.ini";
 
-// Constructor
-iDDSDevice::iDDSDevice() : node_id("defaultNode"),
-                           listenerNodeAdvertisement_impl(new DataReaderListenerImpl),
-                           listenerNodeAdvertisement(listenerNodeAdvertisement_impl),
-                           listenerCommand_impl(new CommandListenerImpl),
-                           listenerCommand(listenerCommand_impl)
-{
-    SetupiDDSDevice();
-}
-
-iDDSDevice::iDDSDevice(const std::string node_id) : node_id(node_id),
-                                                         listenerNodeAdvertisement_impl(new DataReaderListenerImpl),
-                                                         listenerNodeAdvertisement(listenerNodeAdvertisement_impl),
-                                                         listenerCommand_impl(new CommandListenerImpl),
-                                                         listenerCommand(listenerCommand_impl)
-{
-    SetupiDDSDevice();
-}
-
 iDDSDevice::iDDSDevice(const std::string node_id, const std::string manufacturer, const std::string productType,
                        const std::string serialNumber, const std::string hwVersion, const std::string swVersion,
                        const std::string ipAddress) : node_id(node_id), manufacturer(manufacturer), productType(productType),
@@ -497,16 +478,16 @@ int iDDSDevice::SendAdvertisementMessage()
     {
         // Write samples
         RealTimeBackbone::AboutNode nodeAdvertisementMessage;
-        nodeAdvertisementMessage.realNodeID.manufacturer = "OpenDAQ";
-        nodeAdvertisementMessage.realNodeID.productType = "model";
-        nodeAdvertisementMessage.realNodeID.serialNumber = "serial_number";
-        nodeAdvertisementMessage.buildStandard.hardwareVersion = "1.0";
-        nodeAdvertisementMessage.buildStandard.softwareVersion = "1.0";
-        nodeAdvertisementMessage.operationalStatus = RealTimeBackbone::OpStatusReady;
-        nodeAdvertisementMessage.statusReason = "statusReason";
+        nodeAdvertisementMessage.realNodeID.manufacturer = manufacturer.c_str();
+        nodeAdvertisementMessage.realNodeID.productType = productType.c_str();
+        nodeAdvertisementMessage.realNodeID.serialNumber = serialNumber.c_str();
+        nodeAdvertisementMessage.buildStandard.hardwareVersion = hwVersion.c_str();
+        nodeAdvertisementMessage.buildStandard.softwareVersion = swVersion.c_str();
+        nodeAdvertisementMessage.operationalStatus = RealTimeBackbone::OpStatusReady; //To be updated
+        nodeAdvertisementMessage.statusReason = ""; //To be updated
         nodeAdvertisementMessage.logicalNodeID = node_id.c_str();
         nodeAdvertisementMessage.domainID = c_nDomainID;
-        nodeAdvertisementMessage.ipAddress = "127.0.0.1";
+        nodeAdvertisementMessage.ipAddress = ipAddress.c_str();
         nodeAdvertisementMessage.time.seconds = 0;
         nodeAdvertisementMessage.time.nanoseconds = 0;
 

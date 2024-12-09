@@ -30,11 +30,11 @@ class iDDSDevice
 {
 public:
     /// Constructor
-    iDDSDevice();
-    explicit iDDSDevice(const std::string node_id);
-    explicit iDDSDevice(const std::string node_id, const std::string manufacturer, const std::string productType,
-                        const std::string serialNumber, const std::string hwVersion, const std::string swVersion,
-                        const std::string ipAddress);
+    //iDDSDevice();
+    //explicit iDDSDevice(const std::string node_id);
+    explicit iDDSDevice(const std::string node_id, const std::string manufacturer = "openDAQ", const std::string productType = "model",
+                        const std::string serialNumber = "serial_number", const std::string hwVersion = "", const std::string swVersion = "",
+                        const std::string ipAddress = "127.0.0.1");
 
     /// Destructor
     ~iDDSDevice();

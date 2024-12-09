@@ -36,9 +36,14 @@ iDDSDeviceBuilder& iDDSDeviceBuilder::setIPAddress(const std::string& ipAddress)
     return *this;
 }
 
+iDDSDeviceBuilder& iDDSDeviceBuilder::setLogicalNodeId(const std::string& logicalNodeID)
+{
+    _logicalNodeID = logicalNodeID;
+    return *this;
+}
+
 // Method to build the iDDSDevice
 iDDSDevice iDDSDeviceBuilder::build()
 {
-    //return iDDSDevice(_manufacturer, _productType, _logicalNodeID, _serialNumber, _hwVersion, _swVersion, _ipAddress);
-    return iDDSDevice(_logicalNodeID);
+    return iDDSDevice(_logicalNodeID, _manufacturer, _productType, _serialNumber, _hwVersion, _swVersion, _ipAddress);
 }
