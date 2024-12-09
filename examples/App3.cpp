@@ -12,7 +12,8 @@ int main()
 
     std::cout << "Available iDDS devices: " << std::endl;
     auto devices = device.GetAvailableIDDSDevices();
-    for (const auto& id : devices) {
+    for (const auto& id : devices)
+    {
         std::cout << " - " << id << std::endl;
     }
 

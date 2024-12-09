@@ -1,12 +1,14 @@
 #include <idds_wrapper/iDDSDevice.h>
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 
 //--------------------------------------------------------------------------------------------------
 // Constants.
 //--------------------------------------------------------------------------------------------------
 static const int c_nAdveritisementInterval = 1; // seconds
 static const int c_nDomainID = 0;
+static const int c_nStreamingDomainID = -1; //Set to -1 (minus one) if not currently known.
 static const char node_advertiser_topic[] = "AboutNode";
 static const char message_topic[] = "Message";
 static const char rtps_file[] = "rtps.ini";
@@ -39,41 +41,70 @@ iDDSDevice::~iDDSDevice()
     }
 
     // Clean up
-    participant->delete_contained_entities();
-    dpf->delete_participant(participant);
+    if(participant)
+    {
+        participant->delete_contained_entities();
+    }
+
+    if(dpf)
+    {
+        dpf->delete_participant(participant);
+    }
+
     TheServiceParticipant->shutdown();
 }
 
 /// Initialize Domain Factory and Participant
 int iDDSDevice::SetupiDDSDevice()
 {
-    // Check RTPS ini file exists
-    std::ifstream file(rtps_file);
-    if (!file.good())
+
+    try
     {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l:")
-                              ACE_TEXT("RTPS configuration file was not found!\n")),
-                         1);
-        return 0;
+        // Check RTPS ini file exists
+        std::ifstream file(rtps_file);
+        if (!file.good())
+        {
+            // Get current working directory
+            std::string cwd = std::filesystem::current_path().string();
+            std::string full_path = cwd + "/" + rtps_file;
+
+            ACE_ERROR((LM_ERROR,
+                                  ACE_TEXT("ERROR: RTPS %s does not exist!\n"), full_path.c_str()));
+            return -1;
+        }
+
+        // Initialize DomainParticipantFactory
+        TheServiceParticipant->default_configuration_file(ACE_TEXT(rtps_file));
+        DDS::DomainParticipantFactory_var dpf = TheServiceParticipant->get_domain_participant_factory();
+
+        if (!dpf)
+        {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("ERROR: %N:%l: main() -")
+                                  ACE_TEXT("Domain Pariticipant Factory failed! Please check Environment variables are set.\n")),
+                             1);
+
+            return -1;
+        }
+
+        // Create DomainParticipant
+        participant =
+            dpf->create_participant(c_nDomainID,
+                                    PARTICIPANT_QOS_DEFAULT,
+                                    0,
+                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+        if (!participant)
+        {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("ERROR: %N:%l: main() -")
+                                  ACE_TEXT(" create_participant failed!\n")),
+                             1);
+        }
     }
-
-    // Initialize DomainParticipantFactory
-    TheServiceParticipant->default_configuration_file(ACE_TEXT(rtps_file));
-    DDS::DomainParticipantFactory_var dpf = TheServiceParticipant->get_domain_participant_factory();
-
-    // Create DomainParticipant
-    participant =
-        dpf->create_participant(c_nDomainID,
-                                PARTICIPANT_QOS_DEFAULT,
-                                0,
-                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    if (!participant)
+    catch (const std::exception &e)
     {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                              ACE_TEXT(" create_participant failed!\n")),
-                         1);
+        std::cerr << "Exception caught setting up iDDS device" << std::endl;
+        return -1;
     }
 
     CreateNodeAdvertiserTopic();
@@ -190,7 +221,7 @@ int iDDSDevice::CreateNodeAdvertiserTopic()
     }
     catch (const CORBA::Exception &e)
     {
-        e._tao_print_exception("Exception caught in main():");
+        e._tao_print_exception("Exception caught creating node advertisement topic");
         return 1;
     }
 }
@@ -299,7 +330,7 @@ int iDDSDevice::CreateMessageTopic()
     }
     catch (const CORBA::Exception &e)
     {
-        e._tao_print_exception("Exception caught in main():");
+        e._tao_print_exception("Exception caught creating message topic");
         return 1;
     }
 }
@@ -335,6 +366,14 @@ int iDDSDevice::SendIDDSMessage(const std::string destination_node_id, const std
 {
     try
     {
+        if(!MessageWriter)
+        {
+            ACE_ERROR((LM_ERROR,
+                              ACE_TEXT("ERROR: MessageWriter is null!\n")));
+
+            return -1;
+        }
+
         // Block until Subscriber is available
         DDS::StatusCondition_var condition = MessageWriter->get_statuscondition();
         condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
@@ -425,7 +464,7 @@ int iDDSDevice::SendIDDSMessage(const std::string destination_node_id, const std
     }
     catch (const CORBA::Exception &e)
     {
-        e._tao_print_exception("Exception caught in main():");
+        e._tao_print_exception("Exception caught sending iDDS message");
         return 1;
     }
 }
@@ -466,7 +505,14 @@ void iDDSDevice::NodeAdvertiser()
         std::this_thread::sleep_for(std::chrono::seconds(c_nAdveritisementInterval));
         if (m_bRunning)
         {
-            SendAdvertisementMessage();
+            if(SendAdvertisementMessage() == -1)
+            {
+                ACE_ERROR((LM_ERROR,
+                              ACE_TEXT("ERROR: %N:%l: main() -")
+                                  ACE_TEXT(" SendAdvertisementMessage failed!\n")));
+
+                return;
+            }
         }
     }
 }
@@ -476,6 +522,14 @@ int iDDSDevice::SendAdvertisementMessage()
 {
     try
     {
+        if(!AboutNode_writer)
+        {
+            ACE_ERROR((LM_ERROR,
+                              ACE_TEXT("ERROR: AboutNode_writer is null!\n")));
+
+            return -1;
+        }
+
         // Write samples
         RealTimeBackbone::AboutNode nodeAdvertisementMessage;
         nodeAdvertisementMessage.realNodeID.manufacturer = manufacturer.c_str();
@@ -486,7 +540,7 @@ int iDDSDevice::SendAdvertisementMessage()
         nodeAdvertisementMessage.operationalStatus = RealTimeBackbone::OpStatusReady; //To be updated
         nodeAdvertisementMessage.statusReason = ""; //To be updated
         nodeAdvertisementMessage.logicalNodeID = node_id.c_str();
-        nodeAdvertisementMessage.domainID = c_nDomainID;
+        nodeAdvertisementMessage.domainID = c_nStreamingDomainID;
         nodeAdvertisementMessage.ipAddress = ipAddress.c_str();
         nodeAdvertisementMessage.time.seconds = 0;
         nodeAdvertisementMessage.time.nanoseconds = 0;
@@ -513,7 +567,7 @@ int iDDSDevice::SendAdvertisementMessage()
     }
     catch (const CORBA::Exception &e)
     {
-        e._tao_print_exception("Exception caught in main():");
+        e._tao_print_exception("Exception caught sending node advertisment message");
         return 1;
     }
 
