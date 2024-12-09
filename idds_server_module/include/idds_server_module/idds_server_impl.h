@@ -21,6 +21,7 @@
 #include <opendaq/server_impl.h>
 #include <coretypes/intfs.h>
 #include <idds_wrapper/iDDSDevice.h>
+#include <idds_wrapper/iDDSDeviceBuilder.h>
 
 BEGIN_NAMESPACE_OPENDAQ_IDDS_SERVER_MODULE
 

@@ -1,8 +1,10 @@
+#include <idds_wrapper/iDDSDeviceBuilder.h>
 #include <idds_wrapper/iDDSDevice.h>
 #include <iostream>
 
-int main() {
-    iDDSDevice device("NodeId3");
+int main()
+{
+    iDDSDevice device = iDDSDeviceBuilder().setLogicalNodeId("NodeId3").build();
     device.StartServer();
 
     std::cout << "Press Enter to check available iDDS devices." << std::endl;

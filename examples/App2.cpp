@@ -1,8 +1,10 @@
+#include <idds_wrapper/iDDSDeviceBuilder.h>
 #include <idds_wrapper/iDDSDevice.h>
 #include <iostream>
 
-int main() {
-    iDDSDevice device("NodeId2");
+int main()
+{
+    iDDSDevice device = iDDSDeviceBuilder().setLogicalNodeId("NodeId2").build();
     device.StartServer();
 
     while (true) {
