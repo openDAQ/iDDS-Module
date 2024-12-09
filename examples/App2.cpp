@@ -7,7 +7,8 @@ int main()
     iDDSDevice device = iDDSDeviceBuilder().setLogicalNodeId("NodeId2").build();
     device.StartServer();
 
-    while (true) {
+    while (true)
+    {
         std::cout << "Press Enter to print received iDDS messages." << std::endl;
         std::cin.get();
         device.PrintReceivedIDDSMessages();
