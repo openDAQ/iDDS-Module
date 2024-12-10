@@ -91,7 +91,7 @@ int iDDSDevice::SetupiDDSDevice()
         participant =
             dpf->create_participant(c_nDomainID,
                                     PARTICIPANT_QOS_DEFAULT,
-                                    0,
+                                    nullptr,
                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
         if (!participant)
         {
@@ -125,7 +125,7 @@ int iDDSDevice::CreateNodeAdvertiserTopic()
         if (ts->register_type(participant, "") != DDS::RETCODE_OK)
         {
             ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("ERROR: %N:%l: main() -")
+                              ACE_TEXT("ERROR: %N:%l: CreateNodeAdvertiserTopic() -")
                                   ACE_TEXT(" register_type failed!\n")),
                              1);
         }
@@ -142,7 +142,7 @@ int iDDSDevice::CreateNodeAdvertiserTopic()
         if (!NodeAdvertiserTopic)
         {
             ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("ERROR: %N:%l: main() -")
+                              ACE_TEXT("ERROR: %N:%l: CreateNodeAdvertiserTopic() -")
                                   ACE_TEXT(" create_topic failed!\n")),
                              1);
         }
@@ -156,21 +156,26 @@ int iDDSDevice::CreateNodeAdvertiserTopic()
         if (!NodeAdvertiserPublisher)
         {
             ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("ERROR: %N:%l: main() -")
+                              ACE_TEXT("ERROR: %N:%l: CreateNodeAdvertiserTopic() -")
                                   ACE_TEXT(" create_publisher failed!\n")),
                              1);
         }
 
+        // Set QoS for DataWriter
+        DDS::DataWriterQos writer_qos;
+        NodeAdvertiserPublisher->get_default_datawriter_qos(writer_qos);
+        writer_qos.reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
+
         NodeAdvertiserWriter =
             NodeAdvertiserPublisher->create_datawriter(NodeAdvertiserTopic,
-                                         DATAWRITER_QOS_DEFAULT,
-                                         0,
+                                         writer_qos,
+                                         nullptr,
                                          OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
         if (!NodeAdvertiserWriter)
         {
             ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("ERROR: %N:%l: main() -")
+                              ACE_TEXT("ERROR: %N:%l: CreateNodeAdvertiserTopic() -")
                                   ACE_TEXT(" create_datawriter failed!\n")),
                              1);
         }
@@ -181,7 +186,7 @@ int iDDSDevice::CreateNodeAdvertiserTopic()
         if (!AboutNode_writer)
         {
             ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("ERROR: %N:%l: main() -")
+                              ACE_TEXT("ERROR: %N:%l: CreateNodeAdvertiserTopic() -")
                                   ACE_TEXT(" _narrow failed!\n")),
                              1);
         }
@@ -194,14 +199,15 @@ int iDDSDevice::CreateNodeAdvertiserTopic()
         if (!NodeAdvertiserSubscriber)
         {
             ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
+                          ACE_TEXT("ERROR: %N:%l: CreateNodeAdvertiserTopic() -")
                               ACE_TEXT(" create_subscriber failed!\n")),
                          1);
         }
 
+        // Set QoS for DataReader
         DDS::DataReaderQos reader_qos;
         NodeAdvertiserSubscriber->get_default_datareader_qos(reader_qos);
-        reader_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+        reader_qos.reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
 
         NodeAdvertiserReader =
             NodeAdvertiserSubscriber->create_datareader(NodeAdvertiserTopic,
@@ -212,7 +218,7 @@ int iDDSDevice::CreateNodeAdvertiserTopic()
         if (!NodeAdvertiserReader)
         {
             ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("ERROR: %N:%l: main() -")
+                              ACE_TEXT("ERROR: %N:%l: CreateNodeAdvertiserTopic() -")
                                   ACE_TEXT(" create_datareader failed!\n")),
                              1);
         }
@@ -248,7 +254,7 @@ int iDDSDevice::CreateMessageTopic()
         MessageTopic = participant->create_topic(message_topic,
                                                  type_name,
                                                  TOPIC_QOS_DEFAULT,
-                                                 0,
+                                                 nullptr,
                                                  OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
         if (!MessageTopic)
@@ -261,7 +267,7 @@ int iDDSDevice::CreateMessageTopic()
 
         // Create Publisher
         MessagePublisher = participant->create_publisher(PUBLISHER_QOS_DEFAULT,
-                                                         0,
+                                                         nullptr,
                                                          OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
         if (!MessagePublisher)
@@ -272,9 +278,18 @@ int iDDSDevice::CreateMessageTopic()
                              1);
         }
 
+        // Set QoS for DataWriter
+        DDS::DataWriterQos writer_qos;
+        MessagePublisher->get_default_datawriter_qos(writer_qos);
+
+        writer_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+        writer_qos.durability.kind = DDS::VOLATILE_DURABILITY_QOS;
+        writer_qos.history.kind = DDS::KEEP_LAST_HISTORY_QOS;
+        writer_qos.history.depth = 10;
+
         MessageWriter = MessagePublisher->create_datawriter(MessageTopic,
-                                                            DATAWRITER_QOS_DEFAULT,
-                                                            0,
+                                                            writer_qos,
+                                                            nullptr,
                                                             OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
         if (!MessageWriter)
@@ -297,7 +312,7 @@ int iDDSDevice::CreateMessageTopic()
 
         // Create Subscriber
         MessageSubscriber = participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
-                                                           0,
+                                                           nullptr,
                                                            OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
         if (!MessageSubscriber)
@@ -310,7 +325,12 @@ int iDDSDevice::CreateMessageTopic()
 
         DDS::DataReaderQos reader_qos;
         MessageSubscriber->get_default_datareader_qos(reader_qos);
+
+
         reader_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+        reader_qos.durability.kind = DDS::VOLATILE_DURABILITY_QOS;
+        reader_qos.history.kind = DDS::KEEP_LAST_HISTORY_QOS;
+        reader_qos.history.depth = 10;
 
         DDS::DataReader_var reader =
             MessageSubscriber->create_datareader(MessageTopic,
