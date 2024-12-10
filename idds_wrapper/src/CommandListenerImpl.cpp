@@ -58,6 +58,18 @@ void CommandListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     {
         // Add the received message to the message_vector
         message_vector.push_back(message);
+
+        // Print the received message
+        std::cout << "From: = " << message.from;
+        std::cout << "; to: = " << message.to;
+
+        // Printing the command sequence
+        if (message.command.length() > 0) {
+            std::string command_str(reinterpret_cast<const char*>(message.command.get_buffer()), message.command.length());
+            std::cout << "; message: = " << command_str << std::endl;
+        } else {
+            std::cout << "; message: = [empty]" << std::endl;
+        }
     }
   }
   else

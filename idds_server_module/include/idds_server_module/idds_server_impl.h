@@ -20,25 +20,31 @@
 #include <opendaq/server.h>
 #include <opendaq/server_impl.h>
 #include <coretypes/intfs.h>
-//#include <idds_wrapper/iDDSDevice.h>
+#include <idds_wrapper/iDDSDevice.h>
 
 BEGIN_NAMESPACE_OPENDAQ_IDDS_SERVER_MODULE
 
 class iDDSServerImpl : public daq::Server
 {
 public:
-    explicit iDDSServerImpl(daq::DevicePtr rootDevice, const ContextPtr& context);
+    explicit iDDSServerImpl(const DevicePtr& rootDevice,
+                            const PropertyObjectPtr& config,
+                            const ContextPtr& context);
+    ~iDDSServerImpl();
+
     static ServerTypePtr createType();
 
 protected:
     void onStopServer() override;
 
-    //daq::idds::iDDSServer iDDSServer;
+    iDDSDevice iDDSServer;
+    ContextPtr context;
 };
 
 OPENDAQ_DECLARE_CLASS_FACTORY_WITH_INTERFACE(
     INTERNAL_FACTORY, iDDSServer, daq::IServer,
     DevicePtr, rootDevice,
+    PropertyObjectPtr, config,
     const ContextPtr&, context
 )
 

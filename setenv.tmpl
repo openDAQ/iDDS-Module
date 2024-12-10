@@ -1,0 +1,7 @@
+#!/bin/bash
+# Generated script to set up environment variables for iDDS-Module
+
+export ACE_ROOT="@ACE_ROOT_PATH@"
+export OPENDDS_ROOT="@OPENDDS_ROOT_PATH@"
+
+export LD_LIBRARY_PATH="${ACE_ROOT}:${OPENDDS_ROOT}:${LD_LIBRARY_PATH}"
