@@ -14,8 +14,8 @@
 #include <dds/DCPS/LocalObject.h>
 #include <dds/DCPS/Definitions.h>
 
-#include "MessengerTypeSupportC.h"
-#include "MessengerTypeSupportImpl.h"
+#include "iDDSTypeSupportC.h"
+#include "iDDSTypeSupportImpl.h"
 
 #include <vector>
 
@@ -49,10 +49,10 @@ public:
     DDS::DataReader_ptr reader,
     const DDS::SampleLostStatus& status);
 
-  std::vector<Messenger::iDDSHelloMsg> get_message_vector();
+  std::vector<RealTimeBackbone::AboutNode> get_message_vector();
 
 public:
-  std::vector<Messenger::iDDSHelloMsg> message_vector;
+  std::vector<RealTimeBackbone::AboutNode> message_vector;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL_H */

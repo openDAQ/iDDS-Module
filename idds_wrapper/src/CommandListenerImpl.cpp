@@ -36,8 +36,8 @@ void CommandListenerImpl::on_liveliness_changed(
 
 void CommandListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 {
-   Messenger::iDDSControlMsgDataReader_var reader_i =
-      Messenger::iDDSControlMsgDataReader::_narrow(reader);
+   RealTimeBackbone::MessageDataReader_var reader_i =
+      RealTimeBackbone::MessageDataReader::_narrow(reader);
 
   if (!reader_i)
   {
@@ -47,7 +47,7 @@ void CommandListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     ACE_OS::exit(1);
   }
 
-  Messenger::iDDSControlMsg message;
+  RealTimeBackbone::Message message;
   DDS::SampleInfo info;
 
   const DDS::ReturnCode_t error = reader_i->take_next_sample(message, info);
@@ -60,14 +60,18 @@ void CommandListenerImpl::on_data_available(DDS::DataReader_ptr reader)
         message_vector.push_back(message);
 
         // Print the received message
-        std::cout << "From: = " << message.from;
-        std::cout << "; to: = " << message.to;
+        std::cout << "From: = " << message.sourceLogicalNodeID;
+        std::cout << "; to: = " << message.targetLogicalNodeID;
 
-        // Printing the command sequence
-        if (message.command.length() > 0) {
-            std::string command_str(reinterpret_cast<const char*>(message.command.get_buffer()), message.command.length());
-            std::cout << "; message: = " << command_str << std::endl;
-        } else {
+        // Printing the message
+        std::string strMessageBody(message.messageBody);
+
+        if (strMessageBody.size() > 0)
+        {
+            std::cout << "; message: = " << strMessageBody << std::endl;
+        }
+        else
+        {
             std::cout << "; message: = [empty]" << std::endl;
         }
     }
@@ -92,7 +96,7 @@ void CommandListenerImpl::on_sample_lost(
 {
 }
 
-std::vector<Messenger::iDDSControlMsg> CommandListenerImpl::get_message_vector()
+std::vector<RealTimeBackbone::Message> CommandListenerImpl::get_message_vector()
 {
   return message_vector;
 }

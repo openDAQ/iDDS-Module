@@ -14,8 +14,8 @@
 #include <dds/DCPS/LocalObject.h>
 #include <dds/DCPS/Definitions.h>
 
-#include "MessengerTypeSupportC.h"
-#include "MessengerTypeSupportImpl.h"
+#include "iDDSTypeSupportC.h"
+#include "iDDSTypeSupportImpl.h"
 
 
 class CommandListenerImpl
@@ -48,10 +48,10 @@ public:
     DDS::DataReader_ptr reader,
     const DDS::SampleLostStatus& status);
 
-  std::vector<Messenger::iDDSControlMsg> get_message_vector();
+  std::vector<RealTimeBackbone::Message> get_message_vector();
 
 public:
-  std::vector<Messenger::iDDSControlMsg> message_vector;
+  std::vector<RealTimeBackbone::Message> message_vector;
 };
 
 #endif /* COMMAND_LISTENER_IMPL_H */

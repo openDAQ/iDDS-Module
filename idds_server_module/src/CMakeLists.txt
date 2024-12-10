@@ -24,7 +24,7 @@ add_library(${PROJECT_NAME} SHARED
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC daq::opendaq
-                                      PRIVATE idds_wrapper
+                                      PUBLIC idds_wrapper
 
 )
 
