@@ -29,45 +29,47 @@ include(CommonUtils)
 setup_repo(${REPO_OPTION_PREFIX})
 
 if (${REPO_OPTION_PREFIX}_ENABLE_EXAMPLE)
-    add_subdirectory(examples)
+    #add_subdirectory(examples)
 endif()
 
 add_subdirectory(external)
-add_subdirectory(idds_wrapper)
-add_subdirectory(idds_server_module)
-add_subdirectory(idds_client_module)
+#add_subdirectory(idds_wrapper)
+#add_subdirectory(idds_server_module)
+#add_subdirectory(idds_client_module)
 
-# Copy rtps.ini to the bin directory
-add_custom_command(
-    OUTPUT ${CMAKE_BINARY_DIR}/bin/rtps.ini
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${CMAKE_SOURCE_DIR}/rtps.ini
-            ${CMAKE_BINARY_DIR}/bin/
-    DEPENDS ${CMAKE_SOURCE_DIR}/rtps.ini
-)
+if(UNIX)
+    # Copy rtps.ini to the bin directory
+    add_custom_command(
+        OUTPUT ${CMAKE_BINARY_DIR}/bin/rtps.ini
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                ${CMAKE_SOURCE_DIR}/rtps.ini
+                ${CMAKE_BINARY_DIR}/bin/
+        DEPENDS ${CMAKE_SOURCE_DIR}/rtps.ini
+    )
 
-add_custom_target(copy_rtps_ini ALL DEPENDS ${CMAKE_BINARY_DIR}/bin/rtps.ini)
+    add_custom_target(copy_rtps_ini ALL DEPENDS ${CMAKE_BINARY_DIR}/bin/rtps.ini)
 
-# Generate setenv.sh script
-# Paths for ACE_ROOT and OPENDDS_ROOT
-set(ACE_ROOT_PATH "${CMAKE_BINARY_DIR}/_deps/opendds-build/lib")
-set(OPENDDS_ROOT_PATH "${CMAKE_BINARY_DIR}/_deps/opendds-build/ace_tao/lib")
+    # Generate setenv.sh script
+    # Paths for ACE_ROOT and OPENDDS_ROOT
+    set(ACE_ROOT_PATH "${CMAKE_BINARY_DIR}/_deps/opendds-build/lib")
+    set(OPENDDS_ROOT_PATH "${CMAKE_BINARY_DIR}/_deps/opendds-build/ace_tao/lib")
 
-# Script file path
-set(ENV_SCRIPT_PATH "${CMAKE_SOURCE_DIR}/setenv.sh")
+    # Script file path
+    set(ENV_SCRIPT_PATH "${CMAKE_SOURCE_DIR}/setenv.sh")
 
-# Generate the setenv.sh script
-configure_file(
-    ${CMAKE_SOURCE_DIR}/setenv.tmpl
-    ${ENV_SCRIPT_PATH}
-    @ONLY
-)
+    # Generate the setenv.sh script
+    configure_file(
+        ${CMAKE_SOURCE_DIR}/setenv.tmpl
+        ${ENV_SCRIPT_PATH}
+        @ONLY
+    )
 
-add_custom_command(
-    OUTPUT ${ENV_SCRIPT_PATH}
-    COMMAND ${CMAKE_COMMAND} -E touch ${ENV_SCRIPT_PATH}
-    COMMAND chmod +x ${ENV_SCRIPT_PATH}
-    COMMENT "Generating environment setup script"
-)
+    add_custom_command(
+        OUTPUT ${ENV_SCRIPT_PATH}
+        COMMAND ${CMAKE_COMMAND} -E touch ${ENV_SCRIPT_PATH}
+        COMMAND chmod +x ${ENV_SCRIPT_PATH}
+        COMMENT "Generating environment setup script"
+    )
 
-add_custom_target(generate_env_script ALL DEPENDS ${ENV_SCRIPT_PATH})
+    add_custom_target(generate_env_script ALL DEPENDS ${ENV_SCRIPT_PATH})
+endif (UNIX)
