@@ -14,7 +14,9 @@ iDDSServerImpl::iDDSServerImpl(const DevicePtr& rootDevice,
                                const PropertyObjectPtr& config,
                                const ContextPtr& context)
     : Server("OpenDAQiDDS", config, rootDevice, context)
-    , iDDSServer("iDDSServer1")
+    , iDDSServer(iDDSDeviceBuilder()
+                 .setLogicalNodeId("iDDSServerNode")
+                 .build())
     , context(context)
 {
     iDDSServer.StartServer();

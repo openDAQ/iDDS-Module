@@ -16,7 +16,9 @@ iDDSClientModule::iDDSClientModule(ContextPtr context)
             daq::VersionInfo(IDDS_CL_MODULE_MAJOR_VERSION, IDDS_CL_MODULE_MINOR_VERSION, IDDS_CL_MODULE_PATCH_VERSION),
             std::move(context),
             "OpenDAQiDDSClientModule")
-    , iDDSClient("iDDSClient1")
+    , iDDSClient(iDDSDeviceBuilder()
+                 .setLogicalNodeId("iDDSClientNode")
+                 .build())
 {
 }
 

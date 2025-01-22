@@ -1,8 +1,10 @@
+#include <idds_wrapper/iDDSDeviceBuilder.h>
 #include <idds_wrapper/iDDSDevice.h>
 #include <iostream>
 
-int main() {
-    iDDSDevice device("NodeId3");
+int main()
+{
+    iDDSDevice device = iDDSDeviceBuilder().setLogicalNodeId("NodeId3").build();
     device.StartServer();
 
     std::cout << "Press Enter to check available iDDS devices." << std::endl;
@@ -10,7 +12,8 @@ int main() {
 
     std::cout << "Available iDDS devices: " << std::endl;
     auto devices = device.GetAvailableIDDSDevices();
-    for (const auto& id : devices) {
+    for (const auto& id : devices)
+    {
         std::cout << " - " << id << std::endl;
     }
 

@@ -1,8 +1,8 @@
 #ifndef IDDSDEVICE_H
 #define IDDSDEVICE_H
 
-#include "MessengerTypeSupportImpl.h"
-#include "MessengerC.h"
+#include "iDDSTypeSupportImpl.h"
+#include "iDDSC.h"
 #include "DataReaderListenerImpl.h"
 #include "CommandListenerImpl.h"
 
@@ -29,11 +29,10 @@
 class iDDSDevice
 {
 public:
-    using iDDSNodeUniqueID = std::string;
-
     /// Constructor
-    iDDSDevice();
-    explicit iDDSDevice(const iDDSNodeUniqueID node_id);
+    explicit iDDSDevice(const std::string node_id, const std::string manufacturer = "openDAQ", const std::string productType = "model",
+                        const std::string serialNumber = "serial_number", const std::string hwVersion = "", const std::string swVersion = "",
+                        const std::string ipAddress = "127.0.0.1");
 
     /// Destructor
     ~iDDSDevice();
@@ -42,10 +41,10 @@ public:
     void StartServer();
 
     /// Returns a vector of available iDDS devices
-    std::vector<iDDSNodeUniqueID> GetAvailableIDDSDevices();
+    std::vector<std::string> GetAvailableIDDSDevices();
 
     /// Send iDDS message to a specific nodeID
-    int SendIDDSMessage(const iDDSNodeUniqueID destination_node_id, const std::string message_);
+    int SendIDDSMessage(const std::string destination_node_id, const std::string message_);
 
     /// Print received iDDS messages
     void PrintReceivedIDDSMessages();
@@ -67,7 +66,13 @@ private:
     int CreateMessageTopic();
 
 private:
-    iDDSNodeUniqueID node_id;
+    std::string node_id;
+    std::string manufacturer;
+    std::string productType;
+    std::string serialNumber;
+    std::string hwVersion;
+    std::string swVersion;
+    std::string ipAddress;
     std::vector<std::string> received_messages;
 
     std::thread advertiser_thread;
@@ -83,11 +88,11 @@ private:
     CommandListenerImpl* listenerCommand_impl;
     DDS::DataReaderListener_var listenerCommand;
 
-    //NodeAdvertiser Topic
+    //AboutNode Topic
     DDS::Topic_var NodeAdvertiserTopic;
     DDS::Publisher_var NodeAdvertiserPublisher;
     DDS::DataWriter_var NodeAdvertiserWriter;
-    Messenger::iDDSHelloMsgDataWriter_var iDDSHelloMsg_writer;
+    RealTimeBackbone::AboutNodeDataWriter_var AboutNode_writer;
     DDS::Subscriber_var NodeAdvertiserSubscriber;
     DDS::DataReader_var NodeAdvertiserReader;
 
@@ -95,7 +100,7 @@ private:
     DDS::Topic_var MessageTopic;
     DDS::Publisher_var MessagePublisher;
     DDS::DataWriter_var MessageWriter;
-    Messenger::iDDSControlMsgDataWriter_var iDDSMessage_writer;
+    RealTimeBackbone::MessageDataWriter_var Message_writer;
     DDS::Subscriber_var MessageSubscriber;
     DDS::DataReader_var MessageReader;
 };
