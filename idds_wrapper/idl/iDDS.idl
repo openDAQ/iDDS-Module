@@ -1,4 +1,10 @@
-module RealTimeBackbone {
+module iDDS {
+  struct Msg
+  {
+    long userID;
+    string message;
+  };
+
   // Constant Values
   const long MAXIMUM_EVENT_DESCRIPTION_LENGTH = 512;
   const long MAXIMUM_HARDWARE_VERSION_LENGTH = 64;
@@ -74,16 +80,15 @@ module RealTimeBackbone {
   };
 
   //AboutNode Struct - Used for Node Advertisement
-  @topic
-  struct AboutNode{
-    RealNodeID                  _realNodeID;
-    BuildStandard               _buildStandard;
-    OperationalStatus           _operationalStatus;
-    string<64>                  statusReason;
-    LogicalNodeID               _logicalNodeID;
-    DomainID                    _domainID;
-    string<40>                  ipAddress;
-    Time                        _time;
+  struct AboutNode {
+    @key RealNodeID aboutRealNodeID;
+    BuildStandard aboutNodeBuildStandard;
+    OperationalStatus aboutOperationalStatus;
+    string<64> statusReason;
+    LogicalNodeID aboutLogicalNodeID;
+    DomainID aboutDomainID;
+    string<40> ipAddress;
+    Time aboutTime;
   };
 
   //Message Struct - Used for Sending and Receiving Message
@@ -94,7 +99,7 @@ module RealTimeBackbone {
     string<MAXIMUM_MESSAGE_BODY_LENGTH>  messageBody;
     ReferenceNumber                      myReferenceNumber;
     ReferenceNumber                      yourReferenceNumber;
-    Time                                 _time;
+    Time                                 time;
     unsigned long                        fragmentNumber;
     boolean                              moreFragments;
   };

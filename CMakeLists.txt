@@ -18,7 +18,7 @@ set(OPENDAQ_DOCUMENTATION_TESTS OFF)
 set(OPENDAQ_ENABLE_NATIVE_STREAMING OFF)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(${REPO_OPTION_PREFIX}_ENABLE_EXAMPLE "Enable Example" ON)
+set(${REPO_OPTION_PREFIX}_ENABLE_EXAMPLE "Enable Examples" ON)
 
 list(APPEND CMAKE_MESSAGE_CONTEXT ${REPO_NAME})
 set(CMAKE_MESSAGE_CONTEXT_SHOW ON CACHE BOOL "Show CMake message context")
@@ -31,12 +31,12 @@ setup_repo(${REPO_OPTION_PREFIX})
 include(SetupDDS)
 setup_dds_dependencies()
 
-if (${REPO_OPTION_PREFIX}_ENABLE_EXAMPLE)
-#    add_subdirectory(examples)
-endif()
-
-#add_subdirectory(external)
-#add_subdirectory(idds_wrapper)
+add_subdirectory(external)
+add_subdirectory(idds_wrapper)
 #add_subdirectory(idds_server_module)
 #add_subdirectory(idds_client_module)
 add_subdirectory(helloworld)
+
+if (${REPO_OPTION_PREFIX}_ENABLE_EXAMPLE)
+    add_subdirectory(examples)
+endif()
