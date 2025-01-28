@@ -2,7 +2,7 @@ project(idds_wrapper
         VERSION 1.0.0
         LANGUAGES CXX)
 
-set(LIB_NAME idds_wrapper)
+set(LIB_NAME ${PROJECT_NAME})
 
 # Add the CycloneDDS-CXX and CycloneDDS core libraries installation directory to the CMake search path
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}/cyclonedds-install")
@@ -12,7 +12,9 @@ if(NOT TARGET CycloneDDS-CXX::ddscxx)
   find_package(CycloneDDS-CXX REQUIRED)
 endif()
 
-idlcxx_generate(TARGET idl-data FILES "${CMAKE_CURRENT_SOURCE_DIR}/../idl/iDDS.idl" WARNINGS no-implicit-extensibility)
+idlcxx_generate(TARGET idl-data
+                FILES "${CMAKE_CURRENT_SOURCE_DIR}/../idl/iDDS.idl"
+                WARNINGS no-implicit-extensibility)
 
 set(idds_libs
         CycloneDDS-CXX::ddscxx
@@ -39,8 +41,8 @@ add_library(${PROJECT_NAME} SHARED
     ${SRC_PrivateHeaders}
 )
 
-target_include_directories(idds_wrapper PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(idds_wrapper PUBLIC ${idds_libs})
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${idds_libs})
 
 target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
                                                $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/../include>

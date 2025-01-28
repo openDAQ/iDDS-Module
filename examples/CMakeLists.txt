@@ -23,6 +23,7 @@ target_link_libraries(App3 PRIVATE idds_wrapper)
 #add_executable(idds_server_module_example
 #  idds_server.cpp
 #)
+#add_dependencies(idds_server_module_example idds_wrapper daq::opendaq)
 #target_link_libraries(idds_server_module_example PUBLIC daq::opendaq
 #                                      PUBLIC idds_wrapper
 #
@@ -31,6 +32,7 @@ target_link_libraries(App3 PRIVATE idds_wrapper)
 #add_executable(idds_client_module_example
 #  idds_client.cpp
 #)
+#add_dependencies(idds_client_module_example idds_wrapper daq::opendaq)
 #target_link_libraries(idds_client_module_example PUBLIC daq::opendaq
 #                                      PUBLIC idds_wrapper
 #
