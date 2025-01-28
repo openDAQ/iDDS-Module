@@ -14,7 +14,8 @@ endif()
 
 idlcxx_generate(TARGET idl-data
                 FILES "${CMAKE_CURRENT_SOURCE_DIR}/../idl/iDDS.idl"
-                WARNINGS no-implicit-extensibility)
+                WARNINGS no-implicit-extensibility
+                OUTPUT_DIR "${CMAKE_BINARY_DIR}/generated")
 
 set(idds_libs
         CycloneDDS-CXX::ddscxx
@@ -39,6 +40,12 @@ add_library(${PROJECT_NAME} SHARED
     ${SRC_Cpp}
     ${SRC_PublicHeaders}
     ${SRC_PrivateHeaders}
+)
+
+set_source_files_properties ("${CMAKE_BINARY_DIR}/generated/iDDS.hpp"
+                             "${CMAKE_BINARY_DIR}/generated/iDDS.cpp"
+                             PROPERTIES
+                             GENERATED TRUE
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
