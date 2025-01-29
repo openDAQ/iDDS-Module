@@ -28,6 +28,9 @@ public:
     /// Starts the iDDS server spawning the advertiser and listener threads
     void StartServer();
 
+    /// Stop the iDDS server
+    void StopServer();
+
     /// Returns a vector of available iDDS devices
     std::vector<std::string> GetAvailableIDDSDevices();
 

@@ -75,6 +75,27 @@ void iDDSDevice::StartServer()
     message_listener_thread = std::thread(&iDDSDevice::MessageListener, this);
 }
 
+// Stop the iDDS server
+void iDDSDevice::StopServer()
+{
+    m_bRunning = false;
+
+    if (advertiser_thread.joinable())
+    {
+        advertiser_thread.join();
+    }
+
+    if (node_discovery_thread.joinable())
+    {
+        node_discovery_thread.join();
+    }
+
+    if (message_listener_thread.joinable())
+    {
+        message_listener_thread.join();
+    }
+}
+
 // GetAvailableIDDSDevices method
 std::vector<std::string> iDDSDevice::GetAvailableIDDSDevices()
 {
