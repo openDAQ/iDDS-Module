@@ -43,3 +43,23 @@ add_subdirectory(idds_client_module)
 if (${REPO_OPTION_PREFIX}_ENABLE_EXAMPLE)
     add_subdirectory(examples)
 endif()
+
+# Set CPack variables
+set(CPACK_COMPONENTS_ALL RUNTIME)
+set(CPACK_PROJECT_NAME ${PROJECT_NAME})
+set(CPACK_PACKAGE_NAME ${PROJECT_NAME})
+set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
+set(CPACK_OUTPUT_FILE_PREFIX "${CMAKE_BINARY_DIR}/package")
+
+# Set the CPack generator based on the platform
+if (WIN32)
+    set(CPACK_GENERATOR "ZIP")
+elseif (UNIX AND NOT APPLE)
+    cmake_host_system_information(RESULT DISTRO_ID QUERY DISTRIB_ID)
+    cmake_host_system_information(RESULT DISTRO_VERSION_ID QUERY DISTRIB_VERSION_ID)
+    set(CPACK_SYSTEM_NAME "${DISTRO_ID}${DISTRO_VERSION_ID}")
+    set(CPACK_GENERATOR "TGZ")
+endif()
+
+# Include CPack for packaging
+include(CPack)
