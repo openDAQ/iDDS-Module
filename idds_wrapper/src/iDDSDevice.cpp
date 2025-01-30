@@ -6,7 +6,7 @@
 //--------------------------------------------------------------------------------------------------
 // Constants.
 //--------------------------------------------------------------------------------------------------
-static const int c_nAdveritisementInterval = 1; // seconds
+static const int c_nAdveritisementInterval = 5; // seconds
 static const int c_nDomainID = 0;
 static const int c_nStreamingDomainID = -1; //Set to -1 (minus one) if not currently known.
 static const char node_advertiser_topic[] = "AboutNode";
@@ -103,7 +103,7 @@ std::vector<std::string> iDDSDevice::GetAvailableIDDSDevices()
 
     for (auto &node : m_veciDDSNodes)
     {
-        available_devices.push_back(node.aboutLogicalNodeID());
+        available_devices.push_back(node.logicalNodeID());
     }
 
     return available_devices;
@@ -112,13 +112,13 @@ std::vector<std::string> iDDSDevice::GetAvailableIDDSDevices()
 // SendIDDSMessage method
 int iDDSDevice::SendIDDSMessage(const std::string destination_node_id, const std::string message_)
 {
-    iDDS::LogicalNodeID sourceLogicalNodeID{node_id};
-    iDDS::LogicalNodeID targetLogicalNodeID{destination_node_id};
-    iDDS::Time time{0, 0}; // To be adjusted
+    LogicalNodeID sourceLogicalNodeID{node_id};
+    LogicalNodeID targetLogicalNodeID{destination_node_id};
+    Time time{0, 0}; // To be adjusted
 
     try
     {
-        iDDS::Message msg(
+        Message msg(
             targetLogicalNodeID,            // TargetLogicalNodeID
             sourceLogicalNodeID,            // SourceLogicalNodeID
             message_,                       // Message Body
@@ -177,7 +177,7 @@ void iDDSDevice::NodeDiscovery()
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-        dds::sub::LoanedSamples<iDDS::AboutNode> samples;
+        dds::sub::LoanedSamples<AboutNode> samples;
 
         /* Try taking samples from the reader. */
         samples = m_aboutNodeReader.take();
@@ -185,17 +185,17 @@ void iDDSDevice::NodeDiscovery()
         /* Are samples read? */
         if (samples.length() > 0)
         {
-            dds::sub::LoanedSamples<iDDS::AboutNode>::const_iterator sample_iter;
+            dds::sub::LoanedSamples<AboutNode>::const_iterator sample_iter;
             for (sample_iter = samples.begin(); sample_iter < samples.end(); ++sample_iter)
             {
                 /* Get the message and sample information. */
-                const iDDS::AboutNode& msg = sample_iter->data();
+                const AboutNode& msg = sample_iter->data();
                 const dds::sub::SampleInfo& info = sample_iter->info();
 
                 // Check if this sample has valid data.
                 if (info.valid())
                 {
-                    const iDDS::LogicalNodeID& logicalNodeID = msg.aboutLogicalNodeID();
+                    const LogicalNodeID& logicalNodeID = msg.logicalNodeID();
 
                     //Ignore own Logical ID
                     if (logicalNodeID == node_id)
@@ -205,8 +205,8 @@ void iDDSDevice::NodeDiscovery()
 
                     // Debugging version of unique_id comparison
                     auto it = std::find_if(m_veciDDSNodes.begin(), m_veciDDSNodes.end(),
-                             [&logicalNodeID](const iDDS::AboutNode &node){
-                                return node.aboutLogicalNodeID() == logicalNodeID;
+                             [&logicalNodeID](const AboutNode &node){
+                                return node.logicalNodeID() == logicalNodeID;
                              });
 
                     // If unique_id is not found, append the new message to the vector
@@ -229,7 +229,7 @@ void iDDSDevice::MessageListener()
 
     while (m_bRunning)
     {
-        dds::sub::LoanedSamples<iDDS::Message> samples;
+        dds::sub::LoanedSamples<Message> samples;
 
         /* Try taking samples from the reader. */
         samples = m_MessageReader.take();
@@ -237,17 +237,17 @@ void iDDSDevice::MessageListener()
         /* Are samples read? */
         if (samples.length() > 0)
         {
-            dds::sub::LoanedSamples<iDDS::Message>::const_iterator sample_iter;
+            dds::sub::LoanedSamples<Message>::const_iterator sample_iter;
             for (sample_iter = samples.begin(); sample_iter < samples.end(); ++sample_iter)
             {
                 /* Get the message and sample information. */
-                const iDDS::Message& msg = sample_iter->data();
+                const Message& msg = sample_iter->data();
                 const dds::sub::SampleInfo& info = sample_iter->info();
 
                 // Check if this sample has valid data.
                 if (info.valid())
                 {
-                    const iDDS::LogicalNodeID& logicalNodeID = msg.sourceLogicalNodeID();
+                    const LogicalNodeID& logicalNodeID = msg.sourceLogicalNodeID();
                     const std::string& messageBody = msg.messageBody();
 
                     m_veciDDSMessages.push_back(msg);
@@ -261,17 +261,17 @@ void iDDSDevice::MessageListener()
 // Helper method to send advertisement message
 int iDDSDevice::SendAdvertisementMessage()
 {
-    iDDS::RealNodeID realNodeID{manufacturer, productType, serialNumber};
-    iDDS::BuildStandard buildStandard{hwVersion, swVersion};
-    iDDS::LogicalNodeID logicalNodeID{node_id};
-    iDDS::Time aboutTime{0, 0}; // To be adjusted
+    RealNodeID realNodeID{manufacturer, productType, serialNumber};
+    BuildStandard buildStandard{hwVersion, swVersion};
+    LogicalNodeID logicalNodeID{node_id};
+    Time aboutTime{0, 0}; // To be adjusted
 
     try
     {
-        iDDS::AboutNode msg(
+        AboutNode msg(
             realNodeID,                             // RealNodeID
             buildStandard,                          // BuildStandard
-            iDDS::OperationalStatus::OpStatusReady, // To be adjusted
+            OperationalStatus::OpStatusReady,       // To be adjusted
             "",                                     // StatusReason - To be adjusted
             logicalNodeID,                          // LogicalNodeID
             c_nStreamingDomainID,                   // DomainID
