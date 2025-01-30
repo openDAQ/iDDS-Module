@@ -17,7 +17,6 @@ int main()
         std::cout << " - " << id << std::endl;
     }
 
-
     std::cout << "Press Enter to send iDDS messages." << std::endl;
     std::cin.get();
 

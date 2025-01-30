@@ -23,6 +23,13 @@ add_library(${PROJECT_NAME} SHARED
     ${SRC_PrivateHeaders}
 )
 
+# This is workaround for the issue with the generated files
+set_source_files_properties ("${CMAKE_BINARY_DIR}/generated/iDDS.hpp"
+                             "${CMAKE_BINARY_DIR}/generated/iDDS.cpp"
+                             PROPERTIES
+                             GENERATED TRUE
+)
+
 target_link_libraries(${PROJECT_NAME} PUBLIC daq::opendaq
                                       PUBLIC idds_wrapper
 

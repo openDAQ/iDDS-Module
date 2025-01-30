@@ -1,6 +1,4 @@
 #include <idds_wrapper/iDDSDevice.h>
-#include <iDDSTypeSupportImpl.h>
-#include <iDDSC.h>
 
 class iDDSDeviceBuilder
 {
