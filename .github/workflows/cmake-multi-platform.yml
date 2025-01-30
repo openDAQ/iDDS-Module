@@ -42,7 +42,7 @@ jobs:
 
     - name: Install additional dependencies
       run: |
-          apt-get install -y --no-install-recommends ${{ matrix.apt_packages }} \
+          sudo apt-get install -y --no-install-recommends ${{ matrix.apt_packages }} \
           awscli unzip \
           lld ninja-build curl \
           mono-runtime libmono-system-json-microsoft4.0-cil libmono-system-data4.0-cil \
