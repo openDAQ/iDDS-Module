@@ -1,10 +1,11 @@
-name: CMake on multiple platforms
+name: Build and test iDDS Modules
 
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
 
 env:
     package_path: ${{ github.workspace }}/build/package/
