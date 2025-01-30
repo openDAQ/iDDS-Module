@@ -67,3 +67,18 @@ install(TARGETS ${LIB_NAME}
         ARCHIVE DESTINATION ${INSTALL_LIB_DIR}
         PUBLIC_HEADER DESTINATION include/${TARGET_FOLDER_NAME}
 )
+
+# Copy the CycloneDDS files to the output directory
+if (EXISTS "${CMAKE_BINARY_DIR}/cyclonedds-install/bin")
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_BINARY_DIR}/cyclonedds-install/bin" "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
+        COMMENT "Copying CycloneDDS binaries..."
+    )
+endif()
+
+if (EXISTS "${CMAKE_BINARY_DIR}/cyclonedds-cxx-install/bin")
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_BINARY_DIR}/cyclonedds-cxx-install/bin" "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
+        COMMENT "Copying CycloneDDS-CXX binaries..."
+    )
+endif()
