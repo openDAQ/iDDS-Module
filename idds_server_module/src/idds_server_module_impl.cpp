@@ -24,9 +24,9 @@ DictPtr<IString, IServerType> iDDSServerModule::onGetAvailableServerTypes()
     return result;
 }
 
-ServerPtr iDDSServerModule::onCreateServer(StringPtr serverType,
-                                           PropertyObjectPtr serverConfig,
-                                           DevicePtr rootDevice)
+ServerPtr iDDSServerModule::onCreateServer(const StringPtr& serverType,
+                                           const PropertyObjectPtr& serverConfig,
+                                           const DevicePtr& rootDevice)
 {
     ServerPtr server(iDDSServer_Create(rootDevice, serverConfig, context));
     return server;

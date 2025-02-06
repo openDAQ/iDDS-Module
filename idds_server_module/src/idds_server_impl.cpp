@@ -36,8 +36,7 @@ ServerTypePtr iDDSServerImpl::createType()
 
 void iDDSServerImpl::onStopServer()
 {
-    //iDDSServer.stop();
-    std::cout << "Desctructor called" << std::endl;
+    iDDSServer.StopServer();
 }
 
 OPENDAQ_DEFINE_CLASS_FACTORY_WITH_INTERFACE(

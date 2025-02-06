@@ -2,33 +2,32 @@ project(idds_wrapper
         VERSION 1.0.0
         LANGUAGES CXX)
 
-set(LIB_NAME idds_wrapper)
+set(LIB_NAME ${PROJECT_NAME})
 
-find_package(OpenDDS REQUIRED)
-include(opendds_testing)
+# Add the CycloneDDS-CXX and CycloneDDS core libraries installation directory to the CMake search path
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}/cyclonedds-install")
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}/cyclonedds-cxx-install")
 
-# IDL TypeSupport Library
-add_library(opendaq_idl SHARED)
-opendds_target_sources(opendaq_idl PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../idl/iDDS.idl")
-target_link_libraries(opendaq_idl PUBLIC OpenDDS::Dcps)
+if(NOT TARGET CycloneDDS-CXX::ddscxx)
+  find_package(CycloneDDS-CXX REQUIRED)
+endif()
 
-set(opendds_libs
-  OpenDDS::Dcps # Core OpenDDS Library
-  OpenDDS::InfoRepoDiscovery OpenDDS::Tcp # For run_test.pl
-  OpenDDS::Rtps OpenDDS::Rtps_Udp # For run_test.pl --rtps
-  opendaq_idl
+idlcxx_generate(TARGET idl-data
+                FILES "${CMAKE_CURRENT_SOURCE_DIR}/../idl/iDDS.idl"
+                WARNINGS no-implicit-extensibility
+                OUTPUT_DIR "${CMAKE_BINARY_DIR}/generated")
+
+set(idds_libs
+        CycloneDDS-CXX::ddscxx
+        idl-data
 )
 
 set(SRC_Cpp iDDSDevice.cpp
             iDDSDeviceBuilder.cpp
-            DataReaderListenerImpl.cpp
-            CommandListenerImpl.cpp
 )
 
 set(SRC_PublicHeaders iDDSDevice.h
                       iDDSDeviceBuilder.h
-                      DataReaderListenerImpl.h
-                      CommandListenerImpl.h
 )
 
 set(SRC_PrivateHeaders
@@ -43,8 +42,14 @@ add_library(${PROJECT_NAME} SHARED
     ${SRC_PrivateHeaders}
 )
 
-target_include_directories(idds_wrapper PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(idds_wrapper PUBLIC ${opendds_libs})
+set_source_files_properties ("${CMAKE_BINARY_DIR}/generated/iDDS.hpp"
+                             "${CMAKE_BINARY_DIR}/generated/iDDS.cpp"
+                             PROPERTIES
+                             GENERATED TRUE
+)
+
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${idds_libs})
 
 target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
                                                $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/../include>
@@ -62,3 +67,18 @@ install(TARGETS ${LIB_NAME}
         ARCHIVE DESTINATION ${INSTALL_LIB_DIR}
         PUBLIC_HEADER DESTINATION include/${TARGET_FOLDER_NAME}
 )
+
+# Copy the CycloneDDS files to the output directory
+if (EXISTS "${CMAKE_BINARY_DIR}/cyclonedds-install/bin")
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_BINARY_DIR}/cyclonedds-install/bin" "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
+        COMMENT "Copying CycloneDDS binaries..."
+    )
+endif()
+
+if (EXISTS "${CMAKE_BINARY_DIR}/cyclonedds-cxx-install/bin")
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_BINARY_DIR}/cyclonedds-cxx-install/bin" "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
+        COMMENT "Copying CycloneDDS-CXX binaries..."
+    )
+endif()

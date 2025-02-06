@@ -1,101 +1,132 @@
-module RealTimeBackbone {
-  // Constant Values
-  const long MAXIMUM_EVENT_DESCRIPTION_LENGTH = 512;
-  const long MAXIMUM_HARDWARE_VERSION_LENGTH = 64;
-  const long MAXIMUM_LOGICAL_NODE_ID_LENGTH = 16;
-  const long MAXIMUM_MANUFACTURER_LENGTH = 64;
-  const long MAXIMUM_MESSAGE_BODY_LENGTH = 2048;
-  const long MAXIMUM_NODE_CONFIGURATION_ITEMS = 32;
-  const long MAXIMUM_NODE_CONFIGURATION_ITEM_NAME_LENGTH = 32;
-  const long MAXIMUM_NODE_CONFIGURATION_ITEM_VERSION_LENGTH = 16;
-  const long MAXIMUM_PARAMETER_NAME_LENGTH = 64;
-  const long MAXIMUM_PARTITION_NAME_LENGTH = 64;
-  const long MAXIMUM_PRODUCT_TYPE_LENGTH = 64;
-  const long MAXIMUM_SERIAL_NUMBER_LENGTH = 64;
-  const long MAXIMUM_SOFTWARE_VERSION_LENGTH = 64;
-  const long MAXIMUM_STREAMING_DDS_METHODS = 16;
-  const long MAXIMUM_TOPIC_NAME_LENGTH = 64;
-  const long MAXIMUM_UNITS_LENGTH = 32;
-  const long MAXIMUM_URL_LENGTH = 8192;
-
-  typedef string<MAXIMUM_LOGICAL_NODE_ID_LENGTH> LogicalNodeID;
-  typedef string<MAXIMUM_PARAMETER_NAME_LENGTH> ParameterName;
-  typedef unsigned long ParameterID;
-  typedef long DomainID;
-  typedef unsigned long ReferenceNumber;
-
-  struct RealNodeID{
-    string<MAXIMUM_MANUFACTURER_LENGTH> manufacturer;
-    string<MAXIMUM_PRODUCT_TYPE_LENGTH> productType;
-    string<MAXIMUM_SERIAL_NUMBER_LENGTH> serialNumber;
+module HelloWorldData
+{
+  struct Msg
+  {
+    @key
+    long userID;
+    string message;
   };
+};
 
-  struct BuildStandard{
-    string<MAXIMUM_HARDWARE_VERSION_LENGTH> hardwareVersion;
-    string<MAXIMUM_SOFTWARE_VERSION_LENGTH> softwareVersion;
-  };
+// Constant Values
+const long MAXIMUM_EVENT_DESCRIPTION_LENGTH = 512;
+const long MAXIMUM_HARDWARE_VERSION_LENGTH = 64;
+const long MAXIMUM_LOGICAL_NODE_ID_LENGTH = 16;
+const long MAXIMUM_MANUFACTURER_LENGTH = 64;
+const long MAXIMUM_MESSAGE_BODY_LENGTH = 2048;
+const long MAXIMUM_NODE_CONFIGURATION_ITEMS = 32;
+const long MAXIMUM_NODE_CONFIGURATION_ITEM_NAME_LENGTH = 32;
+const long MAXIMUM_NODE_CONFIGURATION_ITEM_VERSION_LENGTH = 16;
+const long MAXIMUM_PARAMETER_NAME_LENGTH = 64;
+const long MAXIMUM_PARTITION_NAME_LENGTH = 64;
+const long MAXIMUM_PRODUCT_TYPE_LENGTH = 64;
+const long MAXIMUM_SERIAL_NUMBER_LENGTH = 64;
+const long MAXIMUM_SOFTWARE_VERSION_LENGTH = 64;
+const long MAXIMUM_STREAMING_DDS_METHODS = 16;
+const long MAXIMUM_TOPIC_NAME_LENGTH = 64;
+const long MAXIMUM_UNITS_LENGTH = 32;
+const long MAXIMUM_URL_LENGTH = 8192;
 
-  struct NodeConfigurationItem{
-    string<MAXIMUM_NODE_CONFIGURATION_ITEM_NAME_LENGTH> name;
-    string<MAXIMUM_NODE_CONFIGURATION_ITEM_VERSION_LENGTH> version;
-    string<MAXIMUM_URL_LENGTH> URL;
-  };
+typedef string<MAXIMUM_LOGICAL_NODE_ID_LENGTH> LogicalNodeID;
+typedef string<MAXIMUM_PARAMETER_NAME_LENGTH> ParameterName;
+typedef unsigned long ParameterID;
+typedef long DomainID;
+typedef unsigned long ReferenceNumber;
 
-  typedef sequence<NodeConfigurationItem, MAXIMUM_NODE_CONFIGURATION_ITEMS> NodeConfigurationItems;
+struct RealNodeID{
+  string<MAXIMUM_MANUFACTURER_LENGTH> manufacturer;
+  string<MAXIMUM_PRODUCT_TYPE_LENGTH> productType;
+  string<MAXIMUM_SERIAL_NUMBER_LENGTH> serialNumber;
+};
 
-  struct Time{
-    unsigned long seconds;
-    unsigned long nanoseconds;
-  };
+struct BuildStandard{
+  string<MAXIMUM_HARDWARE_VERSION_LENGTH> hardwareVersion;
+  string<MAXIMUM_SOFTWARE_VERSION_LENGTH> softwareVersion;
+};
 
-  enum DataType{
-    DataTypeFloat,
-    DataTypeLong,
-    DataTypeShort,
-    DataTypeUnsignedLong,
-    DataTypeUnsignedShort,
-    DataTypeOctet,
-    DataTypeFourOctets,
-    DataTypeBoolean
-  };
+struct NodeConfigurationItem{
+  string<MAXIMUM_NODE_CONFIGURATION_ITEM_NAME_LENGTH> name;
+  string<MAXIMUM_NODE_CONFIGURATION_ITEM_VERSION_LENGTH> version;
+  string<MAXIMUM_URL_LENGTH> URL;
+};
+
+typedef sequence<NodeConfigurationItem, MAXIMUM_NODE_CONFIGURATION_ITEMS> NodeConfigurationItems;
+
+struct Time{
+  unsigned long seconds;
+  unsigned long nanoseconds;
+};
+
+enum DataType{
+  DataTypeFloat,
+  DataTypeLong,
+  DataTypeShort,
+  DataTypeUnsignedLong,
+  DataTypeUnsignedShort,
+  DataTypeOctet,
+  DataTypeFourOctets,
+  DataTypeBoolean
+};
 
 
-  //New implementation
-  enum OperationalStatus{
-    OpStatusDefault,
-    OpStatusGettingLogicalID,
-    OpStatusGettingNodeBackboneConfiguration,
-    OpStatusGettingNodeApplicationConfiguration,
-    OpStatusConfiguring,
-    OpStatusReady,
-    OpStatusCalibrating,
-    OpStatusOperating,
-    OpStatusFaulted
-  };
+//New implementation
+enum OperationalStatus{
+  OpStatusDefault,
+  OpStatusGettingLogicalID,
+  OpStatusGettingNodeBackboneConfiguration,
+  OpStatusGettingNodeApplicationConfiguration,
+  OpStatusConfiguring,
+  OpStatusReady,
+  OpStatusCalibrating,
+  OpStatusOperating,
+  OpStatusFaulted
+};
 
   //AboutNode Struct - Used for Node Advertisement
-  @topic
-  struct AboutNode{
-    RealNodeID                  _realNodeID;
-    BuildStandard               _buildStandard;
-    OperationalStatus           _operationalStatus;
-    string<64>                  statusReason;
-    LogicalNodeID               _logicalNodeID;
-    DomainID                    _domainID;
-    string<40>                  ipAddress;
-    Time                        _time;
-  };
+@final
+struct AboutNode {
+    @key RealNodeID realNodeID;
+    BuildStandard buildStandard;
+    OperationalStatus operationalStatus;
+    string<64> statusReason;
+    LogicalNodeID logicalNodeID;
+    DomainID domainID;
+    string<40> ipAddress;
+    Time time;
+};
 
   //Message Struct - Used for Sending and Receiving Message
-  @topic
-  struct Message{
-    LogicalNodeID                        targetLogicalNodeID;
-    LogicalNodeID                        sourceLogicalNodeID;
-    string<MAXIMUM_MESSAGE_BODY_LENGTH>  messageBody;
-    ReferenceNumber                      myReferenceNumber;
-    ReferenceNumber                      yourReferenceNumber;
-    Time                                 _time;
-    unsigned long                        fragmentNumber;
-    boolean                              moreFragments;
-  };
+
+@final
+struct Message {
+   @key LogicalNodeID targetLogicalNodeID;
+   LogicalNodeID sourceLogicalNodeID;
+   string<MAXIMUM_MESSAGE_BODY_LENGTH> messageBody;
+   ReferenceNumber myReferenceNumber;
+   ReferenceNumber yourReferenceNumber;
+   Time time;
+   unsigned long fragmentNumber;
+   boolean moreFragments;
+};
+
+enum EventKind {
+   EventKindTestDiaryEntry,
+   EventKindDefault
+};
+
+enum EventSeverity {
+   EventSeverityInformation,
+   EventSeverityWarning,
+   EventSeverityError,
+   EventSeverityDiagnostic
+};
+
+@final
+struct Event {
+   @key LogicalNodeID sourceLogicalNodeID;
+   EventKind eventKind;
+   EventSeverity eventSeverity;
+   string<MAXIMUM_EVENT_DESCRIPTION_LENGTH> description;
+   ReferenceNumber myReferenceNumber;
+   Time time;
 };

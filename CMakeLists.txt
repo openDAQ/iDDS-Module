@@ -18,7 +18,11 @@ set(OPENDAQ_DOCUMENTATION_TESTS OFF)
 set(OPENDAQ_ENABLE_NATIVE_STREAMING OFF)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(${REPO_OPTION_PREFIX}_ENABLE_EXAMPLE "Enable Example" ON)
+set(${REPO_OPTION_PREFIX}_ENABLE_EXAMPLE "Enable Examples" ON)
+
+IF (WIN32)
+  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+ENDIF(WIN32)
 
 list(APPEND CMAKE_MESSAGE_CONTEXT ${REPO_NAME})
 set(CMAKE_MESSAGE_CONTEXT_SHOW ON CACHE BOOL "Show CMake message context")
@@ -28,48 +32,34 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(CommonUtils)
 setup_repo(${REPO_OPTION_PREFIX})
 
-if (${REPO_OPTION_PREFIX}_ENABLE_EXAMPLE)
-    #add_subdirectory(examples)
-endif()
+include(SetupDDS)
+setup_dds_dependencies()
 
 add_subdirectory(external)
-#add_subdirectory(idds_wrapper)
-#add_subdirectory(idds_server_module)
-#add_subdirectory(idds_client_module)
+add_subdirectory(idds_wrapper)
+add_subdirectory(idds_server_module)
+add_subdirectory(idds_client_module)
 
-if(UNIX)
-    # Copy rtps.ini to the bin directory
-    add_custom_command(
-        OUTPUT ${CMAKE_BINARY_DIR}/bin/rtps.ini
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                ${CMAKE_SOURCE_DIR}/rtps.ini
-                ${CMAKE_BINARY_DIR}/bin/
-        DEPENDS ${CMAKE_SOURCE_DIR}/rtps.ini
-    )
+if (${REPO_OPTION_PREFIX}_ENABLE_EXAMPLE)
+    add_subdirectory(examples)
+endif()
 
-    add_custom_target(copy_rtps_ini ALL DEPENDS ${CMAKE_BINARY_DIR}/bin/rtps.ini)
+# Set CPack variables
+set(CPACK_COMPONENTS_ALL RUNTIME)
+set(CPACK_PROJECT_NAME ${PROJECT_NAME})
+set(CPACK_PACKAGE_NAME ${PROJECT_NAME})
+set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
+set(CPACK_OUTPUT_FILE_PREFIX "${CMAKE_BINARY_DIR}/package")
 
-    # Generate setenv.sh script
-    # Paths for ACE_ROOT and OPENDDS_ROOT
-    set(ACE_ROOT_PATH "${CMAKE_BINARY_DIR}/_deps/opendds-build/lib")
-    set(OPENDDS_ROOT_PATH "${CMAKE_BINARY_DIR}/_deps/opendds-build/ace_tao/lib")
+# Set the CPack generator based on the platform
+if (WIN32)
+    set(CPACK_GENERATOR "ZIP")
+elseif (UNIX AND NOT APPLE)
+    cmake_host_system_information(RESULT DISTRO_ID QUERY DISTRIB_ID)
+    cmake_host_system_information(RESULT DISTRO_VERSION_ID QUERY DISTRIB_VERSION_ID)
+    set(CPACK_SYSTEM_NAME "${DISTRO_ID}${DISTRO_VERSION_ID}")
+    set(CPACK_GENERATOR "TGZ")
+endif()
 
-    # Script file path
-    set(ENV_SCRIPT_PATH "${CMAKE_SOURCE_DIR}/setenv.sh")
-
-    # Generate the setenv.sh script
-    configure_file(
-        ${CMAKE_SOURCE_DIR}/setenv.tmpl
-        ${ENV_SCRIPT_PATH}
-        @ONLY
-    )
-
-    add_custom_command(
-        OUTPUT ${ENV_SCRIPT_PATH}
-        COMMAND ${CMAKE_COMMAND} -E touch ${ENV_SCRIPT_PATH}
-        COMMAND chmod +x ${ENV_SCRIPT_PATH}
-        COMMENT "Generating environment setup script"
-    )
-
-    add_custom_target(generate_env_script ALL DEPENDS ${ENV_SCRIPT_PATH})
-endif (UNIX)
+# Include CPack for packaging
+include(CPack)

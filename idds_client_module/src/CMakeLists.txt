@@ -4,21 +4,25 @@ set(SRC_Cpp module_dll.cpp
             idds_client_module_impl.cpp
 )
 
-set(SRC_PublicHeaders common.h
-                module_dll.h
-                idds_client_module_impl.h
+set(SRC_PublicHeaders ../include/${TARGET_FOLDER_NAME}/common.h
+                      ../include/${TARGET_FOLDER_NAME}/module_dll.h
+                      ../include/${TARGET_FOLDER_NAME}/idds_client_module_impl.h
 )
 
 set(SRC_PrivateHeaders
 )
 
-prepend_include(${TARGET_FOLDER_NAME} SRC_PrivateHeaders)
-prepend_include(${TARGET_FOLDER_NAME} SRC_PublicHeaders)
-
 add_library(${PROJECT_NAME} SHARED
     ${SRC_Cpp}
     ${SRC_PublicHeaders}
     ${SRC_PrivateHeaders}
+)
+
+# This is workaround for the issue with the generated files
+set_source_files_properties ("${CMAKE_BINARY_DIR}/generated/iDDS.hpp"
+                             "${CMAKE_BINARY_DIR}/generated/iDDS.cpp"
+                             PROPERTIES
+                             GENERATED TRUE
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC daq::opendaq
