@@ -4,6 +4,12 @@ set(REPO_OPTION_PREFIX IDDS)
 
 project(${REPO_NAME} VERSION 1.0.0)
 
+# Set iDDS Modules variables
+
+set(${REPO_OPTION_PREFIX}_ENABLE_EXAMPLE "Enable Examples" ON)
+set(${REPO_OPTION_PREFIX}_ENABLE_TESTS   "Enable Tests" OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Set OpenDAQ variables
 set(DAQMODULES_REF_FB_MODULE OFF)
 set(OPENDAQ_ENABLE_OPCUA OFF)
@@ -17,8 +23,7 @@ set(APP_ENABLE_WEBPAGE_EXAMPLES OFF)
 set(OPENDAQ_DOCUMENTATION_TESTS OFF)
 set(OPENDAQ_ENABLE_NATIVE_STREAMING OFF)
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(${REPO_OPTION_PREFIX}_ENABLE_EXAMPLE "Enable Examples" ON)
+
 
 IF (WIN32)
   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
@@ -39,6 +44,7 @@ add_subdirectory(external)
 add_subdirectory(idds_wrapper)
 add_subdirectory(idds_server_module)
 add_subdirectory(idds_client_module)
+add_subdirectory(idds_xml_parser)
 
 if (${REPO_OPTION_PREFIX}_ENABLE_EXAMPLE)
     add_subdirectory(examples)
