@@ -1,12 +1,10 @@
+#pragma once
 #include "pugixml.hpp"
 #include "idds_xml_error.h"
 #include "idds_xml_types.h"
 
 #include <string>
 #include <vector>
-
-#ifndef IDDS_XML_REQUEST_H
-#define IDDS_XML_REQUEST_H
 
 class idds_xml_request
 {
@@ -72,5 +70,3 @@ class idds_xml_request
     std::vector<std::string> m_vecParams;
     pugi::xml_document m_xmlDoc;
 };
-
-#endif // IDDS_XML_REQUEST_H

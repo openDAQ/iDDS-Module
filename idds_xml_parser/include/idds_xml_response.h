@@ -1,3 +1,4 @@
+#pragma once
 #include "idds_xml_error.h"
 #include "idds_xml_types.h"
 #include "idds_xml_utils.h"
@@ -5,9 +6,6 @@
 #include "pugixml.hpp"
 #include <string>
 #include <vector>
-
-#ifndef IDDS_XML_RESPONSE_H
-#define IDDS_XML_RESPONSE_H
 
 class idds_xml_response
 {
@@ -83,5 +81,3 @@ class idds_xml_response
     std::string m_strMessage;
     int m_nCode;
 };
-
-#endif // IDDS_XML_RESPONSE_H

@@ -1,10 +1,8 @@
+#pragma once
 #include "idds_xml_error.h"
 
 #include <string>
 #include <tuple>
-
-#ifndef IDDS_XML_PARAMS_ENCODE_H
-#define IDDS_XML_PARAMS_ENCODE_H
 
 template <typename T>
 class idds_xml_params_encode
@@ -23,5 +21,3 @@ class idds_xml_params_encode
     T m_Param;
     std::string m_strParamName;
 };
-
-#endif // IDDS_XML_PARAMS_ENCODE_H

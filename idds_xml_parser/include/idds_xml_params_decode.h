@@ -1,12 +1,10 @@
+#pragma once
 #include "pugixml.hpp"
 #include "idds_xml_error.h"
 
 #include <string>
 #include <iostream>
 #include <tuple>
-
-#ifndef IDDS_XML_PARAMS_DECODE_H
-#define IDDS_XML_PARAMS_DECODE_H
 
 template <typename T>
 class idds_xml_params_decode
@@ -48,5 +46,3 @@ class idds_xml_params_decode
     pugi::xml_document m_xmlDoc;
     pugi::xml_parse_result m_parseResult;
 };
-
-#endif // IDDS_XML_PARAMS_DECODE_H

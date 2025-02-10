@@ -1,5 +1,4 @@
-#ifndef IDDS_XML_ERROR_H
-#define IDDS_XML_ERROR_H
+#pragma once
 
 const int c_invalidCode = -1;
 
@@ -20,5 +19,3 @@ enum class idds_xml_error {
     response_code_range_invalid,
     request_method_name_not_set,
 };
-
-#endif // IDDS_XML_ERROR_H

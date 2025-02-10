@@ -1,6 +1,4 @@
-#ifndef IDDSDEVICE_H
-#define IDDSDEVICE_H
-
+#pragma once
 #include <string>
 #include <vector>
 #include <thread>
@@ -87,5 +85,3 @@ private:
     std::vector<AboutNode>          m_veciDDSNodes;
     std::vector<Message>            m_veciDDSMessages;
 };
-
-#endif // IDDSDEVICE_H
