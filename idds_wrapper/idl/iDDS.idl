@@ -8,7 +8,7 @@ module HelloWorldData
   };
 };
 
-// Constant Values
+// Const Values
 const long MAXIMUM_EVENT_DESCRIPTION_LENGTH = 512;
 const long MAXIMUM_HARDWARE_VERSION_LENGTH = 64;
 const long MAXIMUM_LOGICAL_NODE_ID_LENGTH = 16;
@@ -57,6 +57,11 @@ struct Time{
   unsigned long nanoseconds;
 };
 
+@final
+struct FourOctets {
+   octet Octets[4];
+};
+
 enum DataType{
   DataTypeFloat,
   DataTypeLong,
@@ -65,7 +70,27 @@ enum DataType{
   DataTypeUnsignedShort,
   DataTypeOctet,
   DataTypeFourOctets,
-  DataTypeBoolean
+  DataTypeBoolean,
+  DataTypeTime,
+  DataTypeUnsignedLongLong,
+  DataTypeLongLong,
+  DataTypeDouble,
+  DataTypeFourOctetsLittleEndian,
+  DataTypeFourOctetsBigEndian,
+  DataTypeFloatSeq,
+  DataTypeLongSeq,
+  DataTypeShortSeq,
+  DataTypeUnsignedLongSeq,
+  DataTypeUnsignedShortSeq,
+  DataTypeOctetSeq,
+  DataTypeFourOctetsSeq,
+  DataTypeBooleanSeq,
+  DataTypeTimeSeq,
+  DataTypeUnsignedLongLongSeq,
+  DataTypeLongLongSeq,
+  DataTypeDoubleSeq,
+  DataTypeFourOctetsLittleEndianSeq,
+  DataTypeFourOctetsBigEndianSeq
 };
 
 
@@ -129,4 +154,126 @@ struct Event {
    string<MAXIMUM_EVENT_DESCRIPTION_LENGTH> description;
    ReferenceNumber myReferenceNumber;
    Time time;
+};
+
+const unsigned long QualityGood                    = 1 << 0;
+const unsigned long QualityBad                     = 1 << 1;
+const unsigned long QualitySuspect                 = 1 << 2;
+const unsigned long QualityTimestampClockLocked    = 1 << 3;
+const unsigned long QualitySamplingClockLocked     = 1 << 4;
+const unsigned long QualityCalibrated              = 1 << 5;
+const unsigned long QualityUniformSampling         = 1 << 6;
+const unsigned long QualityShortCircuit            = 1 << 7;
+const unsigned long QualityOpenCircuit             = 1 << 8;
+const unsigned long QualityExtrapolatedCalibration = 1 << 9;
+const unsigned long QualityTareRemoved             = 1 << 10;
+const unsigned long QualityOffsetApplied           = 1 << 11;
+const unsigned long QualityCalibrationExpired      = 1 << 12;
+const unsigned long QualityNoData                  = 1 << 13;
+const unsigned long QualityReserved_1              = 1 << 29;
+
+const long MAXIMUM_1_OCTET_SAMPLES = 40000;
+const long MAXIMUM_2_OCTET_SAMPLES = 20000;
+const long MAXIMUM_4_OCTET_SAMPLES = 10000;
+const long MAXIMUM_8_OCTET_SAMPLES = 5000;
+
+union ParameterValues switch ( DataType ) {
+   case DataTypeFloat:
+      float floatValue;
+
+   case DataTypeLong:
+      long longValue;
+
+   case DataTypeShort:
+      short shortValue;
+
+   case DataTypeUnsignedLong:
+      unsigned long unsignedLongValue;
+
+   case DataTypeUnsignedShort:
+      unsigned short unsignedShortValue;
+
+   case DataTypeOctet:
+      octet octetValue;
+
+   case DataTypeFourOctets:
+   case DataTypeFourOctetsLittleEndian:
+   case DataTypeFourOctetsBigEndian:
+      octet fourOctets[4];
+
+   case DataTypeBoolean:
+      boolean booleanValue;
+
+   case DataTypeTime:
+      Time timeValue;
+
+   case DataTypeUnsignedLongLong:
+      unsigned long long unsignedLongLongValue;
+
+   case DataTypeLongLong:
+      long long longLongValue;
+
+   case DataTypeDouble:
+      double doubleValue;
+
+   case DataTypeFloatSeq:
+      sequence<float, MAXIMUM_4_OCTET_SAMPLES> floatValues;
+
+   case DataTypeLongSeq:
+      sequence<long, MAXIMUM_4_OCTET_SAMPLES> longValues;
+
+   case DataTypeShortSeq:
+      sequence<short, MAXIMUM_2_OCTET_SAMPLES> shortValues;
+
+   case DataTypeUnsignedLongSeq:
+      sequence<unsigned long, MAXIMUM_4_OCTET_SAMPLES> unsignedLongValues;
+
+   case DataTypeUnsignedShortSeq:
+      sequence<unsigned short, MAXIMUM_2_OCTET_SAMPLES> unsignedShortValues;
+
+   case DataTypeOctetSeq:
+      sequence<octet, MAXIMUM_1_OCTET_SAMPLES> octetValues;
+
+   case DataTypeFourOctetsSeq:
+   case DataTypeFourOctetsLittleEndianSeq:
+
+   case DataTypeBooleanSeq:
+      sequence<boolean, MAXIMUM_4_OCTET_SAMPLES> booleanValues;
+
+   case DataTypeTimeSeq:
+      sequence<Time, MAXIMUM_8_OCTET_SAMPLES> timeValues;
+
+   case DataTypeUnsignedLongLongSeq:
+      sequence<unsigned long long, MAXIMUM_8_OCTET_SAMPLES>
+         unsignedLongLongValues;
+
+   case DataTypeLongLongSeq:
+      sequence<long long, MAXIMUM_8_OCTET_SAMPLES> longLongValues;
+
+   case DataTypeDoubleSeq:
+      sequence<double, MAXIMUM_8_OCTET_SAMPLES> doubleValues;
+};
+
+enum TimeType {
+   TimeTypeSingle,
+   TimeTypeUniform,
+   TimeTypeNonUniform
+};
+
+union Timestamps switch ( TimeType ) {
+   case TimeTypeSingle:
+      Time timestamp;
+   case TimeTypeUniform:
+      sequence<Time, 2> uniformTimes;
+   case TimeTypeNonUniform:
+      sequence<Time, MAXIMUM_8_OCTET_SAMPLES> nonUniformTimes;
+};
+
+@final
+struct ParameterDataSeries {
+   @key ParameterID parameterID;
+   ParameterValues samples;
+   Timestamps times;
+   unsigned long qualityFlags;
+   unsigned long instanceValue;
 };
