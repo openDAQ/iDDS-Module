@@ -7,8 +7,6 @@ macro(setup_repo REPO_OPTION_PREFIX)
     option(${REPO_OPTION_PREFIX}_DISABLE_DEBUG_POSTFIX "Disable debug ('-debug') postfix" OFF)
     option(${REPO_OPTION_PREFIX}_DEBUG_WARNINGS_AS_ERRORS "Treat debug warnings as errors" OFF)
     option(${REPO_OPTION_PREFIX}_ENABLE_TESTS "Enable unit-tests for ${REPO_OPTION_PREFIX}" ON)
-    option(${REPO_OPTION_PREFIX}_BUILD_CAPTURE_MODULE "Enable ASAM CMP Capture Module" ON)
-    option(${REPO_OPTION_PREFIX}_BUILD_DATA_SINK "Enable ASAM CMP Data Sink" ON)
 
     get_filename_component(ROOT_DIR ${CMAKE_SOURCE_DIR} REALPATH)
 
@@ -42,7 +40,7 @@ macro(setup_repo REPO_OPTION_PREFIX)
         string(TIMESTAMP CONFIGURE_DATE)
         string(TIMESTAMP CURRENT_YEAR "%Y")
     endif()
-    
+
     find_package(GitInfo)
     if (COMMAND GIT_WC_INFO)
         GIT_WC_INFO("${CMAKE_CURRENT_SOURCE_DIR}" ${REPO_OPTION_PREFIX})
@@ -158,7 +156,7 @@ macro(setup_repo REPO_OPTION_PREFIX)
         # set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /ignore:4221")
         # set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} /ignore:4221")
     endif()
-    
+
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)

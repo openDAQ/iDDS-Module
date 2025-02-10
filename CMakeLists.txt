@@ -7,7 +7,7 @@ project(${REPO_NAME} VERSION 1.0.0)
 # Set iDDS Modules variables
 
 set(${REPO_OPTION_PREFIX}_ENABLE_EXAMPLE "Enable Examples" ON)
-set(${REPO_OPTION_PREFIX}_ENABLE_TESTS   "Enable Tests" OFF)
+set(${REPO_OPTION_PREFIX}_ENABLE_TESTS   "Enable Tests" ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Set OpenDAQ variables
