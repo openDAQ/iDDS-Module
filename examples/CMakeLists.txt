@@ -37,3 +37,13 @@ target_link_libraries(idds_client_module_example PUBLIC daq::opendaq
                                       PUBLIC idds_wrapper
 
 )
+
+
+add_executable(xml-parser-example
+  xml-example.cpp
+)
+add_dependencies(xml-parser-example idds_wrapper daq::opendaq idds_xml_parser)
+target_link_libraries(xml-parser-example PUBLIC daq::opendaq
+                                         PUBLIC idds_wrapper
+                                         PUBLIC idds_xml_parser
+)
