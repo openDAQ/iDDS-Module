@@ -1,4 +1,5 @@
 #include <idds_client_module/idds_client_module_impl.h>
+#include <idds_client_module/idds_device_impl.h>
 #include <idds_client_module/version.h>
 #include <coretypes/version_info_factory.h>
 #include <coreobjects/callable_info_factory.h>
@@ -26,7 +27,7 @@ DictPtr<IString, IDeviceType> iDDSClientModule::onGetAvailableDeviceTypes()
 {
     auto result = Dict<IString, IDeviceType>();
 
-    auto deviceType = createDeviceType();
+    auto deviceType = iDDSDeviceImpl::CreateType();
     result.set(deviceType.getId(), deviceType);
 
     return result;
@@ -36,7 +37,8 @@ DevicePtr iDDSClientModule::onCreateDevice(const StringPtr& connectionString,
                                            const ComponentPtr& parent,
                                            const PropertyObjectPtr& /*config*/)
 {
-    DevicePtr obj(createWithImplementation<IDevice, Device>(context, parent, "iDDSDevice"));
+    std::string localId = "OpenDAQiDDS";
+    DevicePtr obj(createWithImplementation<IDevice, iDDSDeviceImpl>(context, parent, StringPtr(localId)));
 
     //Start iDDS device
     iDDSClient.StartServer();
@@ -79,16 +81,6 @@ DevicePtr iDDSClientModule::onCreateDevice(const StringPtr& connectionString,
     ));
 
     return obj;
-}
-
-DeviceTypePtr iDDSClientModule::createDeviceType()
-{
-    return DeviceTypeBuilder()
-        .setId("OpenDAQiDDS")
-        .setName("iDDSClientDevice")
-        .setDescription("iDDS device")
-        .setConnectionStringPrefix("daq.idds")
-        .build();
 }
 
 END_NAMESPACE_OPENDAQ_IDDS_CLIENT_MODULE

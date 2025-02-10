@@ -2,11 +2,13 @@ project(idds_cl_module LANGUAGES CXX VERSION 1.0.0)
 
 set(SRC_Cpp module_dll.cpp
             idds_client_module_impl.cpp
+            idds_device_impl.cpp
 )
 
 set(SRC_PublicHeaders ../include/${TARGET_FOLDER_NAME}/common.h
                       ../include/${TARGET_FOLDER_NAME}/module_dll.h
                       ../include/${TARGET_FOLDER_NAME}/idds_client_module_impl.h
+                      ../include/${TARGET_FOLDER_NAME}/idds_device_impl.h
 )
 
 set(SRC_PrivateHeaders
