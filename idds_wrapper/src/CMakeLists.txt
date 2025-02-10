@@ -12,14 +12,13 @@ if(NOT TARGET CycloneDDS-CXX::ddscxx)
   find_package(CycloneDDS-CXX REQUIRED)
 endif()
 
-idlcxx_generate(TARGET idl-data
-                FILES "${CMAKE_CURRENT_SOURCE_DIR}/../idl/iDDS.idl"
-                WARNINGS no-implicit-extensibility
-                OUTPUT_DIR "${CMAKE_BINARY_DIR}/generated")
+idlcxx_generate(TARGET      idl-data
+                FILES       "${CMAKE_CURRENT_SOURCE_DIR}/../idl/iDDS.idl"
+                WARNINGS    no-implicit-extensibility
+                OUTPUT_DIR  "${CMAKE_BINARY_DIR}/generated")
 
-set(idds_libs
-        CycloneDDS-CXX::ddscxx
-        idl-data
+set(idds_libs CycloneDDS-CXX::ddscxx
+              idl-data
 )
 
 set(SRC_Cpp iDDSDevice.cpp
@@ -52,8 +51,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(${PROJECT_NAME} PUBLIC ${idds_libs})
 
 target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
-                                               $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/../include>
-                                               $<INSTALL_INTERFACE:include>
+                                                  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/../include>
+                                                  $<INSTALL_INTERFACE:include>
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${SRC_PublicHeaders}")

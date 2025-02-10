@@ -71,21 +71,21 @@ private:
     dds::domain::DomainParticipant participant;
 
     //AboutNode Topic
-    dds::topic::Topic<AboutNode> m_aboutNodeTopic;
-    dds::sub::Subscriber m_aboutNodesubscriber;
+    dds::topic::Topic<AboutNode>    m_aboutNodeTopic;
+    dds::sub::Subscriber            m_aboutNodesubscriber;
     dds::sub::DataReader<AboutNode> m_aboutNodeReader;
-    dds::pub::Publisher m_aboutNodepublisher;
+    dds::pub::Publisher             m_aboutNodepublisher;
     dds::pub::DataWriter<AboutNode> m_aboutNodewriter;
 
     //Message Topic
-    dds::topic::Topic<Message> m_MessageTopic;
-    dds::sub::Subscriber m_MessageSubscriber;
-    dds::sub::DataReader<Message> m_MessageReader;
-    dds::pub::Publisher m_MessagePublisher;
-    dds::pub::DataWriter<Message> m_MessageWriter;
+    dds::topic::Topic<Message>      m_MessageTopic;
+    dds::sub::Subscriber            m_MessageSubscriber;
+    dds::sub::DataReader<Message>   m_MessageReader;
+    dds::pub::Publisher             m_MessagePublisher;
+    dds::pub::DataWriter<Message>   m_MessageWriter;
 
-    std::vector<AboutNode> m_veciDDSNodes;
-    std::vector<Message> m_veciDDSMessages;
+    std::vector<AboutNode>          m_veciDDSNodes;
+    std::vector<Message>            m_veciDDSMessages;
 };
 
 #endif // IDDSDEVICE_H

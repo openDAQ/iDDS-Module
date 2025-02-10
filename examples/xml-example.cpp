@@ -8,8 +8,6 @@
 
 int main()
 {
-    std::cout << "Hello world!" << std::endl;
-
     std::string xml_message = "<methodCall><methodName>General.StartOperating</methodName><params /></methodCall>";
 
     idds_xml_request parser(xml_message);
