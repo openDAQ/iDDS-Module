@@ -17,4 +17,3 @@ struct idds_xml_walker: pugi::xml_tree_walker
 
     std::map<std::string, int> m_Occurrences;
 };
-

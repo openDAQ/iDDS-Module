@@ -45,22 +45,7 @@ iDDSDevice::~iDDSDevice()
     // Join threads if they are joinable
     if (m_bRunning)
     {
-        m_bRunning = false;
-
-        if (advertiser_thread.joinable())
-        {
-            advertiser_thread.join();
-        }
-
-        if (node_discovery_thread.joinable())
-        {
-            node_discovery_thread.join();
-        }
-
-        if (message_listener_thread.joinable())
-        {
-            message_listener_thread.join();
-        }
+        StopServer();
     }
 }
 
