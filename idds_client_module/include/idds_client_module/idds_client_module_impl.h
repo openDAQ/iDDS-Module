@@ -17,8 +17,8 @@
 #pragma once
 #include <idds_client_module/common.h>
 #include <opendaq/module_impl.h>
-#include <idds_wrapper/iDDSDeviceBuilder.h>
-#include <idds_wrapper/iDDSDevice.h>
+#include <idds_wrapper/idds_device_builder.h>
+#include <idds_wrapper/idds_device_impl.h>
 
 BEGIN_NAMESPACE_OPENDAQ_IDDS_CLIENT_MODULE
 

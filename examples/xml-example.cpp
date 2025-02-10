@@ -1,5 +1,5 @@
-#include <idds_wrapper/iDDSDeviceBuilder.h>
-#include <idds_wrapper/iDDSDevice.h>
+#include <idds_wrapper/idds_device_builder.h>
+#include <idds_wrapper/idds_device_impl.h>
 #include <idds_xml_request.h>
 #include <idds_xml_params_decode.h>
 #include <idds_xml_params_encode.h>

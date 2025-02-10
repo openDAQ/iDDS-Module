@@ -21,12 +21,18 @@ set(idds_libs CycloneDDS-CXX::ddscxx
               idl-data
 )
 
-set(SRC_Cpp iDDSDevice.cpp
-            iDDSDeviceBuilder.cpp
+set(SRC_Cpp           idds_device_impl.cpp
+                      idds_device_builder.cpp
+                      #node_advertiser.cpp
+                      #node_discovery.cpp
+                      #message_listener.cpp
 )
 
-set(SRC_PublicHeaders iDDSDevice.h
-                      iDDSDeviceBuilder.h
+set(SRC_PublicHeaders idds_device_impl.h
+                      idds_device_builder.h
+                      #node_advertiser.h
+                      #node_discovery.cpp
+                      #message_listener.cpp
 )
 
 set(SRC_PrivateHeaders

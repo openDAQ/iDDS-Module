@@ -1,4 +1,4 @@
-#include <idds_wrapper/iDDSDevice.h>
+#include <idds_wrapper/idds_device_impl.h>
 #include <iostream>
 #include <fstream>
 #include <filesystem>
