@@ -8,15 +8,21 @@
 
 int main()
 {
-    std::string xml_message = "<methodCall><methodName>General.StartOperating</methodName><params /></methodCall>";
+    std::string xml_StartOperating = "<methodCall><methodName>General.StartOperating</methodName><params /></methodCall>";
+    std::string xml_GetAttribute = "<methodCall> <methodName>Configuration.GetAttribute</methodName> <params> <param> <name>GetValueOf</name> <value><ListOfString> <String>General/Id/LogicalNodeId</String> <String>General/WatchDog</String> </ListOfString></value> </param> </params></methodCall>";
 
-    idds_xml_request parser(xml_message);
+    idds_xml_request parser(xml_GetAttribute);
     auto err = parser.parse();
 
     if (parser.parse() == idds_xml_error::ok)
     {
         std::cout << "Method name: " << parser.get_method_name() << std::endl;
         std::cout << "Params size: " << parser.get_params().size() << std::endl;
+
+        for (auto param : parser.get_params())
+        {
+            std::cout << "Param name: " << param << std::endl;
+        }
     }
     else
     {

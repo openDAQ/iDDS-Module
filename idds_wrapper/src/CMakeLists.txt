@@ -25,14 +25,15 @@ set(SRC_Cpp           idds_device_impl.cpp
                       idds_device_builder.cpp
                       node_advertiser.cpp
                       node_discovery.cpp
-                      message_listener.cpp
+                      command_handler.cpp
 )
 
-set(SRC_PublicHeaders idds_device_impl.h
+set(SRC_PublicHeaders idds_device_info.h
+                      idds_device_impl.h
                       idds_device_builder.h
                       node_advertiser.h
                       node_discovery.h
-                      message_listener.h
+                      command_handler.h
 )
 
 set(SRC_PrivateHeaders

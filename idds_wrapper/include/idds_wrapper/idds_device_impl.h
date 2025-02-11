@@ -5,9 +5,11 @@
 #include <chrono>
 #include <iostream>
 
+#include "idds_wrapper/idds_device_info.h"
+#include <idds_wrapper/node_advertiser.h>
+#include <idds_wrapper/node_discovery.h>
+#include <idds_wrapper/command_handler.h>
 #include "dds/dds.hpp"
-
-/* Include data type and specific traits to be used with the C++ DDS API. */
 #include "iDDS.hpp"
 
 using namespace org::eclipse::cyclonedds;
@@ -39,49 +41,20 @@ public:
     void PrintReceivedIDDSMessages();
 
 private:
-    /// Advertise node thread
-    void NodeAdvertiser();
-
-    /// Node Discovery thread
-    void NodeDiscovery();
-
-    /// Message Listener thread
-    void MessageListener();
-
-    /// Helper method to send advertisement message
-    int SendAdvertisementMessage();
-
-private:
-    std::string node_id;
-    std::string manufacturer;
-    std::string productType;
-    std::string serialNumber;
-    std::string hwVersion;
-    std::string swVersion;
-    std::string ipAddress;
+    idds_device_info m_idds_device_info;
     std::vector<std::string> received_messages;
 
-    std::thread advertiser_thread;
-    std::thread node_discovery_thread;
-    std::thread message_listener_thread;
-    bool m_bRunning;
-
-    dds::domain::DomainParticipant participant;
-
-    //AboutNode Topic
+    // DDS
+    dds::domain::DomainParticipant  participant;
     dds::topic::Topic<AboutNode>    m_aboutNodeTopic;
     dds::sub::Subscriber            m_aboutNodesubscriber;
     dds::sub::DataReader<AboutNode> m_aboutNodeReader;
     dds::pub::Publisher             m_aboutNodepublisher;
     dds::pub::DataWriter<AboutNode> m_aboutNodewriter;
 
-    //Message Topic
-    dds::topic::Topic<Message>      m_MessageTopic;
-    dds::sub::Subscriber            m_MessageSubscriber;
-    dds::sub::DataReader<Message>   m_MessageReader;
-    dds::pub::Publisher             m_MessagePublisher;
-    dds::pub::DataWriter<Message>   m_MessageWriter;
+    NodeAdvertiser  m_nodeAdvertiser;
+    NodeDiscovery   m_nodeDiscovery;
+    CommandHandler  m_commandHandler;
 
-    std::vector<AboutNode>          m_veciDDSNodes;
-    std::vector<Message>            m_veciDDSMessages;
+    bool m_bRunning;
 };

@@ -1,6 +1,14 @@
 #include <idds_wrapper/node_discovery.h>
 
-NodeDiscovery::NodeDiscovery()
+//--------------------------------------------------------------------------------------------------
+// Constants.
+//--------------------------------------------------------------------------------------------------
+static const char c_node_advertiser_topic[] = "AboutNode";
+
+NodeDiscovery::NodeDiscovery(dds::sub::DataReader<AboutNode>& reader, const idds_device_info& device_info)
+    : m_bRunning(false)
+    , m_device_info(device_info)
+    , m_reader(reader)
 {
 }
 
@@ -10,18 +18,83 @@ NodeDiscovery::~NodeDiscovery()
 
 void NodeDiscovery::Start()
 {
-    m_nodeDiscoveryThread = std::thread(&NodeDiscovery::BeginDiscovery, this);
+    // Start the server
+    if(!m_bRunning)
+    {
+        m_bRunning = true;
+        m_nodeDiscoveryThread = std::thread(&NodeDiscovery::BeginDiscovery, this);
+    }
 }
 
 void NodeDiscovery::Stop()
 {
-    if (m_nodeDiscoveryThread.joinable())
+    if (m_bRunning)
     {
-        m_nodeDiscoveryThread.join();
+        m_bRunning = false;
+
+        if (m_nodeDiscoveryThread.joinable())
+        {
+            m_nodeDiscoveryThread.join();
+        }
     }
 }
 
-/// Start the node discovery thread
+/// Method that parses incoming messages to about node topic to discover new iDDS devices
 void NodeDiscovery::BeginDiscovery()
 {
+    std::cout << "[iDDS_Wrapper] Node Discovery started" << std::endl;
+
+    while (m_bRunning)
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+        dds::sub::LoanedSamples<AboutNode> samples;
+
+        /* Try taking samples from the reader. */
+        samples = m_reader.take();
+
+        /* Are samples read? */
+        if (samples.length() > 0)
+        {
+            dds::sub::LoanedSamples<AboutNode>::const_iterator sample_iter;
+            for (sample_iter = samples.begin(); sample_iter < samples.end(); ++sample_iter)
+            {
+                /* Get the message and sample information. */
+                const AboutNode& msg = sample_iter->data();
+                const dds::sub::SampleInfo& info = sample_iter->info();
+
+                // Check if this sample has valid data.
+                if (info.valid())
+                {
+                    const LogicalNodeID& logicalNodeID = msg.logicalNodeID();
+
+                    //Ignore own Logical ID
+                    if (logicalNodeID == m_device_info.node_id)
+                    {
+                        continue;
+                    }
+
+                    // Debugging version of unique_id comparison
+                    auto it = std::find_if(m_veciDDSNodes.begin(), m_veciDDSNodes.end(),
+                             [&logicalNodeID](const AboutNode &node){
+                                return node.logicalNodeID() == logicalNodeID;
+                             });
+
+                    // If unique_id is not found, append the new message to the vector
+                    if (it == m_veciDDSNodes.end())
+                    {
+                        m_veciDDSNodes.push_back(msg);
+
+                        std::cout << "New iDDS Device Found: " << msg << std::endl;
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// Get Available iDDS devices
+std::vector<AboutNode> NodeDiscovery::GetAvailableIDDSDevices()
+{
+    return m_veciDDSNodes;
 }
