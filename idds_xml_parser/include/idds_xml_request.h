@@ -36,7 +36,12 @@ class idds_xml_request
     {
         return m_strMethodName;
     }
-    
+
+    int get_return_code()
+    {
+        return m_retCode;
+    }
+
     void add_method_name(const std::string& strMethodName)
     {
         m_strMethodName = strMethodName;
@@ -69,4 +74,5 @@ class idds_xml_request
     std::string m_strMethodName;
     std::vector<std::string> m_vecParams;
     pugi::xml_document m_xmlDoc;
+    int m_retCode;
 };

@@ -200,3 +200,14 @@ TEST(idds_xml_request, invalid_xml_response_parse_and_build)
     EXPECT_EQ(idds_xml_error::ok, result);
     EXPECT_EQ(strip_whitespace(testString), strip_whitespace(message));
 }
+
+
+TEST(idds_xml_request, command_response)
+{
+    std::string testString = "<methodResponse><code>0</code><message /><params /></methodResponse>";
+    idds_xml_request parser = idds_xml_request(testString);
+
+    auto err = parser.parse();
+    EXPECT_EQ(err, idds_xml_error::ok);
+    EXPECT_EQ(parser.get_return_code(), 0);
+}

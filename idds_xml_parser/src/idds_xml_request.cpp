@@ -9,7 +9,8 @@
 #include <vector>
 
 idds_xml_request::idds_xml_request(const std::string& strXmlBody)
-    : m_xmlBody(strXmlBody)
+    : m_xmlBody(strXmlBody),
+      m_retCode(-1)
 {
 }
 
@@ -74,6 +75,12 @@ idds_xml_error idds_xml_request::validate_mandatory_nodes(pugi::xml_document &xm
             {"methodName", 0}
             });
 
+    // check if methodResponse is present - tbd validate schema of methodResponse xml
+    if (!xmlDoc.child("methodResponse").empty())
+    {
+        return idds_xml_error::ok;
+    }
+
     xmlDoc.traverse(walker);
     for (const auto& node: walker.m_Occurrences)
     {
@@ -83,10 +90,6 @@ idds_xml_error idds_xml_request::validate_mandatory_nodes(pugi::xml_document &xm
                 return idds_xml_error::not_schema_compliant_multiple_occurrences;
         }
     }
-
-    // check if methodResponse is present
-    if (xmlDoc.child("methodCall").empty())
-        return idds_xml_error::not_schema_compliant_mandatory_missing;
 
     // check if root node is methodResponse
     if (xmlDoc.child("methodCall").type() == pugi::node_document)
@@ -106,6 +109,12 @@ idds_xml_error idds_xml_request::validate_mandatory_nodes(pugi::xml_document &xm
 idds_xml_error idds_xml_request::validate_optional_nodes(pugi::xml_document &xmlDoc) const
 {
     std::vector<std::string> vecChildren;
+
+    // check if methodResponse is present
+    if (!xmlDoc.child("methodResponse").empty())
+    {
+        return idds_xml_error::ok;
+    }
 
     for (const auto& it: xmlDoc.child("methodCall"))
         vecChildren.emplace_back(it.name());
@@ -127,6 +136,13 @@ idds_xml_error idds_xml_request::parse()
     pugi::xml_document xmlDoc;
     if(auto err = is_valid(xmlDoc); err != idds_xml_error::ok)
         return err;
+
+    // check for command response
+    if(!xmlDoc.child("methodResponse").empty())
+    {
+        m_retCode = xmlDoc.child("methodResponse").child("code").text().as_int();
+        return idds_xml_error::ok;
+    }
 
     // parse method name
     m_strMethodName = xmlDoc.child("methodCall").child("methodName").text().as_string();
