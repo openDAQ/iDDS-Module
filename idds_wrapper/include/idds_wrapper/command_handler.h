@@ -7,6 +7,7 @@
 #include <idds_xml_request.h>
 #include <idds_xml_params_decode.h>
 #include <idds_xml_params_encode.h>
+#include "idds_xml_response.h"
 
 #include "dds/dds.hpp"
 #include "iDDS.hpp"
@@ -36,10 +37,13 @@ public:
 
 private:
     /// Parse incoming idds messages
-    void parseMessage(const Message& msg);
+    idds_wrapper_errCode parseMessage(const Message& msg, std::string& response);
 
     /// Register callbacks in the command processor
     void registerCallbacks();
+
+    /// Prepare reply message
+    void prepareReply(std::string& reply, const idds_returnCode returnCode);
 
 private:
     std::thread m_commandHandlerThread;

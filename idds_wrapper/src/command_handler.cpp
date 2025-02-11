@@ -76,12 +76,20 @@ void CommandHandler::BeginMessageParser()
                     const LogicalNodeID& logicalNodeID = msg.targetLogicalNodeID();
                     const std::string& messageBody = msg.messageBody();
 
-                    // Only process messages intended to this node
+                    // Only process messages intended for this node
                     if(logicalNodeID == m_device_info.logical_node_id)
                     {
                         m_veciDDSMessages.push_back(msg);
-                        parseMessage(msg);
+
+                        std::string response;
                         std::cout << "Received new message from: " << logicalNodeID << " msg: " << messageBody << std::endl;
+
+                        // Check for response message
+                        if(parseMessage(msg, response) != idds_wrapper_errCode::METHOD_RESPONSE)
+                        {
+                            // Reply back to the sender
+                            SendIDDSMessage(msg.sourceLogicalNodeID(), response);
+                        }
                     }
                 }
             }
@@ -121,12 +129,18 @@ int CommandHandler::SendIDDSMessage(const std::string destination_node_id, const
 }
 
 /// Parse incoming messages
-void CommandHandler::parseMessage(const Message& msg)
+idds_wrapper_errCode CommandHandler::parseMessage(const Message& msg, std::string& response)
 {
     idds_xml_request parser(msg.messageBody());
 
     if (parser.parse() == idds_xml_error::ok)
     {
+        if(parser.get_return_code() >= 0)
+        {
+            std::cout << "Reply received: " << msg << std::endl;
+            return idds_wrapper_errCode::METHOD_RESPONSE;
+        }
+
         std::cout << "Method name: " << parser.get_method_name() << std::endl;
         std::cout << "Params size: " << parser.get_params().size() << std::endl;
 
@@ -135,7 +149,7 @@ void CommandHandler::parseMessage(const Message& msg)
             std::cout << "Param name: " << param << std::endl;
         }
 
-        idds_wrapper_errCode errCode = m_commandProcessor.processCommand(parser.get_method_name(), parser.get_params());
+        idds_wrapper_errCode errCode = m_commandProcessor.processCommand(parser.get_method_name(), parser.get_params(), response);
         if (errCode != idds_wrapper_errCode::OK)
         {
             std::cout << "[iDDS_Wrapper] Error processing command" << std::endl;
@@ -145,20 +159,42 @@ void CommandHandler::parseMessage(const Message& msg)
     {
         std::cout << "[iDDS_Wrapper] Error parsing xml commands" << std::endl;
     }
+
+    return idds_wrapper_errCode::OK;
 }
 
 /// Register callbacks in the command processor
 void CommandHandler::registerCallbacks()
 {
-    m_commandProcessor.registerCallback("General.HardReset", [](const ParamList& params) {
+    m_commandProcessor.registerCallback("General.HardReset", [this](const ParamList& params, std::string& response) {
+        prepareReply(response, idds_returnCode::OK);
         std::cout << "HardReset command received" << std::endl;
     });
 
-    m_commandProcessor.registerCallback("General.StartOperating", [](const ParamList& params) {
+    m_commandProcessor.registerCallback("General.StartOperating", [this](const ParamList& params, std::string& response) {
+        prepareReply(response, idds_returnCode::OK);
         std::cout << "StartOperating command received" << std::endl;
     });
 
-    m_commandProcessor.registerCallback("General.StopOperating", [](const ParamList& params) {
+    m_commandProcessor.registerCallback("General.StopOperating", [this](const ParamList& params, std::string& response) {
+        prepareReply(response, idds_returnCode::OK);
         std::cout << "StopOperating command received" << std::endl;
     });
+}
+
+/// Prepare reply
+void CommandHandler::prepareReply(std::string& reply, const idds_returnCode returnCode)
+{
+    idds_xml_response parser = idds_xml_response();
+    parser.add_code(static_cast<int>(returnCode));
+    auto[result, message] = parser.build();
+
+    if (result == idds_xml_error::ok)
+    {
+        reply = message;
+    }
+    else
+    {
+        std::cout << "[iDDS_Wrapper] Error preparing reply" << std::endl;
+    }
 }
