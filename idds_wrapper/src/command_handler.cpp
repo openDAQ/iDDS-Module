@@ -82,7 +82,7 @@ void CommandHandler::BeginMessageParser()
                         m_veciDDSMessages.push_back(msg);
 
                         std::string response;
-                        std::cout << "Received new message from: " << logicalNodeID << " msg: " << messageBody << std::endl;
+                        std::cout << "Received new message from: " << msg.sourceLogicalNodeID() << " msg: " << messageBody << std::endl;
 
                         // Check for response message
                         if(parseMessage(msg, response) != idds_wrapper_errCode::METHOD_RESPONSE)
@@ -153,6 +153,8 @@ idds_wrapper_errCode CommandHandler::parseMessage(const Message& msg, std::strin
         if (errCode != idds_wrapper_errCode::OK)
         {
             std::cout << "[iDDS_Wrapper] Error processing command" << std::endl;
+            prepareReply(response, translateReturnCode(errCode));
+            return errCode;
         }
     }
     else
@@ -166,20 +168,41 @@ idds_wrapper_errCode CommandHandler::parseMessage(const Message& msg, std::strin
 /// Register callbacks in the command processor
 void CommandHandler::registerCallbacks()
 {
+    // General.HardReset
     m_commandProcessor.registerCallback("General.HardReset", [this](const ParamList& params, std::string& response) {
         prepareReply(response, idds_returnCode::OK);
         std::cout << "HardReset command received" << std::endl;
     });
 
+    // Configuration.GetAttribute
+    m_commandProcessor.registerCallback("Configuration.GetAttribute", [this](const ParamList& params, std::string& response) {
+        prepareReply(response, idds_returnCode::OK, {"Value1", "Value2"});
+        std::cout << "response: " << response << std::endl;
+        std::cout << "GetAttribute command received" << std::endl;
+
+        for (auto param : params)
+        {
+            idds_xml_params_decode<std::string> idds_param = idds_xml_params_decode<std::string>(param);
+            auto [resultName, varName] = idds_param.get_name();
+            std::cout << "Param name: " << varName << std::endl;
+            auto [resultName2, varValue] = idds_param.get_value();
+            std::cout << "Param value: " << varValue << std::endl;
+        }
+    });
+
+    // General.StartOperating
     m_commandProcessor.registerCallback("General.StartOperating", [this](const ParamList& params, std::string& response) {
         prepareReply(response, idds_returnCode::OK);
         std::cout << "StartOperating command received" << std::endl;
     });
 
+    // General.StopOperating
     m_commandProcessor.registerCallback("General.StopOperating", [this](const ParamList& params, std::string& response) {
         prepareReply(response, idds_returnCode::OK);
         std::cout << "StopOperating command received" << std::endl;
     });
+
+
 }
 
 /// Prepare reply
@@ -196,5 +219,41 @@ void CommandHandler::prepareReply(std::string& reply, const idds_returnCode retu
     else
     {
         std::cout << "[iDDS_Wrapper] Error preparing reply" << std::endl;
+    }
+}
+
+
+/// Prepare reply
+void CommandHandler::prepareReply(std::string& reply, const idds_returnCode returnCode, std::vector<std::string> param)
+{
+    idds_xml_response parser = idds_xml_response();
+    parser.add_code(static_cast<int>(returnCode));
+    for (auto p : param)
+    {
+        parser.add_param(p);
+    }
+    auto[result, message] = parser.build();
+
+    if (result == idds_xml_error::ok)
+    {
+        reply = message;
+    }
+    else
+    {
+        std::cout << "[iDDS_Wrapper] Error preparing reply" << std::endl;
+    }
+}
+
+// Translate idds-return_code to idds_wrapper_errCode
+idds_returnCode CommandHandler::translateReturnCode(const idds_wrapper_errCode returnCode)
+{
+    switch (returnCode)
+    {
+    case idds_wrapper_errCode::OK:
+        return idds_returnCode::OK;
+    case idds_wrapper_errCode::NOK:
+    case idds_wrapper_errCode::CALLBACK_NOT_FOUND:
+    default:
+        return idds_returnCode::CommandNotSupported;
     }
 }

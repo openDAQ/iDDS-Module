@@ -45,6 +45,12 @@ private:
     /// Prepare reply message
     void prepareReply(std::string& reply, const idds_returnCode returnCode);
 
+    /// Prepare reply message with params
+    void prepareReply(std::string& reply, const idds_returnCode returnCode, std::vector<std::string> params);
+
+    /// Translate idds-return_code to idds_wrapper_errCode
+    idds_returnCode translateReturnCode(const idds_wrapper_errCode returnCode);
+
 private:
     std::thread m_commandHandlerThread;
     bool m_bRunning;
