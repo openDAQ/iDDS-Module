@@ -6,7 +6,7 @@
 #include <iostream>
 #include <unordered_map>
 
-#include "idds_wrapper/idds_device_info.h"
+#include "idds_wrapper/idds_common.h"
 #include <idds_wrapper/node_advertiser.h>
 #include <idds_wrapper/node_discovery.h>
 #include <idds_wrapper/command_handler.h>

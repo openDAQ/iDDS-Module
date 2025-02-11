@@ -2,7 +2,8 @@
 #include <thread>
 #include <iostream>
 
-#include "idds_wrapper/idds_device_info.h"
+#include <idds_wrapper/idds_common.h>
+#include <idds_wrapper/command_processor.h>
 #include <idds_xml_request.h>
 #include <idds_xml_params_decode.h>
 #include <idds_xml_params_encode.h>
@@ -34,8 +35,11 @@ public:
     std::vector<Message> GetReceivedIDDSMessages() { return m_veciDDSMessages; }
 
 private:
-    /// Process incoming idds commands
-    void ProcessCommand(const Message& msg);
+    /// Parse incoming idds messages
+    void parseMessage(const Message& msg);
+
+    /// Register callbacks in the command processor
+    void registerCallbacks();
 
 private:
     std::thread m_commandHandlerThread;
@@ -44,13 +48,14 @@ private:
     idds_device_info m_device_info;
 
     dds::domain::DomainParticipant& m_participant;
-
     //Message Topic
     dds::topic::Topic<Message>      m_MessageTopic;
     dds::sub::Subscriber            m_MessageSubscriber;
     dds::sub::DataReader<Message>   m_MessageReader;
     dds::pub::Publisher             m_MessagePublisher;
     dds::pub::DataWriter<Message>   m_MessageWriter;
+
+    CommandProcessor m_commandProcessor;
 
     std::vector<Message> m_veciDDSMessages;
 };

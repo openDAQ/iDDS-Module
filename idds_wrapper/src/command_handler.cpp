@@ -16,7 +16,9 @@ CommandHandler::CommandHandler(dds::domain::DomainParticipant& participant,
     , m_MessageReader(m_MessageSubscriber, m_MessageTopic)
     , m_MessagePublisher(participant)
     , m_MessageWriter(m_MessagePublisher, m_MessageTopic)
+    , m_commandProcessor()
 {
+    registerCallbacks();
 }
 
 CommandHandler::~CommandHandler()
@@ -78,7 +80,7 @@ void CommandHandler::BeginMessageParser()
                     if(logicalNodeID == m_device_info.logical_node_id)
                     {
                         m_veciDDSMessages.push_back(msg);
-                        ProcessCommand(msg);
+                        parseMessage(msg);
                         std::cout << "Received new message from: " << logicalNodeID << " msg: " << messageBody << std::endl;
                     }
                 }
@@ -92,7 +94,7 @@ int CommandHandler::SendIDDSMessage(const std::string destination_node_id, const
 {
     LogicalNodeID sourceLogicalNodeID{m_device_info.logical_node_id};
     LogicalNodeID targetLogicalNodeID{destination_node_id};
-    Time time{0, 0}; // To be adjusteds
+    Time time{0, 0}; // To be adjusted
 
     try
     {
@@ -103,7 +105,7 @@ int CommandHandler::SendIDDSMessage(const std::string destination_node_id, const
             0,                              // MyReferenceNumber
             0,                              // YourReferenceNumber
             time,                           // Time
-            0,                              // Fragment Number
+            1,                              // Fragment Number
             false                           // More Fragments
         );
 
@@ -118,8 +120,8 @@ int CommandHandler::SendIDDSMessage(const std::string destination_node_id, const
     }
 }
 
-/// Process incoming idds commands
-void CommandHandler::ProcessCommand(const Message& msg)
+/// Parse incoming messages
+void CommandHandler::parseMessage(const Message& msg)
 {
     idds_xml_request parser(msg.messageBody());
 
@@ -132,9 +134,31 @@ void CommandHandler::ProcessCommand(const Message& msg)
         {
             std::cout << "Param name: " << param << std::endl;
         }
+
+        idds_wrapper_errCode errCode = m_commandProcessor.processCommand(parser.get_method_name(), parser.get_params());
+        if (errCode != idds_wrapper_errCode::OK)
+        {
+            std::cout << "[iDDS_Wrapper] Error processing command" << std::endl;
+        }
     }
     else
     {
-        std::cout << "Error parsing xml" << std::endl;
+        std::cout << "[iDDS_Wrapper] Error parsing xml commands" << std::endl;
     }
+}
+
+/// Register callbacks in the command processor
+void CommandHandler::registerCallbacks()
+{
+    m_commandProcessor.registerCallback("General.HardReset", [](const ParamList& params) {
+        std::cout << "HardReset command received" << std::endl;
+    });
+
+    m_commandProcessor.registerCallback("General.StartOperating", [](const ParamList& params) {
+        std::cout << "StartOperating command received" << std::endl;
+    });
+
+    m_commandProcessor.registerCallback("General.StopOperating", [](const ParamList& params) {
+        std::cout << "StopOperating command received" << std::endl;
+    });
 }

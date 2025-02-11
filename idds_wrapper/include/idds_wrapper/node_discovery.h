@@ -5,7 +5,7 @@
 #include "dds/dds.hpp"
 #include "iDDS.hpp"
 
-#include "idds_wrapper/idds_device_info.h"
+#include "idds_wrapper/idds_common.h"
 
 using namespace org::eclipse::cyclonedds;
 
