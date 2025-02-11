@@ -5,10 +5,15 @@
 //--------------------------------------------------------------------------------------------------
 static const char c_node_advertiser_topic[] = "AboutNode";
 
-NodeDiscovery::NodeDiscovery(dds::sub::DataReader<AboutNode>& reader, const idds_device_info& device_info)
+NodeDiscovery::NodeDiscovery(dds::domain::DomainParticipant& participant,
+                             dds::sub::DataReader<AboutNode>& reader,
+                             const idds_device_info& device_info,
+                             std::unordered_map<std::string, message_writer_info>& mapMessageTopics)
     : m_bRunning(false)
+    , m_participant(participant)
     , m_device_info(device_info)
     , m_reader(reader)
+    , m_mapMessageTopics(mapMessageTopics)
 {
 }
 
@@ -69,7 +74,7 @@ void NodeDiscovery::BeginDiscovery()
                     const LogicalNodeID& logicalNodeID = msg.logicalNodeID();
 
                     //Ignore own Logical ID
-                    if (logicalNodeID == m_device_info.node_id)
+                    if (logicalNodeID == m_device_info.logical_node_id)
                     {
                         continue;
                     }
@@ -84,6 +89,7 @@ void NodeDiscovery::BeginDiscovery()
                     if (it == m_veciDDSNodes.end())
                     {
                         m_veciDDSNodes.push_back(msg);
+                        CreateTopic(logicalNodeID);
 
                         std::cout << "New iDDS Device Found: " << msg << std::endl;
                     }
@@ -91,6 +97,20 @@ void NodeDiscovery::BeginDiscovery()
             }
         }
     }
+}
+
+void NodeDiscovery::CreateTopic(const std::string logicalNodeID)
+{
+    std::string topic_name = message_topic_prefix + logicalNodeID;
+
+    // Topic creation
+    auto MessageTopic = dds::topic::Topic<Message>(m_participant, topic_name);
+    auto publisher = dds::pub::Publisher(m_participant);
+    auto writer = dds::pub::DataWriter<Message>(publisher, MessageTopic);
+
+    // tbd: Needs thread safety
+    message_writer_info writer_info(MessageTopic, publisher, writer);
+    m_mapMessageTopics.insert({logicalNodeID, writer_info});
 }
 
 /// Get Available iDDS devices

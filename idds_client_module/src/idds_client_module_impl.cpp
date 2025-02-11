@@ -49,7 +49,7 @@ DevicePtr iDDSClientModule::onCreateDevice(const StringPtr& connectionString,
             {
                 std::string message = args[0];
                 std::cout << "Message sent: " << message << std::endl;
-                iDDSClient.SendIDDSMessage("iDDSServer1", message);
+                iDDSClient.SendIDDSMessage("iDDSServerNode", message);
                 return 0;
             });
 

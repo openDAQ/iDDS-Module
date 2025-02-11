@@ -3,16 +3,21 @@
 //--------------------------------------------------------------------------------------------------
 // Constants.
 //--------------------------------------------------------------------------------------------------
-static const char message_topic[] = "Message";
 
-CommandHandler::CommandHandler(dds::domain::DomainParticipant& participant, const idds_device_info& device_info)
-    : m_bRunning(false)
+//--------------------------------------------------------------------------------------------------
+
+CommandHandler::CommandHandler(dds::domain::DomainParticipant& participant,
+                               const idds_device_info& device_info,
+                               std::unordered_map<std::string, message_writer_info>& mapMessageTopics)
+    : m_participant(participant)
+    , m_bRunning(false)
     , m_device_info(device_info)
-    , m_MessageTopic(participant, message_topic)
+    , m_MessageTopic(participant, message_topic_prefix + device_info.logical_node_id) // Topic name includes device's logical node id (eg. "MessageNode1")
     , m_MessageSubscriber(participant)
     , m_MessageReader(m_MessageSubscriber, m_MessageTopic)
     , m_MessagePublisher(participant)
     , m_MessageWriter(m_MessagePublisher, m_MessageTopic)
+    , m_mapMessageTopics(mapMessageTopics)
 {
 }
 
@@ -82,9 +87,17 @@ void CommandHandler::BeginMessageParser()
 // SendIDDSMessage method
 int CommandHandler::SendIDDSMessage(const std::string destination_node_id, const std::string message_)
 {
-    LogicalNodeID sourceLogicalNodeID{m_device_info.node_id};
+    LogicalNodeID sourceLogicalNodeID{m_device_info.logical_node_id};
     LogicalNodeID targetLogicalNodeID{destination_node_id};
-    Time time{0, 0}; // To be adjusted
+    Time time{0, 0}; // To be adjusteds
+
+    // Retrieve the writer for the target node
+    auto it = m_mapMessageTopics.find(destination_node_id);
+    if (it == m_mapMessageTopics.end())
+    {
+        std::cerr << "[iDDS_Wrapper] Error: Destination node not found." << std::endl;
+        return EXIT_FAILURE;
+    }
 
     try
     {
@@ -99,7 +112,8 @@ int CommandHandler::SendIDDSMessage(const std::string destination_node_id, const
             false                           // More Fragments
         );
 
-        m_MessageWriter.write(msg);
+        //write message
+        it->second.writer.write(msg);
         return 0;
     }
     catch (const dds::core::Exception& e)

@@ -12,7 +12,10 @@ using namespace org::eclipse::cyclonedds;
 class CommandHandler
 {
 public:
-    CommandHandler(dds::domain::DomainParticipant& participant, const idds_device_info& device_info);
+    CommandHandler(dds::domain::DomainParticipant& participant,
+                   const idds_device_info& device_info,
+                   std::unordered_map<std::string, message_writer_info>& mapMessageTopics);
+
     ~CommandHandler();
 
     // Start the message listener thread
@@ -33,6 +36,8 @@ private:
 
     idds_device_info m_device_info;
 
+    dds::domain::DomainParticipant& m_participant;
+
     //Message Topic
     dds::topic::Topic<Message>      m_MessageTopic;
     dds::sub::Subscriber            m_MessageSubscriber;
@@ -41,4 +46,5 @@ private:
     dds::pub::DataWriter<Message>   m_MessageWriter;
 
     std::vector<Message> m_veciDDSMessages;
+    std::unordered_map<std::string, message_writer_info>& m_mapMessageTopics;
 };

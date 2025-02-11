@@ -12,7 +12,11 @@ using namespace org::eclipse::cyclonedds;
 class NodeDiscovery
 {
 public:
-    NodeDiscovery(dds::sub::DataReader<AboutNode>& reader, const idds_device_info& device_info);
+    NodeDiscovery(dds::domain::DomainParticipant& participant,
+                  dds::sub::DataReader<AboutNode>& reader,
+                  const idds_device_info& device_info,
+                  std::unordered_map<std::string, message_writer_info>& mapMessageTopics);
+
     ~NodeDiscovery();
 
     // Start the node discovery thread
@@ -24,14 +28,21 @@ public:
     void Start();
     void Stop();
 
+
+private:
+    void CreateTopic(const std::string logicalNodeID);
+
 private:
     std::thread m_nodeDiscoveryThread;
     bool m_bRunning;
+    dds::domain::DomainParticipant& m_participant;
 
     idds_device_info m_device_info;
 
     //AboutNode Topic
     dds::sub::DataReader<AboutNode> m_reader;
+
+    std::unordered_map<std::string, message_writer_info>& m_mapMessageTopics;
 
     std::vector<AboutNode> m_veciDDSNodes;
 };

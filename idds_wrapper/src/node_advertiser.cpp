@@ -63,7 +63,7 @@ int NodeAdvertiser::SendAdvertisementMessage()
 {
     RealNodeID realNodeID{m_device_info.manufacturer, m_device_info.productType, m_device_info.serialNumber};
     BuildStandard buildStandard{m_device_info.hwVersion, m_device_info.swVersion};
-    LogicalNodeID logicalNodeID{m_device_info.node_id};
+    LogicalNodeID logicalNodeID{m_device_info.logical_node_id};
     Time aboutTime{0, 0}; // To be adjusted
 
     try

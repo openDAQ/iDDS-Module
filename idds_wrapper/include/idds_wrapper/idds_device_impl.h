@@ -4,6 +4,7 @@
 #include <thread>
 #include <chrono>
 #include <iostream>
+#include <unordered_map>
 
 #include "idds_wrapper/idds_device_info.h"
 #include <idds_wrapper/node_advertiser.h>
@@ -57,4 +58,6 @@ private:
     CommandHandler  m_commandHandler;
 
     bool m_bRunning;
+
+    std::unordered_map<std::string, message_writer_info> m_mapMessageTopics;
 };
