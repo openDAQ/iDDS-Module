@@ -55,7 +55,8 @@ set_source_files_properties ("${CMAKE_BINARY_DIR}/generated/iDDS.hpp"
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(${PROJECT_NAME} PUBLIC ${idds_libs})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${idds_libs}
+                                      PUBLIC idds_xml_parser)
 
 target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
                                                   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/../include>

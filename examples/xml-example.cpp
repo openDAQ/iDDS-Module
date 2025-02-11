@@ -12,7 +12,6 @@ int main()
     std::string xml_GetAttribute = "<methodCall> <methodName>Configuration.GetAttribute</methodName> <params> <param> <name>GetValueOf</name> <value><ListOfString> <String>General/Id/LogicalNodeId</String> <String>General/WatchDog</String> </ListOfString></value> </param> </params></methodCall>";
 
     idds_xml_request parser(xml_GetAttribute);
-    auto err = parser.parse();
 
     if (parser.parse() == idds_xml_error::ok)
     {

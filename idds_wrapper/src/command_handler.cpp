@@ -3,21 +3,19 @@
 //--------------------------------------------------------------------------------------------------
 // Constants.
 //--------------------------------------------------------------------------------------------------
-
+static const char message_topic[] = "Message";
 //--------------------------------------------------------------------------------------------------
 
 CommandHandler::CommandHandler(dds::domain::DomainParticipant& participant,
-                               const idds_device_info& device_info,
-                               std::unordered_map<std::string, message_writer_info>& mapMessageTopics)
+                               const idds_device_info& device_info)
     : m_participant(participant)
     , m_bRunning(false)
     , m_device_info(device_info)
-    , m_MessageTopic(participant, message_topic_prefix + device_info.logical_node_id) // Topic name includes device's logical node id (eg. "MessageNode1")
+    , m_MessageTopic(participant, message_topic)
     , m_MessageSubscriber(participant)
     , m_MessageReader(m_MessageSubscriber, m_MessageTopic)
     , m_MessagePublisher(participant)
     , m_MessageWriter(m_MessagePublisher, m_MessageTopic)
-    , m_mapMessageTopics(mapMessageTopics)
 {
 }
 
@@ -73,11 +71,16 @@ void CommandHandler::BeginMessageParser()
                 // Check if this sample has valid data.
                 if (info.valid())
                 {
-                    const LogicalNodeID& logicalNodeID = msg.sourceLogicalNodeID();
+                    const LogicalNodeID& logicalNodeID = msg.targetLogicalNodeID();
                     const std::string& messageBody = msg.messageBody();
 
-                    m_veciDDSMessages.push_back(msg);
-                    std::cout << "Received new message from: " << logicalNodeID << "msg: " << messageBody << std::endl;
+                    // Only process messages intended to this node
+                    if(logicalNodeID == m_device_info.logical_node_id)
+                    {
+                        m_veciDDSMessages.push_back(msg);
+                        ProcessCommand(msg);
+                        std::cout << "Received new message from: " << logicalNodeID << " msg: " << messageBody << std::endl;
+                    }
                 }
             }
         }
@@ -90,14 +93,6 @@ int CommandHandler::SendIDDSMessage(const std::string destination_node_id, const
     LogicalNodeID sourceLogicalNodeID{m_device_info.logical_node_id};
     LogicalNodeID targetLogicalNodeID{destination_node_id};
     Time time{0, 0}; // To be adjusteds
-
-    // Retrieve the writer for the target node
-    auto it = m_mapMessageTopics.find(destination_node_id);
-    if (it == m_mapMessageTopics.end())
-    {
-        std::cerr << "[iDDS_Wrapper] Error: Destination node not found." << std::endl;
-        return EXIT_FAILURE;
-    }
 
     try
     {
@@ -113,7 +108,7 @@ int CommandHandler::SendIDDSMessage(const std::string destination_node_id, const
         );
 
         //write message
-        it->second.writer.write(msg);
+        m_MessageWriter.write(msg);
         return 0;
     }
     catch (const dds::core::Exception& e)
@@ -123,8 +118,23 @@ int CommandHandler::SendIDDSMessage(const std::string destination_node_id, const
     }
 }
 
-/// Get Received IDDSMessages
-std::vector<Message> CommandHandler::GetReceivedIDDSMessages()
+/// Process incoming idds commands
+void CommandHandler::ProcessCommand(const Message& msg)
 {
-    return m_veciDDSMessages;
+    idds_xml_request parser(msg.messageBody());
+
+    if (parser.parse() == idds_xml_error::ok)
+    {
+        std::cout << "Method name: " << parser.get_method_name() << std::endl;
+        std::cout << "Params size: " << parser.get_params().size() << std::endl;
+
+        for (auto param : parser.get_params())
+        {
+            std::cout << "Param name: " << param << std::endl;
+        }
+    }
+    else
+    {
+        std::cout << "Error parsing xml" << std::endl;
+    }
 }

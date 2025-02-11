@@ -27,8 +27,8 @@ iDDSDevice::iDDSDevice(const std::string node_id, const std::string manufacturer
                        , m_aboutNodepublisher(participant)
                        , m_aboutNodewriter(m_aboutNodepublisher, m_aboutNodeTopic)
                        , m_nodeAdvertiser(m_aboutNodewriter, m_idds_device_info)
-                       , m_nodeDiscovery(participant, m_aboutNodeReader, m_idds_device_info, m_mapMessageTopics)
-                       , m_commandHandler(participant, m_idds_device_info, m_mapMessageTopics)
+                       , m_nodeDiscovery(participant, m_aboutNodeReader, m_idds_device_info)
+                       , m_commandHandler(participant, m_idds_device_info)
 {
 }
 

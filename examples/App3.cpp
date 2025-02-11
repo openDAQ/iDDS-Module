@@ -20,9 +20,8 @@ int main()
     std::cout << "Press Enter to send iDDS messages." << std::endl;
     std::cin.get();
 
-    device.SendIDDSMessage("NodeId2", "Hello");
-    device.SendIDDSMessage("NodeId2", "World");
-    device.SendIDDSMessage("NodeId2", "<methodCall> <methodName>General.HardReset</methodName> <params /> </methodCall>");
+    device.SendIDDSMessage("NodeId1", "<methodCall> <methodName>General.HardReset</methodName> <params /> </methodCall>");
+    device.SendIDDSMessage("NodeId2", "<methodCall><methodName>General.StartOperating</methodName><params /></methodCall>");
 
     std::cout << "Messages sent. Press Enter to close." << std::endl;
     std::cin.get();

@@ -58,6 +58,4 @@ private:
     CommandHandler  m_commandHandler;
 
     bool m_bRunning;
-
-    std::unordered_map<std::string, message_writer_info> m_mapMessageTopics;
 };

@@ -3,6 +3,10 @@
 #include <iostream>
 
 #include "idds_wrapper/idds_device_info.h"
+#include <idds_xml_request.h>
+#include <idds_xml_params_decode.h>
+#include <idds_xml_params_encode.h>
+
 #include "dds/dds.hpp"
 #include "iDDS.hpp"
 
@@ -13,8 +17,7 @@ class CommandHandler
 {
 public:
     CommandHandler(dds::domain::DomainParticipant& participant,
-                   const idds_device_info& device_info,
-                   std::unordered_map<std::string, message_writer_info>& mapMessageTopics);
+                   const idds_device_info& device_info);
 
     ~CommandHandler();
 
@@ -28,7 +31,11 @@ public:
     int SendIDDSMessage(const std::string destination_node_id, const std::string message_);
 
     /// Get Received IDDSMessages
-    std::vector<Message> GetReceivedIDDSMessages();
+    std::vector<Message> GetReceivedIDDSMessages() { return m_veciDDSMessages; }
+
+private:
+    /// Process incoming idds commands
+    void ProcessCommand(const Message& msg);
 
 private:
     std::thread m_commandHandlerThread;
@@ -46,5 +53,4 @@ private:
     dds::pub::DataWriter<Message>   m_MessageWriter;
 
     std::vector<Message> m_veciDDSMessages;
-    std::unordered_map<std::string, message_writer_info>& m_mapMessageTopics;
 };
