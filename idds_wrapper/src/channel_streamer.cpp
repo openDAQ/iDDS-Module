@@ -132,7 +132,7 @@ void ChannelStreamer::StartStreaming()
         auto now = std::chrono::steady_clock::now();
         std::chrono::duration<double> elapsed = now - start_time;
         double t = elapsed.count();
-        double sine_value = amplitude * std::sin(2.0 * M_PI * frequency * t);
+        double sine_value = amplitude * std::sin(2.0 * 3.14 * frequency * t);
         double sawtooth_value = amplitude * (t * frequency - std::floor(t * frequency));
 
         // Stream data
@@ -224,7 +224,6 @@ std::string ChannelStreamer::getChannelInfo()
 
     for (auto channel : m_parameterDataSeries)
     {
-        std::string aux = header;
         aux = "{{REPLACELOGICALID}{Channel.REPLACECHANNEL}{Name}{REPLACENAME}{Name of ChannelREPLACECHANNEL}}";
         aux = std::regex_replace(aux, std::regex("REPLACELOGICALID"), m_device_info.logical_node_id);
         aux = std::regex_replace(aux, std::regex("REPLACECHANNEL"), std::to_string(channelCount));
