@@ -61,8 +61,8 @@ ChannelStreamer::ChannelStreamer(dds::domain::DomainParticipant& participant,
             , m_bStreamEnabled(true) //Streaming is enabled by default for now
 {
     // Initialize channels
-    m_parameterDataSeries["Channel.1"] = c_nParameterID_channel1;
-    m_parameterDataSeries["Channel.2"] = c_nParameterID_channel2;
+    m_mapSignalIds["Channel.1"] = c_nParameterID_channel1;
+    m_mapSignalIds["Channel.2"] = c_nParameterID_channel2;
 }
 
 ChannelStreamer::~ChannelStreamer()
@@ -197,13 +197,13 @@ void ChannelStreamer::StartStreamReader()
 void ChannelStreamer::SubscribeToChannel(const std::string channelName)
 {
     // Check if the channel exists
-    if(m_parameterDataSeries.find(channelName) == m_parameterDataSeries.end())
+    if(m_mapSignalIds.find(channelName) == m_mapSignalIds.end())
     {
         std::cerr << "[iDDS_Wrapper] Error: Subscription failed - channel does not exist." << std::endl;
         return;
     }
     else
-        m_SubsribedChannel = m_parameterDataSeries[channelName];
+        m_SubsribedChannel = m_mapSignalIds[channelName];
 }
 
 // Subscribe to a channel
@@ -228,7 +228,7 @@ std::string ChannelStreamer::getChannelInfo()
     std::string aux;
     int channelCount = 1;
 
-    for (auto channel : m_parameterDataSeries)
+    for (auto channel : m_mapSignalIds)
     {
         aux = "{{REPLACELOGICALID}{Channel.REPLACECHANNEL}{Name}{REPLACENAME}{Name of ChannelREPLACECHANNEL}}";
         aux = std::regex_replace(aux, std::regex("REPLACELOGICALID"), m_device_info.logical_node_id);
@@ -247,6 +247,20 @@ std::string ChannelStreamer::getChannelInfo()
     return strChannelInfo;
 }
 
+//Add discovered channels
+idds_wrapper_errCode ChannelStreamer::addDiscoverableChannel(const std::string channelName, const int channelParamID)
+{
+    // Check if the channel exists
+    if(m_mapDiscoverableSignalIDs.find(channelName) != m_mapDiscoverableSignalIDs.end())
+    {
+        std::cerr << "[iDDS_Wrapper] Error: Channel already exists." << std::endl;
+        return idds_wrapper_errCode::CHANNEL_ALREADY_EXISTS;
+    }
+
+    m_mapDiscoverableSignalIDs[channelName] = channelParamID;
+    return idds_wrapper_errCode::OK;
+}
+
 // Send sample method
 idds_wrapper_errCode ChannelStreamer::SendSample(const std::string channel, const double value)
 {
@@ -255,7 +269,7 @@ idds_wrapper_errCode ChannelStreamer::SendSample(const std::string channel, cons
         ParameterDataSeries dataSeries;
 
         //parameterID
-        dataSeries.parameterID(m_parameterDataSeries[channel]);
+        dataSeries.parameterID(m_mapSignalIds[channel]);
 
         //parameterValues
         dataSeries.samples().doubleValue(value);

@@ -20,7 +20,8 @@ enum class idds_wrapper_errCode {
     CALLBACK_NOT_FOUND,
     CALLBACK_NOT_REGISTERED,
     CALLBACK_ALREADY_REGISTERED,
-    METHOD_RESPONSE,
+    RESPONSE_TIMEOUT,
+    CHANNEL_ALREADY_EXISTS
 };
 
 enum class idds_returnCode {

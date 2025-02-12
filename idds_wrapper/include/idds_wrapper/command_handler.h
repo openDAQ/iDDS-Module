@@ -1,6 +1,8 @@
 #pragma once
 #include <thread>
 #include <iostream>
+#include <mutex>
+#include <condition_variable>
 
 #include <idds_wrapper/idds_common.h>
 #include <idds_wrapper/command_processor.h>
@@ -32,7 +34,7 @@ public:
     void Stop();
 
     /// Send iDDS message to a specific nodeID
-    int SendIDDSMessage(const std::string destination_node_id, const std::string message_);
+    idds_wrapper_errCode SendIDDSMessage(const std::string destination_node_id, const std::string message_);
 
     /// Get Received IDDSMessages
     std::vector<Message> GetReceivedIDDSMessages() { return m_veciDDSMessages; }
@@ -43,9 +45,15 @@ public:
     // Get command XML
     std::string getCommandXML(std::string command) { return m_commandProcessor.getCommandXML(command); }
 
+    /// Publishes a command and waits for a reply or timeout
+    idds_wrapper_errCode publishCommandAndWaitForReply(const std::string &destination_node_id, const std::string &message_);
+
 private:
     /// Parse incoming idds messages
     idds_wrapper_errCode parseMessage(const Message& msg, std::string& response);
+
+    /// Reply was received
+    void setReplyAvailable();
 
     /// Register callbacks in the command processor
     void registerCallbacks();
@@ -62,9 +70,17 @@ private:
     /// Prepare XML response to be sent back after GetAttribute command
     std::string prepareXMLResponse(std::string value);
 
+    // Helper method to extract channel name and ID from the reply
+    void extractChannelNameAndID(const std::string& input);
+
 private:
     std::thread m_commandHandlerThread;
     bool m_bRunning;
+    bool  m_bReplyAvailable = false;
+    std::string m_strReply;
+
+    std::mutex mtx;
+    std::condition_variable cv;
 
     idds_device_info m_device_info;
 

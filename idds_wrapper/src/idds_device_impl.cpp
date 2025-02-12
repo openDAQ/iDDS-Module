@@ -94,7 +94,7 @@ std::vector<std::string> iDDSDevice::GetAvailableIDDSDevices()
 }
 
 // SendIDDSMessage method
-int iDDSDevice::SendIDDSMessage(const std::string destination_node_id, const std::string message_)
+idds_wrapper_errCode iDDSDevice::SendIDDSMessage(const std::string destination_node_id, const std::string message_)
 {
     return m_commandHandler.SendIDDSMessage(destination_node_id, message_);
 }
@@ -108,9 +108,17 @@ idds_wrapper_errCode iDDSDevice::publishCommand(const std::string targetLogicalN
         return idds_wrapper_errCode::NOK;
     else
     {
-        m_commandHandler.SendIDDSMessage(targetLogicalNodeID, strCommandXml);
+        m_commandHandler.publishCommandAndWaitForReply(targetLogicalNodeID, strCommandXml);
+        //m_commandHandler.SendIDDSMessage(targetLogicalNodeID, strCommandXml);
         return idds_wrapper_errCode::OK;
     }
+}
+
+
+/// Get Available Signal Name and ID
+std::map<std::string, ParameterID> iDDSDevice::getDiscoverableSignalNameAndID()
+{
+    return m_channelStreamer.getDiscoverableSignalNameAndID();
 }
 
 // PrintReceivedIDDSMessages method

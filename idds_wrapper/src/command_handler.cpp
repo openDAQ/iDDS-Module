@@ -2,11 +2,13 @@
 #include <idds_wrapper/idds_state_machine.h>
 
 #include <tuple>
+#include <regex>
 
 //--------------------------------------------------------------------------------------------------
 // Constants.
 //--------------------------------------------------------------------------------------------------
-static const char message_topic[] = "Message";
+static const char c_message_topic[] = "Message";
+static constexpr int c_timeout_ms   = 5000;             // Timeout for reply (milliseconds)
 //--------------------------------------------------------------------------------------------------
 
 
@@ -31,7 +33,7 @@ CommandHandler::CommandHandler(dds::domain::DomainParticipant& participant,
     : m_participant(participant)
     , m_bRunning(false)
     , m_device_info(device_info)
-    , m_MessageTopic(participant, message_topic)
+    , m_MessageTopic(participant, c_message_topic)
     , m_MessageSubscriber(participant)
     , m_MessageReader(m_MessageSubscriber, m_MessageTopic, getMessageReaderQoSFlags(m_MessageTopic))
     , m_MessagePublisher(participant)
@@ -105,14 +107,20 @@ void CommandHandler::BeginMessageParser()
                         std::string response;
                         std::cout << "New message from: " << msg.sourceLogicalNodeID() << " msg: " << messageBody << std::endl;
 
-                        // Check for response message
-                        if(parseMessage(msg, response) == idds_wrapper_errCode::METHOD_RESPONSE)
+                        // Check if its a response message
+                        if(std::string(msg.messageBody()).find("<methodResponse>") != std::string::npos)
                         {
                             // Process response message
+                            setReplyAvailable();
+                            m_strReply = msg.messageBody();
                         }
                         else
                         {
-                            // Reply back to the sender
+                            if(parseMessage(msg, response) != idds_wrapper_errCode::OK)
+                            {
+                                std::cerr << "[iDDS_Wrapper] Error processing message" << std::endl;
+                            }
+
                             SendIDDSMessage(msg.sourceLogicalNodeID(), response);
                         }
                     }
@@ -123,14 +131,14 @@ void CommandHandler::BeginMessageParser()
 }
 
 // SendIDDSMessage method
-int CommandHandler::SendIDDSMessage(const std::string destination_node_id, const std::string message_)
+idds_wrapper_errCode CommandHandler::SendIDDSMessage(const std::string destination_node_id, const std::string message_)
 {
     LogicalNodeID sourceLogicalNodeID{m_device_info.logical_node_id};
     LogicalNodeID targetLogicalNodeID{destination_node_id};
 
     uint32_t seconds_since_epoch = std::chrono::system_clock::now().time_since_epoch() / std::chrono::seconds(1);
     uint32_t nanoseconds_since_epoch = std::chrono::system_clock::now().time_since_epoch() / std::chrono::nanoseconds(1);
-    Time time{seconds_since_epoch, nanoseconds_since_epoch}; // To be adjusted
+    Time time{seconds_since_epoch, nanoseconds_since_epoch};
 
     try
     {
@@ -147,12 +155,12 @@ int CommandHandler::SendIDDSMessage(const std::string destination_node_id, const
 
         //write message
         m_MessageWriter.write(msg);
-        return 0;
+        return idds_wrapper_errCode::OK;
     }
     catch (const dds::core::Exception& e)
     {
         std::cerr << "[iDDS_Wrapper] Exception: " << e.what() << std::endl;
-        return EXIT_FAILURE;
+        return idds_wrapper_errCode::NOK;
     }
 }
 
@@ -163,12 +171,6 @@ idds_wrapper_errCode CommandHandler::parseMessage(const Message& msg, std::strin
 
     if (parser.parse() == idds_xml_error::ok)
     {
-        if(parser.get_return_code() >= 0)
-        {
-            // This is a response message
-            return idds_wrapper_errCode::METHOD_RESPONSE;
-        }
-
         std::cout << "Method name: " << parser.get_method_name() << std::endl;
 
         idds_wrapper_errCode errCode = m_commandProcessor.processCommand(parser.get_method_name(), parser.get_params(), response);
@@ -226,8 +228,6 @@ void CommandHandler::registerCallbacks()
             // Anything else is not supported at this moment
             prepareReply(response, idds_returnCode::CommandNotSupported);
         }
-
-        std::cout << "response: " << response << std::endl;
     });
 
     // General.StartOperating
@@ -312,4 +312,84 @@ std::string CommandHandler::prepareXMLResponse(std::string value)
     strParam += value;
     strParam += "</String></value></param>";
     return strParam;
+}
+
+// Method to be called by another thread when a reply is available
+void CommandHandler::setReplyAvailable()
+{
+        std::lock_guard<std::mutex> lock(mtx);
+        m_bReplyAvailable = true;
+        cv.notify_one();
+}
+
+// Publishes a command and waits for a reply or timeout
+idds_wrapper_errCode CommandHandler::publishCommandAndWaitForReply(const std::string &destination_node_id, const std::string &message_)
+{
+    std::unique_lock<std::mutex> lock(mtx);
+    m_bReplyAvailable = false; // Reset flag before sending message
+
+    // Send message
+    auto errCode = SendIDDSMessage(destination_node_id, message_);
+    if (errCode != idds_wrapper_errCode::OK)
+    {
+        std::cerr << "Failed to send message!" << std::endl;
+        return errCode;
+    }
+
+    // Wait for reply or timeout
+    bool receivedReply = cv.wait_for(lock, std::chrono::milliseconds(c_timeout_ms), [this]()
+                                     { return m_bReplyAvailable; });
+
+    if (receivedReply)
+    {
+        // Process reply
+        m_bReplyAvailable = false;
+        // Check if it has params
+        idds_xml_response parser = idds_xml_response(m_strReply);
+        if (parser.parse() == idds_xml_error::ok)
+        {
+            if(parser.get_params().size() > 0)
+            {
+                idds_xml_params_decode<std::string> stringDecode(parser.get_params()[0]);
+                auto [err, value] = stringDecode.get_value();
+                if(err == idds_xml_error::ok)
+                {
+                    std::cout << "DANIEL Value: " << value << std::endl;
+                    extractChannelNameAndID(value);
+                }
+            }
+        }
+        else
+        {
+            std::cerr << "[iDDS_Wrapper] Error parsing reply" << std::endl;
+        }
+    }
+    else
+    {
+        std::cerr << "[iDDS_Wrapper] Timeout error: No reply received!" << std::endl;
+        return idds_wrapper_errCode::RESPONSE_TIMEOUT;
+    }
+
+    return idds_wrapper_errCode::OK;
+}
+
+void CommandHandler::extractChannelNameAndID(const std::string& input)
+{
+    std::regex nameRegex(R"(\{(.*?)\}\{(.*?)\}\{Name\}\{(.*?)\})");
+    std::regex idRegex(R"(\{(.*?)\}\{(.*?)\}\{ID\}\{(.*?)\})");
+
+    std::sregex_iterator nameIt(input.begin(), input.end(), nameRegex);
+    std::sregex_iterator idIt(input.begin(), input.end(), idRegex);
+    std::sregex_iterator end;
+
+    while (nameIt != end && idIt != end)
+    {
+        std::string name = (*nameIt)[3];
+        std::string id = (*idIt)[3];
+
+        m_channelStreamer.addDiscoverableChannel(name, std::stoi(id));
+
+        ++nameIt;
+        ++idIt;
+    }
 }

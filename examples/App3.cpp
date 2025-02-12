@@ -25,7 +25,17 @@ int main()
 
     std::cin.get();
 
-    // Subscribe to channel
+    // Get available signals name and ID
+    auto map = device.getDiscoverableSignalNameAndID();
+
+    for(const auto& [name, id] : map)
+    {
+        std::cout << "Signal name: " << name << " ID: " << id << std::endl;
+    }
+
+    std::cin.get();
+
+    // Subscribe channel
     device.SubscribeToChannel(6445);
     std::cout << "Subscribed to channel" << std::endl;
 

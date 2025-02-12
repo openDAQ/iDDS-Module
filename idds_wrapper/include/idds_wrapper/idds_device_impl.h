@@ -39,7 +39,7 @@ public:
     std::vector<std::string> GetAvailableIDDSDevices();
 
     /// Send iDDS message to a specific nodeID
-    int SendIDDSMessage(const std::string destination_node_id, const std::string message_);
+    idds_wrapper_errCode SendIDDSMessage(const std::string destination_node_id, const std::string message_);
 
     /// Print received iDDS messages
     void PrintReceivedIDDSMessages();
@@ -55,6 +55,9 @@ public:
 
     /// Request command
     idds_wrapper_errCode publishCommand(const std::string targetLogicalNodeID, const std::string command);
+
+    /// Get Available Signal Name and ID
+    std::map<std::string, ParameterID> getDiscoverableSignalNameAndID();
 
 private:
     idds_device_info m_idds_device_info;

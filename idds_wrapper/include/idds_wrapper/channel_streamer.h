@@ -2,7 +2,7 @@
 #include <thread>
 #include <iostream>
 #include <vector>
-#include <unordered_map>
+#include <map>
 #include <string>
 
 #include "dds/dds.hpp"
@@ -43,6 +43,12 @@ public:
 
     // Get channel information
     std::string getChannelInfo();
+
+    //Add discovered channels
+    idds_wrapper_errCode addDiscoverableChannel(const std::string channelName, const int channelParamID);
+
+    // Get discoverable signal name and ID
+    std::map<std::string, ParameterID> getDiscoverableSignalNameAndID() { return m_mapDiscoverableSignalIDs; }
 private:
     /// Send sample
     idds_wrapper_errCode SendSample(const std::string channel, const double value);
@@ -67,5 +73,6 @@ private:
     dds::pub::Publisher                         m_streamPublisher;
     dds::pub::DataWriter<ParameterDataSeries>   m_streamWriter;
 
-    std::unordered_map<std::string, ParameterID> m_parameterDataSeries;
+    std::map<std::string, ParameterID> m_mapSignalIds;
+    std::map<std::string, ParameterID> m_mapDiscoverableSignalIDs;
 };
