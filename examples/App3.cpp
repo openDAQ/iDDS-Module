@@ -21,7 +21,7 @@ int main()
     std::cin.get();
 
     // Configuration.GetAttribute
-    device.SendIDDSMessage(devices[0], "<methodCall> <methodName>Configuration.GetAttribute</methodName> <params> <param> <name>Attribute</name> <value><String>alistv</String></value> </param> </params> </methodCall>");
+    device.publishCommand(devices[0], "Configuration.GetAttribute");
 
     std::cin.get();
 
@@ -32,12 +32,13 @@ int main()
     std::cin.get();
 
     // General.StartOperating
-    device.SendIDDSMessage(devices[0], "<methodCall> <methodName>General.StartOperating</methodName> <params /> </methodCall>");
+    device.publishCommand(devices[0], "General.StartOperating");
+
 
     std::cin.get();
 
     // General.StopOperating
-    device.SendIDDSMessage(devices[0], "<methodCall> <methodName>General.StopOperating</methodName> <params /> </methodCall>");
+    device.publishCommand(devices[0], "General.StopOperating");
 
     std::cin.get();
 

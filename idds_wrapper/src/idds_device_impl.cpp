@@ -99,6 +99,20 @@ int iDDSDevice::SendIDDSMessage(const std::string destination_node_id, const std
     return m_commandHandler.SendIDDSMessage(destination_node_id, message_);
 }
 
+// Request command
+idds_wrapper_errCode iDDSDevice::publishCommand(const std::string targetLogicalNodeID, const std::string command)
+{
+    auto strCommandXml = m_commandHandler.getCommandXML(command);
+
+    if(strCommandXml.empty())
+        return idds_wrapper_errCode::NOK;
+    else
+    {
+        m_commandHandler.SendIDDSMessage(targetLogicalNodeID, strCommandXml);
+        return idds_wrapper_errCode::OK;
+    }
+}
+
 // PrintReceivedIDDSMessages method
 void iDDSDevice::PrintReceivedIDDSMessages()
 {

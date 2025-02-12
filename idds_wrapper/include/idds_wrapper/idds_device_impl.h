@@ -53,6 +53,9 @@ public:
     /// Get suppoprt idds commands
     std::vector<std::string> getSupportedIDDSCommands() { return m_commandHandler.getSupportedCommands(); }
 
+    /// Request command
+    idds_wrapper_errCode publishCommand(const std::string targetLogicalNodeID, const std::string command);
+
 private:
     idds_device_info m_idds_device_info;
     std::vector<std::string> received_messages;

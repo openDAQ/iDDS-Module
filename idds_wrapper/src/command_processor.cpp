@@ -2,6 +2,11 @@
 
 CommandProcessor::CommandProcessor()
 {
+    // Populate the map with commands - Proper encoding to be added in the future
+    m_mapCommandXML["General.HardReset"] = "<methodCall> <methodName>General.HardReset</methodName> <params /> </methodCall>";
+    m_mapCommandXML["General.StopOperating"] = "<methodCall> <methodName>General.StopOperating</methodName> <params /> </methodCall>";
+    m_mapCommandXML["General.StartOperating"] = "<methodCall> <methodName>General.StartOperating</methodName> <params /> </methodCall>";
+    m_mapCommandXML["Configuration.GetAttribute"] = "<methodCall> <methodName>Configuration.GetAttribute</methodName> <params> <param> <name>Attribute</name> <value><String>alistv</String></value> </param> </params> </methodCall>";
 }
 
 CommandProcessor::~CommandProcessor()
@@ -36,4 +41,17 @@ std::vector<std::string> CommandProcessor::getSupportedCommands()
         supportedCommands.push_back(key);
     }
     return supportedCommands;
+}
+
+// Get command XML for a given command
+std::string CommandProcessor::getCommandXML(std::string command)
+{
+    if (m_mapCommandXML.find(command) != m_mapCommandXML.end())
+    {
+        return m_mapCommandXML[command];
+    }
+    else
+    {
+        return "";
+    }
 }

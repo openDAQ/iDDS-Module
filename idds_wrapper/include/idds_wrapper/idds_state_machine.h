@@ -6,7 +6,7 @@ class IDDSStateMachine
 {
 private:
     OperationalStatus currentState;
-    IDDSStateMachine() : currentState(OperationalStatus::OpStatusDefault) {}
+    IDDSStateMachine() : currentState(OperationalStatus::OpStatusReady) {}
 
 public:
     static IDDSStateMachine &getInstance(){ static IDDSStateMachine instance; return instance; }

@@ -11,5 +11,13 @@ int main()
     std::cout << "Server started. Press Enter to close." << std::endl;
     std::cin.get();
 
+    auto commands = device.getSupportedIDDSCommands();
+
+    for (auto command : commands)
+    {
+        std::cout << command << std::endl;
+    }
+
+    std::cin.get();
     return 0;
 }

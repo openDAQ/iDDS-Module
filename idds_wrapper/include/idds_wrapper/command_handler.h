@@ -40,6 +40,9 @@ public:
     /// Get supported iDDS commands
     std::vector<std::string> getSupportedCommands() { return m_commandProcessor.getSupportedCommands(); }
 
+    // Get command XML
+    std::string getCommandXML(std::string command) { return m_commandProcessor.getCommandXML(command); }
+
 private:
     /// Parse incoming idds messages
     idds_wrapper_errCode parseMessage(const Message& msg, std::string& response);

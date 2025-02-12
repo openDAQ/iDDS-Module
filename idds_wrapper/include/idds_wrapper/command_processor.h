@@ -26,6 +26,10 @@ public:
     // Get supported commands
     std::vector<std::string> getSupportedCommands();
 
+    // Get command XML
+    std::string getCommandXML(std::string command);
+
     private:
         std::unordered_map<std::string, Callback> m_mapCommandCallbacks;
+        std::unordered_map<std::string, std::string> m_mapCommandXML;
 };
