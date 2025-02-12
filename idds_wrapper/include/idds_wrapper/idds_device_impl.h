@@ -45,6 +45,9 @@ public:
     /// Subscribe to a channel for streaming data
     void SubscribeToChannel(const std::string channelName);
 
+    /// Subscribe to a channel for streaming data
+    void SubscribeToChannel(const int channelParamID);
+
 private:
     idds_device_info m_idds_device_info;
     std::vector<std::string> received_messages;

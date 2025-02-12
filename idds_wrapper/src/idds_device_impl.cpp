@@ -62,6 +62,12 @@ void iDDSDevice::SubscribeToChannel(const std::string channelName)
     m_channelStreamer.SubscribeToChannel(channelName);
 }
 
+// Subscribe To a channel for streaming data
+void iDDSDevice::SubscribeToChannel(const int channelParamID)
+{
+    m_channelStreamer.SubscribeToChannel(channelParamID);
+}
+
 // Stop the iDDS server
 void iDDSDevice::StopServer()
 {

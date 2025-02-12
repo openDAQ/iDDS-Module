@@ -169,6 +169,12 @@ void ChannelStreamer::SubscribeToChannel(const std::string channelName)
         m_SubsribedChannel = m_parameterDataSeries[channelName];
 }
 
+// Subscribe to a channel
+void ChannelStreamer::SubscribeToChannel(const int channelParamID)
+{
+    m_SubsribedChannel = channelParamID;
+}
+
 // Get channel information
 std::string ChannelStreamer::getChannelInfo()
 {

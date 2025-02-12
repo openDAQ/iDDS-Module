@@ -31,7 +31,7 @@ int main()
     std::cin.get();
 
     // Subscrive to channel
-    device.SubscribeToChannel("Channel.1");
+    device.SubscribeToChannel(6445);
 
     std::cin.get();
 

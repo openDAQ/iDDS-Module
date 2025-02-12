@@ -38,6 +38,9 @@ public:
     /// Subscribe to a channel
     void SubscribeToChannel(const std::string channelName);
 
+    /// Subscribe to a channel
+    void SubscribeToChannel(const int channelParamID);
+
     // Get channel information
     std::string getChannelInfo();
 private:
