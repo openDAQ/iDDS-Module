@@ -6,7 +6,7 @@ int main()
 {
     iDDSDevice device = iDDSDeviceBuilder().setLogicalNodeId("NodeId1").build();
 
-    device.StartServer();
+    device.startServer();
 
     std::cout << "Server started. Press Enter to close." << std::endl;
     std::cin.get();

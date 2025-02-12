@@ -18,28 +18,28 @@ public:
     ~ChannelStreamer();
 
     /// Start the channel streamer thread
-    void StartStreamer();
+    void startStreamer();
 
     /// Start the channel reader thread
-    void StartReaderThread();
+    void startReaderThread();
 
     /// Stop the channel streamer thread
-    void StopStreamer();
+    void stopStreamer();
 
     /// Stop the channel reader thread
-    void StopStreamReader();
+    void stopStreamReader();
 
     /// Method that starts the channel streaming
-    void StartStreaming();
+    void startStreaming();
 
     /// Method that prints out samples from subscribed channel
-    void StartStreamReader();
+    void startStreamReader();
 
     /// Subscribe to a channel
-    void SubscribeToChannel(const std::string channelName);
+    void subscribeToChannel(const std::string channelName);
 
     /// Subscribe to a channel
-    void SubscribeToChannel(const int channelParamID);
+    void subscribeToChannel(const int channelParamID);
 
     // Get channel information
     std::string getChannelInfo();
@@ -51,7 +51,7 @@ public:
     std::map<std::string, ParameterID> getDiscoverableSignalNameAndID() { return m_mapDiscoverableSignalIDs; }
 private:
     /// Send sample
-    idds_wrapper_errCode SendSample(const std::string channel, const double value);
+    idds_wrapper_errCode sendSample(const std::string channel, const double value);
 
 private:
     std::thread m_channelStreamerThread;

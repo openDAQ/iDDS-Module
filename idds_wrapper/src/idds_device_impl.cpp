@@ -39,51 +39,51 @@ iDDSDevice::~iDDSDevice()
     // Join threads if they are joinable
     if (m_bRunning)
     {
-        StopServer();
+        stopServer();
     }
 }
 
-// StartServer method
-void iDDSDevice::StartServer()
+// startServer method
+void iDDSDevice::startServer()
 {
     // Start the server
     m_bRunning = true;
 
-    m_nodeAdvertiser.Start();
-    m_nodeDiscovery.Start();
-    m_commandHandler.Start();
-    m_channelStreamer.StartStreamer();
-    m_channelStreamer.StartReaderThread();
+    m_nodeAdvertiser.start();
+    m_nodeDiscovery.start();
+    m_commandHandler.start();
+    m_channelStreamer.startStreamer();
+    m_channelStreamer.startReaderThread();
 }
 
 // Subscribe To a channel for streaming data
-void iDDSDevice::SubscribeToChannel(const std::string channelName)
+void iDDSDevice::subscribeToChannel(const std::string channelName)
 {
-    m_channelStreamer.SubscribeToChannel(channelName);
+    m_channelStreamer.subscribeToChannel(channelName);
 }
 
 // Subscribe To a channel for streaming data
-void iDDSDevice::SubscribeToChannel(const int channelParamID)
+void iDDSDevice::subscribeToChannel(const int channelParamID)
 {
-    m_channelStreamer.SubscribeToChannel(channelParamID);
+    m_channelStreamer.subscribeToChannel(channelParamID);
 }
 
 // Stop the iDDS server
-void iDDSDevice::StopServer()
+void iDDSDevice::stopServer()
 {
     m_bRunning = false;
 
-    m_nodeAdvertiser.Stop();
-    m_nodeDiscovery.Stop();
-    m_commandHandler.Stop();
+    m_nodeAdvertiser.stop();
+    m_nodeDiscovery.stop();
+    m_commandHandler.stop();
 }
 
-// GetAvailableIDDSDevices method
-std::vector<std::string> iDDSDevice::GetAvailableIDDSDevices()
+// getAvailableIDDSDevices method
+std::vector<std::string> iDDSDevice::getAvailableIDDSDevices()
 {
     std::vector<std::string> available_devices;
 
-    std::vector<AboutNode> veciDDSNodes = m_nodeDiscovery.GetAvailableIDDSDevices();
+    std::vector<AboutNode> veciDDSNodes = m_nodeDiscovery.getAvailableIDDSDevices();
 
     for (auto &node : veciDDSNodes)
     {
@@ -93,10 +93,10 @@ std::vector<std::string> iDDSDevice::GetAvailableIDDSDevices()
     return available_devices;
 }
 
-// SendIDDSMessage method
-idds_wrapper_errCode iDDSDevice::SendIDDSMessage(const std::string destination_node_id, const std::string message_)
+// sendIDDSMessage method
+idds_wrapper_errCode iDDSDevice::sendIDDSMessage(const std::string destination_node_id, const std::string message_)
 {
-    return m_commandHandler.SendIDDSMessage(destination_node_id, message_);
+    return m_commandHandler.sendIDDSMessage(destination_node_id, message_);
 }
 
 // Request command
@@ -109,7 +109,7 @@ idds_wrapper_errCode iDDSDevice::publishCommand(const std::string targetLogicalN
     else
     {
         m_commandHandler.publishCommandAndWaitForReply(targetLogicalNodeID, strCommandXml);
-        //m_commandHandler.SendIDDSMessage(targetLogicalNodeID, strCommandXml);
+        //m_commandHandler.sendIDDSMessage(targetLogicalNodeID, strCommandXml);
         return idds_wrapper_errCode::OK;
     }
 }
@@ -121,12 +121,12 @@ std::map<std::string, ParameterID> iDDSDevice::getDiscoverableSignalNameAndID()
     return m_channelStreamer.getDiscoverableSignalNameAndID();
 }
 
-// PrintReceivedIDDSMessages method
-void iDDSDevice::PrintReceivedIDDSMessages()
+// printReceivedIDDSMessages method
+void iDDSDevice::printReceivedIDDSMessages()
 {
     std::cout << "Received iDDS messages: " << std::endl;
 
-    std::vector<Message> veciDDSMessages = m_commandHandler.GetReceivedIDDSMessages();
+    std::vector<Message> veciDDSMessages = m_commandHandler.getReceivedIDDSMessages();
 
     for (const auto& msg : veciDDSMessages)
     {

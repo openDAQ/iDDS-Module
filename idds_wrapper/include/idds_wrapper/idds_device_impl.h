@@ -30,25 +30,25 @@ public:
     ~iDDSDevice();
 
     /// Starts the iDDS server spawning the advertiser and listener threads
-    void StartServer();
+    void startServer();
 
     /// Stop the iDDS server
-    void StopServer();
+    void stopServer();
 
     /// Returns a vector of available iDDS devices
-    std::vector<std::string> GetAvailableIDDSDevices();
+    std::vector<std::string> getAvailableIDDSDevices();
 
     /// Send iDDS message to a specific nodeID
-    idds_wrapper_errCode SendIDDSMessage(const std::string destination_node_id, const std::string message_);
+    idds_wrapper_errCode sendIDDSMessage(const std::string destination_node_id, const std::string message_);
 
     /// Print received iDDS messages
-    void PrintReceivedIDDSMessages();
+    void printReceivedIDDSMessages();
 
     /// Subscribe to a channel for streaming data
-    void SubscribeToChannel(const std::string channelName);
+    void subscribeToChannel(const std::string channelName);
 
     /// Subscribe to a channel for streaming data
-    void SubscribeToChannel(const int channelParamID);
+    void subscribeToChannel(const int channelParamID);
 
     /// Get suppoprt idds commands
     std::vector<std::string> getSupportedIDDSCommands() { return m_commandHandler.getSupportedCommands(); }

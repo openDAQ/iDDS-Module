@@ -39,7 +39,7 @@ DevicePtr iDDSClientModule::onCreateDevice(const StringPtr& connectionString,
     DevicePtr obj(createWithImplementation<IDevice, Device>(context, parent, "iDDSDevice"));
 
     //Start iDDS device
-    iDDSClient.StartServer();
+    iDDSClient.startServer();
 
     //Send Message Function
     auto sendMessageProp = FunctionProperty(
@@ -49,7 +49,7 @@ DevicePtr iDDSClientModule::onCreateDevice(const StringPtr& connectionString,
             {
                 std::string message = args[0];
                 std::cout << "Message sent: " << message << std::endl;
-                iDDSClient.SendIDDSMessage("iDDSServerNode", message);
+                iDDSClient.sendIDDSMessage("iDDSServerNode", message);
                 return 0;
             });
 
@@ -61,20 +61,20 @@ DevicePtr iDDSClientModule::onCreateDevice(const StringPtr& connectionString,
             "getAvailableDevices", ProcedureInfo());
         ProcedurePtr getAvailableDevicesCallback = [this](){
                 std::cout << "Available iDDS devices: " << std::endl;
-                //return iDDSClient.GetAvailableIDDSDevices();
+                //return iDDSClient.getAvailableIDDSDevices();
             };
 
     obj.addProperty(getAvailableDevicesProp);
     obj.setPropertyValue("getAvailableDevices", Procedure(
         [this]()
         {
-                auto vec = iDDSClient.GetAvailableIDDSDevices();
+                auto vec = iDDSClient.getAvailableIDDSDevices();
                 std::cout << "Available iDDS devices: " << std::endl;
                 for (const auto& id : vec)
                 {
                     std::cout << " - " << id << std::endl;
                 }
-                return iDDSClient.GetAvailableIDDSDevices();
+                return iDDSClient.getAvailableIDDSDevices();
         }
     ));
 

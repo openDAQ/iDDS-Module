@@ -19,17 +19,17 @@ NodeDiscovery::~NodeDiscovery()
 {
 }
 
-void NodeDiscovery::Start()
+void NodeDiscovery::start()
 {
     // Start the server
     if(!m_bRunning)
     {
         m_bRunning = true;
-        m_nodeDiscoveryThread = std::thread(&NodeDiscovery::BeginDiscovery, this);
+        m_nodeDiscoveryThread = std::thread(&NodeDiscovery::beginDiscovery, this);
     }
 }
 
-void NodeDiscovery::Stop()
+void NodeDiscovery::stop()
 {
     if (m_bRunning)
     {
@@ -43,7 +43,7 @@ void NodeDiscovery::Stop()
 }
 
 /// Method that parses incoming messages to about node topic to discover new iDDS devices
-void NodeDiscovery::BeginDiscovery()
+void NodeDiscovery::beginDiscovery()
 {
     std::cout << "[iDDS_Wrapper] Node Discovery started" << std::endl;
 
@@ -97,7 +97,7 @@ void NodeDiscovery::BeginDiscovery()
 }
 
 /// Get Available iDDS devices
-std::vector<AboutNode> NodeDiscovery::GetAvailableIDDSDevices()
+std::vector<AboutNode> NodeDiscovery::getAvailableIDDSDevices()
 {
     return m_veciDDSNodes;
 }

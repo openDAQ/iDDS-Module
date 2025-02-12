@@ -19,13 +19,13 @@ public:
     ~NodeDiscovery();
 
     // Start the node discovery thread
-    void BeginDiscovery();
+    void beginDiscovery();
 
     // Get Available iDDS devices
-    std::vector<AboutNode> GetAvailableIDDSDevices();
+    std::vector<AboutNode> getAvailableIDDSDevices();
 
-    void Start();
-    void Stop();
+    void start();
+    void stop();
 
 private:
     std::thread m_nodeDiscoveryThread;

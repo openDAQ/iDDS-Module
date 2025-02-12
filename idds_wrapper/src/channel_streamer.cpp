@@ -70,32 +70,32 @@ ChannelStreamer::~ChannelStreamer()
     // Join threads if they are joinable
     if (m_bRunning)
     {
-        StopStreamer();
-        StopStreamReader();
+        stopStreamer();
+        stopStreamReader();
     }
 }
 
 /// Start the channel streamer thread
-void ChannelStreamer::StartStreamer()
+void ChannelStreamer::startStreamer()
 {
     // Start the server
     if(!m_bRunning)
     {
         m_bRunning = true;
-        m_channelStreamerThread = std::thread(&ChannelStreamer::StartStreaming, this);
+        m_channelStreamerThread = std::thread(&ChannelStreamer::startStreaming, this);
     }
 }
 
 /// Start the channel reader thread
-void ChannelStreamer::StartReaderThread()
+void ChannelStreamer::startReaderThread()
 {
     // Start the server
-    m_channelReaderThread = std::thread(&ChannelStreamer::StartStreamReader, this);
+    m_channelReaderThread = std::thread(&ChannelStreamer::startStreamReader, this);
     m_bRunningReader = true;
 }
 
 /// Stop the channel streamer thread
-void ChannelStreamer::StopStreamer()
+void ChannelStreamer::stopStreamer()
 {
     if(m_bRunning)
     {
@@ -108,7 +108,7 @@ void ChannelStreamer::StopStreamer()
     }
 }
 
-void ChannelStreamer::StopStreamReader()
+void ChannelStreamer::stopStreamReader()
 {
     if(m_bRunningReader)
     {
@@ -121,7 +121,7 @@ void ChannelStreamer::StopStreamReader()
 }
 
 /// Method that starts the channel streaming
-void ChannelStreamer::StartStreaming()
+void ChannelStreamer::startStreaming()
 {
     std::cout << "[iDDS_Wrapper] Streaming started" << std::endl;
 
@@ -141,8 +141,8 @@ void ChannelStreamer::StartStreaming()
             double sawtooth_value = amplitude * (t * frequency - std::floor(t * frequency));
 
             // Stream data
-            SendSample("Channel.1", sine_value);
-            SendSample("Channel.2", sawtooth_value);
+            sendSample("Channel.1", sine_value);
+            sendSample("Channel.2", sawtooth_value);
 
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
@@ -151,7 +151,7 @@ void ChannelStreamer::StartStreaming()
     std::cout << "[iDDS_Wrapper] Streaming stopped" << std::endl;
 }
 
-void ChannelStreamer::StartStreamReader()
+void ChannelStreamer::startStreamReader()
 {
     std::cout << "[iDDS_Wrapper] Stream reader started" << std::endl;
 
@@ -194,7 +194,7 @@ void ChannelStreamer::StartStreamReader()
 }
 
 // Subscribe to a channel
-void ChannelStreamer::SubscribeToChannel(const std::string channelName)
+void ChannelStreamer::subscribeToChannel(const std::string channelName)
 {
     // Check if the channel exists
     if(m_mapSignalIds.find(channelName) == m_mapSignalIds.end())
@@ -207,7 +207,7 @@ void ChannelStreamer::SubscribeToChannel(const std::string channelName)
 }
 
 // Subscribe to a channel
-void ChannelStreamer::SubscribeToChannel(const int channelParamID)
+void ChannelStreamer::subscribeToChannel(const int channelParamID)
 {
     m_SubsribedChannel = channelParamID;
 }
@@ -262,7 +262,7 @@ idds_wrapper_errCode ChannelStreamer::addDiscoverableChannel(const std::string c
 }
 
 // Send sample method
-idds_wrapper_errCode ChannelStreamer::SendSample(const std::string channel, const double value)
+idds_wrapper_errCode ChannelStreamer::sendSample(const std::string channel, const double value)
 {
     try
     {

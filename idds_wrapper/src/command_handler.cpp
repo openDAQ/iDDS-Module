@@ -48,7 +48,7 @@ CommandHandler::~CommandHandler()
 {
 }
 
-void CommandHandler::Start()
+void CommandHandler::start()
 {
     // Start the server
     if(!m_bRunning)
@@ -58,7 +58,7 @@ void CommandHandler::Start()
     }
 }
 
-void CommandHandler::Stop()
+void CommandHandler::stop()
 {
     if(m_bRunning)
     {
@@ -121,7 +121,7 @@ void CommandHandler::BeginMessageParser()
                                 std::cerr << "[iDDS_Wrapper] Error processing message" << std::endl;
                             }
 
-                            SendIDDSMessage(msg.sourceLogicalNodeID(), response);
+                            sendIDDSMessage(msg.sourceLogicalNodeID(), response);
                         }
                     }
                 }
@@ -130,8 +130,8 @@ void CommandHandler::BeginMessageParser()
     }
 }
 
-// SendIDDSMessage method
-idds_wrapper_errCode CommandHandler::SendIDDSMessage(const std::string destination_node_id, const std::string message_)
+// sendIDDSMessage method
+idds_wrapper_errCode CommandHandler::sendIDDSMessage(const std::string destination_node_id, const std::string message_)
 {
     LogicalNodeID sourceLogicalNodeID{m_device_info.logical_node_id};
     LogicalNodeID targetLogicalNodeID{destination_node_id};
@@ -329,7 +329,7 @@ idds_wrapper_errCode CommandHandler::publishCommandAndWaitForReply(const std::st
     m_bReplyAvailable = false; // Reset flag before sending message
 
     // Send message
-    auto errCode = SendIDDSMessage(destination_node_id, message_);
+    auto errCode = sendIDDSMessage(destination_node_id, message_);
     if (errCode != idds_wrapper_errCode::OK)
     {
         std::cerr << "Failed to send message!" << std::endl;
@@ -354,7 +354,6 @@ idds_wrapper_errCode CommandHandler::publishCommandAndWaitForReply(const std::st
                 auto [err, value] = stringDecode.get_value();
                 if(err == idds_xml_error::ok)
                 {
-                    std::cout << "DANIEL Value: " << value << std::endl;
                     extractChannelNameAndID(value);
                 }
             }

@@ -19,17 +19,17 @@ NodeAdvertiser::~NodeAdvertiser()
 {
 }
 
-void NodeAdvertiser::Start()
+void NodeAdvertiser::start()
 {
     // Start the server
     if(!m_bRunning)
     {
         m_bRunning = true;
-        m_nodeAdvertiserThread = std::thread(&NodeAdvertiser::BeginAdvertise, this);
+        m_nodeAdvertiserThread = std::thread(&NodeAdvertiser::beginAdvertise, this);
     }
 }
 
-void NodeAdvertiser::Stop()
+void NodeAdvertiser::stop()
 {
     if(m_bRunning)
     {
@@ -42,7 +42,7 @@ void NodeAdvertiser::Stop()
 }
 
 /// Start the node advertiser thread
-void NodeAdvertiser::BeginAdvertise()
+void NodeAdvertiser::beginAdvertise()
 {
     std::cout << "[iDDS_Wrapper] Node advertiser started" << std::endl;
 
@@ -51,7 +51,7 @@ void NodeAdvertiser::BeginAdvertise()
         std::this_thread::sleep_for(std::chrono::seconds(c_nAdveritisementInterval));
         if (m_bRunning)
         {
-            if(SendAdvertisementMessage() == EXIT_FAILURE)
+            if(sendAdvertisementMessage() == EXIT_FAILURE)
             {
                 std::cout << "[iDDS_Wrapper] Error: Failed to send node advertismente message." << std::endl;
             }
@@ -60,7 +60,7 @@ void NodeAdvertiser::BeginAdvertise()
 }
 
 // Helper method to send advertisement message
-int NodeAdvertiser::SendAdvertisementMessage()
+int NodeAdvertiser::sendAdvertisementMessage()
 {
     RealNodeID realNodeID{m_device_info.manufacturer, m_device_info.productType, m_device_info.serialNumber};
     BuildStandard buildStandard{m_device_info.hwVersion, m_device_info.swVersion};

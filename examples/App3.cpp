@@ -5,13 +5,13 @@
 int main()
 {
     iDDSDevice device = iDDSDeviceBuilder().setLogicalNodeId("NodeId3").build();
-    device.StartServer();
+    device.startServer();
 
     std::cout << "Press Enter to check available iDDS devices." << std::endl;
     std::cin.get();
 
     std::cout << "Available iDDS devices: " << std::endl;
-    auto devices = device.GetAvailableIDDSDevices();
+    auto devices = device.getAvailableIDDSDevices();
     for (const auto& id : devices)
     {
         std::cout << " - " << id << std::endl;
@@ -36,7 +36,7 @@ int main()
     std::cin.get();
 
     // Subscribe channel
-    device.SubscribeToChannel(6445);
+    device.subscribeToChannel(6445);
     std::cout << "Subscribed to channel" << std::endl;
 
     std::cin.get();

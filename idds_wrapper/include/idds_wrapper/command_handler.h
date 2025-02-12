@@ -30,14 +30,14 @@ public:
     // Start the message listener thread
     void BeginMessageParser();
 
-    void Start();
-    void Stop();
+    void start();
+    void stop();
 
     /// Send iDDS message to a specific nodeID
-    idds_wrapper_errCode SendIDDSMessage(const std::string destination_node_id, const std::string message_);
+    idds_wrapper_errCode sendIDDSMessage(const std::string destination_node_id, const std::string message_);
 
     /// Get Received IDDSMessages
-    std::vector<Message> GetReceivedIDDSMessages() { return m_veciDDSMessages; }
+    std::vector<Message> getReceivedIDDSMessages() { return m_veciDDSMessages; }
 
     /// Get supported iDDS commands
     std::vector<std::string> getSupportedCommands() { return m_commandProcessor.getSupportedCommands(); }

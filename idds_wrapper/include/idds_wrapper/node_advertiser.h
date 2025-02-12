@@ -16,10 +16,10 @@ public:
     ~NodeAdvertiser();
 
     // Start the node advertiser thread
-    void BeginAdvertise();
+    void beginAdvertise();
 
-    void Start();
-    void Stop();
+    void start();
+    void stop();
 
 private:
     std::thread m_nodeAdvertiserThread;
@@ -31,5 +31,5 @@ private:
     dds::pub::DataWriter<AboutNode> m_writer;
 
     /// Helper method to send advertisement message
-    int SendAdvertisementMessage();
+    int sendAdvertisementMessage();
 };
