@@ -38,6 +38,7 @@ set(SRC_PublicHeaders idds_common.h
                       command_handler.h
                       command_processor.h
                       channel_streamer.h
+                      idds_state_machine.h
 )
 
 set(SRC_PrivateHeaders

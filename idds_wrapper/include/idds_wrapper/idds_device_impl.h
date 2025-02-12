@@ -5,6 +5,8 @@
 #include <chrono>
 #include <iostream>
 #include <unordered_map>
+#include <memory>
+#include <mutex>
 
 #include "idds_wrapper/idds_common.h"
 #include <idds_wrapper/node_advertiser.h>

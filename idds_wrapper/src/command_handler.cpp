@@ -1,4 +1,5 @@
 #include <idds_wrapper/command_handler.h>
+#include <idds_wrapper/idds_state_machine.h>
 
 #include <tuple>
 
@@ -231,14 +232,24 @@ void CommandHandler::registerCallbacks()
 
     // General.StartOperating
     m_commandProcessor.registerCallback("General.StartOperating", [this](const ParamList& params, std::string& response) {
-        prepareReply(response, idds_returnCode::OK);
+
         std::cout << "StartOperating command received" << std::endl;
+        std::cout << "State: " << IDDSStateMachine::getInstance().getState() << std::endl;
+        IDDSStateMachine::getInstance().setState(OperationalStatus::OpStatusOperating);
+        std::cout << "State: " << IDDSStateMachine::getInstance().getState() << std::endl;
+
+        prepareReply(response, idds_returnCode::OK);
     });
 
     // General.StopOperating
     m_commandProcessor.registerCallback("General.StopOperating", [this](const ParamList& params, std::string& response) {
-        prepareReply(response, idds_returnCode::OK);
         std::cout << "StopOperating command received" << std::endl;
+
+        std::cout << "State: " << IDDSStateMachine::getInstance().getState() << std::endl;
+        IDDSStateMachine::getInstance().setState(OperationalStatus::OpStatusReady);
+        std::cout << "State: " << IDDSStateMachine::getInstance().getState() << std::endl;
+
+        prepareReply(response, idds_returnCode::OK);
     });
 }
 
@@ -259,8 +270,7 @@ void CommandHandler::prepareReply(std::string& reply, const idds_returnCode retu
     }
 }
 
-
-/// Prepare reply
+/// Prepare reply and include parameters in the response
 void CommandHandler::prepareReply(std::string& reply, const idds_returnCode returnCode, std::vector<std::string> param)
 {
     idds_xml_response parser = idds_xml_response();

@@ -1,5 +1,5 @@
 #include <idds_wrapper/channel_streamer.h>
-
+#include <idds_wrapper/idds_state_machine.h>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -129,20 +129,23 @@ void ChannelStreamer::StartStreaming()
     const double amplitude = 1.0;                           // Amplitude
     auto start_time = std::chrono::steady_clock::now();     // Time reference
 
-    while (m_bRunning && m_bStreamEnabled)
+    while (m_bRunning)
     {
-        // sine wave
-        auto now = std::chrono::steady_clock::now();
-        std::chrono::duration<double> elapsed = now - start_time;
-        double t = elapsed.count();
-        double sine_value = amplitude * std::sin(2.0 * M_PI * frequency * t);
-        double sawtooth_value = amplitude * (t * frequency - std::floor(t * frequency));
+        if(IDDSStateMachine::getInstance().getState()  == OperationalStatus::OpStatusOperating)
+        {
+            // sine wave
+            auto now = std::chrono::steady_clock::now();
+            std::chrono::duration<double> elapsed = now - start_time;
+            double t = elapsed.count();
+            double sine_value = amplitude * std::sin(2.0 * M_PI * frequency * t);
+            double sawtooth_value = amplitude * (t * frequency - std::floor(t * frequency));
 
-        // Stream data
-        SendSample("Channel.1", sine_value);
-        SendSample("Channel.2", sawtooth_value);
+            // Stream data
+            SendSample("Channel.1", sine_value);
+            SendSample("Channel.2", sawtooth_value);
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
     }
 
     std::cout << "[iDDS_Wrapper] Streaming stopped" << std::endl;

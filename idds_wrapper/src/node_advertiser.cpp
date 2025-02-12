@@ -1,4 +1,5 @@
 #include <idds_wrapper/node_advertiser.h>
+#include <idds_wrapper/idds_state_machine.h>
 
 //--------------------------------------------------------------------------------------------------
 // Constants.
@@ -66,12 +67,15 @@ int NodeAdvertiser::SendAdvertisementMessage()
     LogicalNodeID logicalNodeID{m_device_info.logical_node_id};
     Time aboutTime{0, 0}; // To be adjusted
 
+    // Get current state
+    IDDSStateMachine &machine = IDDSStateMachine::getInstance();
+
     try
     {
         AboutNode msg(
             realNodeID,                             // RealNodeID
             buildStandard,                          // BuildStandard
-            OperationalStatus::OpStatusReady,       // To be adjusted
+            machine.getState(),                     // To be adjusted
             "",                                     // StatusReason - To be adjusted
             logicalNodeID,                          // LogicalNodeID
             c_nStreamingDomainID,                   // DomainID

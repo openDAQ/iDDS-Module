@@ -25,13 +25,14 @@ int main()
 
     std::cin.get();
 
-    // General.StartOperating
-    device.SendIDDSMessage("NodeId1", "<methodCall> <methodName>General.StartOperating</methodName> <params /> </methodCall>");
+    // Subscribe to channel
+    device.SubscribeToChannel(6445);
+    std::cout << "Subscribed to channel" << std::endl;
 
     std::cin.get();
 
-    // Subscrive to channel
-    device.SubscribeToChannel(6445);
+    // General.StartOperating
+    device.SendIDDSMessage("NodeId1", "<methodCall> <methodName>General.StartOperating</methodName> <params /> </methodCall>");
 
     std::cin.get();
 
