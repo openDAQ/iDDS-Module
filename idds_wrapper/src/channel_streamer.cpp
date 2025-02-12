@@ -1,5 +1,8 @@
 #include <idds_wrapper/channel_streamer.h>
-#include <cmath>
+
+
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 #include <chrono>
 #include <regex>
@@ -132,7 +135,7 @@ void ChannelStreamer::StartStreaming()
         auto now = std::chrono::steady_clock::now();
         std::chrono::duration<double> elapsed = now - start_time;
         double t = elapsed.count();
-        double sine_value = amplitude * std::sin(2.0 * 3.14 * frequency * t);
+        double sine_value = amplitude * std::sin(2.0 * M_PI * frequency * t);
         double sawtooth_value = amplitude * (t * frequency - std::floor(t * frequency));
 
         // Stream data
