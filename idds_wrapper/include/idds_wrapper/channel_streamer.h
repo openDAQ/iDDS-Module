@@ -37,6 +37,9 @@ public:
 
     /// Subscribe to a channel
     void SubscribeToChannel(const std::string channelName);
+
+    // Get channel information
+    std::string getChannelInfo();
 private:
     /// Send sample
     idds_wrapper_errCode SendSample(const std::string channel, const double value);

@@ -20,10 +20,24 @@ int main()
     std::cout << "Press Enter to send iDDS messages." << std::endl;
     std::cin.get();
 
-    device.SendIDDSMessage("NodeId1", "<methodCall> <methodName>General.HardReset</methodName> <params /> </methodCall>");
-    device.SendIDDSMessage("NodeId2", "<methodCall><methodName>General.StartOperating</methodName><params /></methodCall>");
+    // Configuration.GetAttribute
+    device.SendIDDSMessage("NodeId1", "<methodCall> <methodName>Configuration.GetAttribute</methodName> <params> <param> <name>Attribute</name> <value><String>alistv</String></value> </param> </params> </methodCall>");
 
-    std::cout << "Messages sent. Press Enter to close." << std::endl;
+    std::cin.get();
+
+    // General.StartOperating
+    device.SendIDDSMessage("NodeId1", "<methodCall> <methodName>General.StartOperating</methodName> <params /> </methodCall>");
+
+    std::cin.get();
+
+    // Subscrive to channel
+    device.SubscribeToChannel("Channel.1");
+
+    std::cin.get();
+
+    // General.StopOperating
+    device.SendIDDSMessage("NodeId1", "<methodCall> <methodName>General.StopOperating</methodName> <params /> </methodCall>");
+
     std::cin.get();
 
     return 0;

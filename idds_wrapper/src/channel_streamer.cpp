@@ -2,11 +2,13 @@
 #include <cmath>
 
 #include <chrono>
+#include <regex>
 
 //--------------------------------------------------------------------------------------------------
 // Constants.
 //--------------------------------------------------------------------------------------------------
 static const char stream_topic[] = "ParameterDataSeries";
+static const char header[]       =  "{{LOGICAL-ID}{SECTION}{NAME}{VALUE}{R/W}{DESCRIPTION}}";
 static const int c_nParameterID_channel1 = 6445;
 static const int c_nParameterID_channel2 = 6446;
 //--------------------------------------------------------------------------------------------------
@@ -165,6 +167,42 @@ void ChannelStreamer::SubscribeToChannel(const std::string channelName)
     }
     else
         m_SubsribedChannel = m_parameterDataSeries[channelName];
+}
+
+// Get channel information
+std::string ChannelStreamer::getChannelInfo()
+{
+    /*
+    {{LOGICAL-ID}{SECTION}{NAME}{VALUE}{R/W}{DESCRIPTION}}
+    {{OpenDaqDevice1}{Channel.1}{Name}{ChannelName1}{Name of Channel 1}}
+    {{OpenDaqDevice1}{Channel.1}{ID}{6445}{ID of Channel 1}}
+    {{OpenDaqDevice1}{Channel.2}{Name}{ChannelName2}{Name of Channel 2}}
+    {{OpenDaqDevice1}{Channel.2}{ID}{6446}{ID of Channel 2}}
+    ...
+    */
+
+    std::string strChannelInfo = header;
+    std::string aux;
+    int channelCount = 1;
+
+    for (auto channel : m_parameterDataSeries)
+    {
+        std::string aux = header;
+        aux = "{{REPLACELOGICALID}{Channel.REPLACECHANNEL}{Name}{REPLACENAME}{Name of ChannelREPLACECHANNEL}}";
+        aux = std::regex_replace(aux, std::regex("REPLACELOGICALID"), m_device_info.logical_node_id);
+        aux = std::regex_replace(aux, std::regex("REPLACECHANNEL"), std::to_string(channelCount));
+        aux = std::regex_replace(aux, std::regex("REPLACENAME"), channel.first);
+        strChannelInfo += aux;
+
+        aux = "{{REPLACELOGICALID}{Channel.REPLACECHANNEL}{ID}{REPLACEID}{ID of Channel ChannelREPLACECHANNEL}}";
+        aux = std::regex_replace(aux, std::regex("REPLACELOGICALID"), m_device_info.logical_node_id);
+        aux = std::regex_replace(aux, std::regex("REPLACECHANNEL"), std::to_string(channelCount));
+        aux = std::regex_replace(aux, std::regex("REPLACEID"), std::to_string(channel.second));
+        strChannelInfo += aux;
+        channelCount++;
+    }
+
+    return strChannelInfo;
 }
 
 // Send sample method

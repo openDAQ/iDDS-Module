@@ -1,5 +1,7 @@
 #include <idds_wrapper/command_handler.h>
 
+#include <tuple>
+
 //--------------------------------------------------------------------------------------------------
 // Constants.
 //--------------------------------------------------------------------------------------------------
@@ -7,7 +9,8 @@ static const char message_topic[] = "Message";
 //--------------------------------------------------------------------------------------------------
 
 CommandHandler::CommandHandler(dds::domain::DomainParticipant& participant,
-                               const idds_device_info& device_info)
+                               const idds_device_info& device_info,
+                               ChannelStreamer& channelStreamer)
     : m_participant(participant)
     , m_bRunning(false)
     , m_device_info(device_info)
@@ -17,6 +20,7 @@ CommandHandler::CommandHandler(dds::domain::DomainParticipant& participant,
     , m_MessagePublisher(participant)
     , m_MessageWriter(m_MessagePublisher, m_MessageTopic)
     , m_commandProcessor()
+    , m_channelStreamer(channelStreamer)
 {
     registerCallbacks();
 }
@@ -82,10 +86,14 @@ void CommandHandler::BeginMessageParser()
                         m_veciDDSMessages.push_back(msg);
 
                         std::string response;
-                        std::cout << "Received new message from: " << msg.sourceLogicalNodeID() << " msg: " << messageBody << std::endl;
+                        std::cout << "New message from: " << msg.sourceLogicalNodeID() << " msg: " << messageBody << std::endl;
 
                         // Check for response message
-                        if(parseMessage(msg, response) != idds_wrapper_errCode::METHOD_RESPONSE)
+                        if(parseMessage(msg, response) == idds_wrapper_errCode::METHOD_RESPONSE)
+                        {
+                            // Process response message
+                        }
+                        else
                         {
                             // Reply back to the sender
                             SendIDDSMessage(msg.sourceLogicalNodeID(), response);
@@ -140,22 +148,16 @@ idds_wrapper_errCode CommandHandler::parseMessage(const Message& msg, std::strin
     {
         if(parser.get_return_code() >= 0)
         {
-            std::cout << "Reply received: " << msg << std::endl;
+            // This is a response message
             return idds_wrapper_errCode::METHOD_RESPONSE;
         }
 
         std::cout << "Method name: " << parser.get_method_name() << std::endl;
-        std::cout << "Params size: " << parser.get_params().size() << std::endl;
-
-        for (auto param : parser.get_params())
-        {
-            std::cout << "Param name: " << param << std::endl;
-        }
 
         idds_wrapper_errCode errCode = m_commandProcessor.processCommand(parser.get_method_name(), parser.get_params(), response);
         if (errCode != idds_wrapper_errCode::OK)
         {
-            std::cout << "[iDDS_Wrapper] Error processing command" << std::endl;
+            std::cout << "[iDDS_Wrapper] Error processing command " << parser.get_method_name() << std::endl;
             prepareReply(response, translateReturnCode(errCode));
             return errCode;
         }
@@ -173,24 +175,42 @@ void CommandHandler::registerCallbacks()
 {
     // General.HardReset
     m_commandProcessor.registerCallback("General.HardReset", [this](const ParamList& params, std::string& response) {
+        // Do nothing - TBD
         prepareReply(response, idds_returnCode::OK);
-        std::cout << "HardReset command received" << std::endl;
     });
 
     // Configuration.GetAttribute
     m_commandProcessor.registerCallback("Configuration.GetAttribute", [this](const ParamList& params, std::string& response) {
-        prepareReply(response, idds_returnCode::OK, {"Value1", "Value2"});
-        std::cout << "response: " << response << std::endl;
         std::cout << "GetAttribute command received" << std::endl;
+
+        std::string value;
+        idds_xml_error result;
 
         for (auto param : params)
         {
             idds_xml_params_decode<std::string> idds_param = idds_xml_params_decode<std::string>(param);
-            auto [resultName, varName] = idds_param.get_name();
-            std::cout << "Param name: " << varName << std::endl;
-            auto [resultName2, varValue] = idds_param.get_value();
-            std::cout << "Param value: " << varValue << std::endl;
+            std::tie(result, value) = idds_param.get_name();
+            std::cout << "Param name: " << value << std::endl;
+             std::tie(result, value) = idds_param.get_value();
+            std::cout << "Param value: " << value << std::endl;
         }
+
+        if(value == "alistv")
+        {
+            // Channel information requested
+            std::string strChannelInfo;
+
+            // Prepare channel information response
+            std::string strParam = prepareXMLResponse( m_channelStreamer.getChannelInfo());
+            prepareReply(response, idds_returnCode::OK, {strParam});
+        }
+        else
+        {
+            // Anything else is not supported at this moment
+            prepareReply(response, idds_returnCode::CommandNotSupported);
+        }
+
+        std::cout << "response: " << response << std::endl;
     });
 
     // General.StartOperating
@@ -204,8 +224,6 @@ void CommandHandler::registerCallbacks()
         prepareReply(response, idds_returnCode::OK);
         std::cout << "StopOperating command received" << std::endl;
     });
-
-
 }
 
 /// Prepare reply
@@ -259,4 +277,13 @@ idds_returnCode CommandHandler::translateReturnCode(const idds_wrapper_errCode r
     default:
         return idds_returnCode::CommandNotSupported;
     }
+}
+
+/// Prepare XML response to be sent back after GetAttribute command
+std::string CommandHandler::prepareXMLResponse(std::string value)
+{
+    std::string strParam = "<param><name>Attribute</name><value><String>";
+    strParam += value;
+    strParam += "</String></value></param>";
+    return strParam;
 }

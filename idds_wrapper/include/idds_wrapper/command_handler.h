@@ -4,6 +4,7 @@
 
 #include <idds_wrapper/idds_common.h>
 #include <idds_wrapper/command_processor.h>
+#include <idds_wrapper/channel_streamer.h>
 #include <idds_xml_request.h>
 #include <idds_xml_params_decode.h>
 #include <idds_xml_params_encode.h>
@@ -19,7 +20,8 @@ class CommandHandler
 {
 public:
     CommandHandler(dds::domain::DomainParticipant& participant,
-                   const idds_device_info& device_info);
+                   const idds_device_info& device_info,
+                   ChannelStreamer& channelStreamer);
 
     ~CommandHandler();
 
@@ -51,6 +53,9 @@ private:
     /// Translate idds-return_code to idds_wrapper_errCode
     idds_returnCode translateReturnCode(const idds_wrapper_errCode returnCode);
 
+    /// Prepare XML response to be sent back after GetAttribute command
+    std::string prepareXMLResponse(std::string value);
+
 private:
     std::thread m_commandHandlerThread;
     bool m_bRunning;
@@ -66,6 +71,7 @@ private:
     dds::pub::DataWriter<Message>   m_MessageWriter;
 
     CommandProcessor m_commandProcessor;
+    ChannelStreamer& m_channelStreamer;
 
     std::vector<Message> m_veciDDSMessages;
 };
