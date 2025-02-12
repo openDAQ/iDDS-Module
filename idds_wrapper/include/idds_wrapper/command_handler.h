@@ -37,6 +37,9 @@ public:
     /// Get Received IDDSMessages
     std::vector<Message> GetReceivedIDDSMessages() { return m_veciDDSMessages; }
 
+    /// Get supported iDDS commands
+    std::vector<std::string> getSupportedCommands() { return m_commandProcessor.getSupportedCommands(); }
+
 private:
     /// Parse incoming idds messages
     idds_wrapper_errCode parseMessage(const Message& msg, std::string& response);

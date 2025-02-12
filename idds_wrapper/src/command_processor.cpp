@@ -26,3 +26,14 @@ idds_wrapper_errCode CommandProcessor::processCommand(const std::string& method,
         return idds_wrapper_errCode::CALLBACK_NOT_FOUND;
     }
 }
+
+// Get supported commands
+std::vector<std::string> CommandProcessor::getSupportedCommands()
+{
+    std::vector<std::string> supportedCommands;
+    for (auto& [key, value] : m_mapCommandCallbacks)
+    {
+        supportedCommands.push_back(key);
+    }
+    return supportedCommands;
+}

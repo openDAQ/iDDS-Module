@@ -50,6 +50,9 @@ public:
     /// Subscribe to a channel for streaming data
     void SubscribeToChannel(const int channelParamID);
 
+    /// Get suppoprt idds commands
+    std::vector<std::string> getSupportedIDDSCommands() { return m_commandHandler.getSupportedCommands(); }
+
 private:
     idds_device_info m_idds_device_info;
     std::vector<std::string> received_messages;

@@ -23,6 +23,9 @@ public:
     // Invoke callback
     idds_wrapper_errCode processCommand(const std::string& method, const ParamList& params, std::string& response);
 
+    // Get supported commands
+    std::vector<std::string> getSupportedCommands();
+
     private:
         std::unordered_map<std::string, Callback> m_mapCommandCallbacks;
 };
