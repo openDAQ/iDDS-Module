@@ -27,6 +27,7 @@ set(SRC_Cpp           idds_device_impl.cpp
                       node_discovery.cpp
                       command_handler.cpp
                       command_processor.cpp
+                      channel_streamer.cpp
 )
 
 set(SRC_PublicHeaders idds_common.h
@@ -36,6 +37,7 @@ set(SRC_PublicHeaders idds_common.h
                       node_discovery.h
                       command_handler.h
                       command_processor.h
+                      channel_streamer.h
 )
 
 set(SRC_PrivateHeaders

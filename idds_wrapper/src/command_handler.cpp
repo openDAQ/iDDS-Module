@@ -102,7 +102,10 @@ int CommandHandler::SendIDDSMessage(const std::string destination_node_id, const
 {
     LogicalNodeID sourceLogicalNodeID{m_device_info.logical_node_id};
     LogicalNodeID targetLogicalNodeID{destination_node_id};
-    Time time{0, 0}; // To be adjusted
+
+    uint32_t seconds_since_epoch = std::chrono::system_clock::now().time_since_epoch() / std::chrono::seconds(1);
+    uint32_t nanoseconds_since_epoch = std::chrono::system_clock::now().time_since_epoch() / std::chrono::nanoseconds(1);
+    Time time{seconds_since_epoch, nanoseconds_since_epoch}; // To be adjusted
 
     try
     {
@@ -113,7 +116,7 @@ int CommandHandler::SendIDDSMessage(const std::string destination_node_id, const
             0,                              // MyReferenceNumber
             0,                              // YourReferenceNumber
             time,                           // Time
-            1,                              // Fragment Number
+            1,                              // Fragment Number: 1 fragment
             false                           // More Fragments
         );
 

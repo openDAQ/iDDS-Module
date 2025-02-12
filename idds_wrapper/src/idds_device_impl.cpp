@@ -29,6 +29,7 @@ iDDSDevice::iDDSDevice(const std::string node_id, const std::string manufacturer
                        , m_nodeAdvertiser(m_aboutNodewriter, m_idds_device_info)
                        , m_nodeDiscovery(participant, m_aboutNodeReader, m_idds_device_info)
                        , m_commandHandler(participant, m_idds_device_info)
+                       , m_channelStreamer(participant, m_idds_device_info)
 {
 }
 
@@ -51,6 +52,14 @@ void iDDSDevice::StartServer()
     m_nodeAdvertiser.Start();
     m_nodeDiscovery.Start();
     m_commandHandler.Start();
+    m_channelStreamer.StartStreamer();
+    m_channelStreamer.StartReaderThread();
+}
+
+// Subscribe To a channel for streaming data
+void iDDSDevice::SubscribeToChannel(const std::string channelName)
+{
+    m_channelStreamer.SubscribeToChannel(channelName);
 }
 
 // Stop the iDDS server

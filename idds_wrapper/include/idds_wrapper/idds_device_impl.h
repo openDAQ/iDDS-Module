@@ -10,6 +10,7 @@
 #include <idds_wrapper/node_advertiser.h>
 #include <idds_wrapper/node_discovery.h>
 #include <idds_wrapper/command_handler.h>
+#include <idds_wrapper/channel_streamer.h>
 #include "dds/dds.hpp"
 #include "iDDS.hpp"
 
@@ -41,6 +42,9 @@ public:
     /// Print received iDDS messages
     void PrintReceivedIDDSMessages();
 
+    /// Subscribe to a channel for streaming data
+    void SubscribeToChannel(const std::string channelName);
+
 private:
     idds_device_info m_idds_device_info;
     std::vector<std::string> received_messages;
@@ -56,6 +60,7 @@ private:
     NodeAdvertiser  m_nodeAdvertiser;
     NodeDiscovery   m_nodeDiscovery;
     CommandHandler  m_commandHandler;
+    ChannelStreamer m_channelStreamer;
 
     bool m_bRunning;
 };
