@@ -13,6 +13,37 @@ static const int c_nParameterID_channel1 = 6445;
 static const int c_nParameterID_channel2 = 6446;
 //--------------------------------------------------------------------------------------------------
 
+dds::sub::qos::DataReaderQos getParameterDataSeriesReaderQoSFlags(dds::topic::Topic<ParameterDataSeries>& topic)
+{
+    dds::sub::qos::DataReaderQos currQos = topic.qos();
+
+    std::vector<dds::core::policy::DataRepresentationId> reprs;
+    reprs.push_back(dds::core::policy::DataRepresentationId::XCDR1);
+    currQos << dds::core::policy::DataRepresentation(reprs);
+
+    currQos << dds::core::policy::LatencyBudget(dds::core::Duration(25, 0));
+
+    return currQos;
+}
+
+dds::pub::qos::DataWriterQos getParameterDataSeriesWriterQoSFlags(dds::topic::Topic<ParameterDataSeries>& topic)
+{
+    dds::pub::qos::DataWriterQos currQos = topic.qos();
+
+    // Policy.DataRepresentation(use_cdrv0_representation=True, use_xcdrv2_representation=False)
+    std::vector<dds::core::policy::DataRepresentationId> reprs;
+    reprs.push_back(dds::core::policy::DataRepresentationId::XCDR1);
+    currQos << dds::core::policy::DataRepresentation(reprs);
+
+    // Policy.Reliability.Reliable(max_blocking_time=100000000)
+    currQos << dds::core::policy::Reliability(dds::core::policy::ReliabilityKind_def::RELIABLE, dds::core::Duration(0, 100000000));
+
+    // Policy.LatencyBudget(budget=2500000)
+    currQos << dds::core::policy::LatencyBudget(dds::core::Duration(0, 1500000));
+
+    return currQos;
+}
+
 ChannelStreamer::ChannelStreamer(dds::domain::DomainParticipant& participant,
                                  const idds_device_info& device_info)
             : m_participant(participant)
@@ -20,9 +51,9 @@ ChannelStreamer::ChannelStreamer(dds::domain::DomainParticipant& participant,
             , m_device_info(device_info)
             , m_streamTopic(participant, stream_topic)
             , m_streamSubscriber(participant)
-            , m_streamReader(m_streamSubscriber, m_streamTopic)
+            , m_streamReader(m_streamSubscriber, m_streamTopic, getParameterDataSeriesReaderQoSFlags(m_streamTopic))
             , m_streamPublisher(participant)
-            , m_streamWriter(m_streamPublisher, m_streamTopic)
+            , m_streamWriter(m_streamPublisher, m_streamTopic, getParameterDataSeriesWriterQoSFlags(m_streamTopic))
             , m_SubsribedChannel(-1)
             , m_bStreamEnabled(true) //Streaming is enabled by default for now
 {

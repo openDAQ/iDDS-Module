@@ -8,6 +8,22 @@
 static const char message_topic[] = "Message";
 //--------------------------------------------------------------------------------------------------
 
+
+dds::sub::qos::DataReaderQos getMessageReaderQoSFlags(dds::topic::Topic<Message>& topic)
+{
+    dds::sub::qos::DataReaderQos currQos = topic.qos();
+
+    std::vector<dds::core::policy::DataRepresentationId> reprs;
+    reprs.push_back(dds::core::policy::DataRepresentationId::XCDR1);
+    currQos << dds::core::policy::DataRepresentation(reprs);
+
+    currQos << dds::core::policy::LatencyBudget(dds::core::Duration(0, 100000));
+
+    currQos << dds::core::policy::Reliability(dds::core::policy::ReliabilityKind_def::RELIABLE, dds::core::Duration(0, 100000000));
+
+    return currQos;
+}
+
 CommandHandler::CommandHandler(dds::domain::DomainParticipant& participant,
                                const idds_device_info& device_info,
                                ChannelStreamer& channelStreamer)
@@ -16,7 +32,7 @@ CommandHandler::CommandHandler(dds::domain::DomainParticipant& participant,
     , m_device_info(device_info)
     , m_MessageTopic(participant, message_topic)
     , m_MessageSubscriber(participant)
-    , m_MessageReader(m_MessageSubscriber, m_MessageTopic)
+    , m_MessageReader(m_MessageSubscriber, m_MessageTopic, getMessageReaderQoSFlags(m_MessageTopic))
     , m_MessagePublisher(participant)
     , m_MessageWriter(m_MessagePublisher, m_MessageTopic)
     , m_commandProcessor()
