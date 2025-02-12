@@ -1,4 +1,5 @@
 #include <idds_wrapper/channel_streamer.h>
+#include <cmath>
 
 #include <chrono>
 
@@ -21,7 +22,7 @@ ChannelStreamer::ChannelStreamer(dds::domain::DomainParticipant& participant,
             , m_streamPublisher(participant)
             , m_streamWriter(m_streamPublisher, m_streamTopic)
             , m_SubsribedChannel(-1)
-            , m_bStreamEnabled(false) //Streaming is disabled by default
+            , m_bStreamEnabled(true) //Streaming is enabled by default for now
 {
     // Initialize channels
     m_parameterDataSeries["Channel.1"] = c_nParameterID_channel1;
@@ -88,12 +89,24 @@ void ChannelStreamer::StartStreaming()
 {
     std::cout << "[iDDS_Wrapper] Streaming started" << std::endl;
 
+    const double frequency = 0.5;                           // Hz
+    const double amplitude = 1.0;                           // Amplitude
+    auto start_time = std::chrono::steady_clock::now();     // Time reference
+
     while (m_bRunning && m_bStreamEnabled)
     {
+        // sine wave
+        auto now = std::chrono::steady_clock::now();
+        std::chrono::duration<double> elapsed = now - start_time;
+        double t = elapsed.count();
+        double sine_value = amplitude * std::sin(2.0 * M_PI * frequency * t);
+        double sawtooth_value = amplitude * (t * frequency - std::floor(t * frequency));
+
         // Stream data
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        SendSample("Channel.1", 1.0);
-        SendSample("Channel.2", 2.0);
+        SendSample("Channel.1", sine_value);
+        SendSample("Channel.2", sawtooth_value);
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
     std::cout << "[iDDS_Wrapper] Streaming stopped" << std::endl;
