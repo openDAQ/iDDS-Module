@@ -71,6 +71,8 @@ private:
     dds::sub::DataReader<AboutNode> m_aboutNodeReader;
     dds::pub::Publisher             m_aboutNodepublisher;
     dds::pub::DataWriter<AboutNode> m_aboutNodewriter;
+    dds::sub::Subscriber            m_ParameterDataSeriesSubscriber;
+    dds::pub::Publisher             m_ParameterDataSeriesPublisher;
 
     NodeAdvertiser  m_nodeAdvertiser;
     NodeDiscovery   m_nodeDiscovery;

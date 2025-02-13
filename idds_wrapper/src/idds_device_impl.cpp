@@ -13,7 +13,6 @@ static const char node_advertiser_topic[] = "AboutNode";
 static const char message_topic[] = "Message";
 static const char rtps_file[] = "rtps.ini";
 
-
 iDDSDevice::iDDSDevice(const std::string node_id, const std::string manufacturer, const std::string productType,
                        const std::string serialNumber, const std::string hwVersion, const std::string swVersion,
                        const std::string ipAddress)
@@ -27,9 +26,11 @@ iDDSDevice::iDDSDevice(const std::string node_id, const std::string manufacturer
                        , m_aboutNodeReader(m_aboutNodesubscriber, m_aboutNodeTopic)
                        , m_aboutNodepublisher(m_participant)
                        , m_aboutNodewriter(m_aboutNodepublisher, m_aboutNodeTopic)
+                       , m_ParameterDataSeriesSubscriber(m_streamParticipant, m_streamParticipant.default_subscriber_qos() << dds::core::policy::Partition("default"))
+                       , m_ParameterDataSeriesPublisher(m_streamParticipant, m_streamParticipant.default_publisher_qos() << dds::core::policy::Partition("default"))
                        , m_nodeAdvertiser(m_aboutNodewriter, m_idds_device_info)
                        , m_nodeDiscovery(m_participant, m_aboutNodeReader, m_idds_device_info)
-                       , m_channelStreamer(m_streamParticipant, m_idds_device_info)             // different domain for streaming
+                       , m_channelStreamer(m_streamParticipant, m_idds_device_info, m_ParameterDataSeriesPublisher, m_ParameterDataSeriesSubscriber)
                        , m_commandHandler(m_participant, m_idds_device_info, m_channelStreamer)
 {
 }

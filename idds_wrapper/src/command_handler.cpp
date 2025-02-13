@@ -372,6 +372,7 @@ idds_wrapper_errCode CommandHandler::publishCommandAndWaitForReply(const std::st
     return idds_wrapper_errCode::OK;
 }
 
+// Helper method to extract channel name and ID from the reply. Method also adds the channel to the channel streamer
 void CommandHandler::extractChannelNameAndID(const std::string& input)
 {
     /*
@@ -386,7 +387,6 @@ void CommandHandler::extractChannelNameAndID(const std::string& input)
         Name: Temperature, ID: 1
         Name: Pressure, ID: 2
     */
-
 
     std::regex nameRegex(R"(\{(.*?)\}\{(.*?)\}\{Name\}\{(.*?)\})");
     std::regex idRegex(R"(\{(.*?)\}\{(.*?)\}\{ID\}\{(.*?)\})");

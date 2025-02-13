@@ -14,7 +14,9 @@ class ChannelStreamer
 {
 public:
     ChannelStreamer(dds::domain::DomainParticipant& participant,
-                    const idds_device_info& device_info);
+                    const idds_device_info& device_info,
+                    const dds::pub::Publisher& publisher,
+                    const dds::sub::Subscriber& subscriber);
     ~ChannelStreamer();
 
     /// Start the channel streamer thread
