@@ -17,7 +17,7 @@ int main()
         std::cout << " - " << id << std::endl;
     }
 
-    std::cout << "Press Enter to send iDDS messages." << std::endl;
+    std::cout << "Publish Command: Configuration.GetAttribute" << std::endl;
     std::cin.get();
 
     // Configuration.GetAttribute
@@ -37,20 +37,38 @@ int main()
 
     // Subscribe channel
     device.subscribeToChannel(6445);
-    std::cout << "Subscribed to channel" << std::endl;
+    std::cout << "Subscribed to channel ID:6445" << std::endl;
 
     std::cin.get();
 
     // General.StartOperating
+    std::cout << "Publish Command: General.StartOperating" << std::endl;
     device.publishCommand(devices[0], "General.StartOperating");
 
 
     std::cin.get();
 
     // General.StopOperating
+    std::cout << "Publish Command: General.StopOperating" << std::endl;
     device.publishCommand(devices[0], "General.StopOperating");
 
     std::cin.get();
+
+    std::cout << "Subscribed to channel ID:6446" << std::endl;
+    device.subscribeToChannel(6446);
+    
+    std::cin.get();
+
+    // General.StartOperating
+    std::cout << "Publish Command: General.StartOperating" << std::endl;
+    device.publishCommand(devices[0], "General.StartOperating");
+
+
+    std::cin.get();
+
+    // General.StopOperating
+    std::cout << "Publish Command: General.StopOperating" << std::endl;
+    device.publishCommand(devices[0], "General.StopOperating");
 
     return 0;
 }
