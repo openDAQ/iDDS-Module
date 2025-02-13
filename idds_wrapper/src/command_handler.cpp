@@ -8,7 +8,7 @@
 // Constants.
 //--------------------------------------------------------------------------------------------------
 static const char c_message_topic[] = "Message";
-static constexpr int c_timeout_ms   = 5000;             // Timeout for reply (milliseconds)
+static constexpr int c_timeout_ms   = 10000;             // Timeout for reply (milliseconds)
 //--------------------------------------------------------------------------------------------------
 
 

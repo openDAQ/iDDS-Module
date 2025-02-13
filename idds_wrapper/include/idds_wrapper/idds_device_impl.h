@@ -64,7 +64,8 @@ private:
     std::vector<std::string> received_messages;
 
     // DDS
-    dds::domain::DomainParticipant  participant;
+    dds::domain::DomainParticipant  m_participant;
+    dds::domain::DomainParticipant  m_streamParticipant;
     dds::topic::Topic<AboutNode>    m_aboutNodeTopic;
     dds::sub::Subscriber            m_aboutNodesubscriber;
     dds::sub::DataReader<AboutNode> m_aboutNodeReader;

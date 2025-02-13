@@ -37,5 +37,3 @@ enum class idds_returnCode {
     AttributeIncorrectDataType,
     NamespaceNotFoundOrInvalid
 };
-
-

@@ -52,10 +52,10 @@ ChannelStreamer::ChannelStreamer(dds::domain::DomainParticipant& participant,
             : m_participant(participant)
             , m_bRunning(false)
             , m_device_info(device_info)
-            , m_streamTopic(participant, stream_topic)
-            , m_streamSubscriber(participant)
+            , m_streamTopic(m_participant, stream_topic)
+            , m_streamSubscriber(m_participant)
             , m_streamReader(m_streamSubscriber, m_streamTopic, getParameterDataSeriesReaderQoSFlags(m_streamTopic))
-            , m_streamPublisher(participant)
+            , m_streamPublisher(m_participant)
             , m_streamWriter(m_streamPublisher, m_streamTopic, getParameterDataSeriesWriterQoSFlags(m_streamTopic))
             , m_SubsribedChannel(-1)
             , m_bStreamEnabled(true) //Streaming is enabled by default for now
