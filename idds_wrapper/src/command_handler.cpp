@@ -374,6 +374,20 @@ idds_wrapper_errCode CommandHandler::publishCommandAndWaitForReply(const std::st
 
 void CommandHandler::extractChannelNameAndID(const std::string& input)
 {
+    /*
+        Example input:
+        {{LOGICAL-ID}{SECTION}{NAME}{VALUE}{R/W}{DESCRIPTION}}
+        {{LogicalNodeID}{Channel1}{Name}{Temperature}{Name of Channel1}}
+        {{LogicalNodeID}{Channel1}{ID}{1}{ID of Channel Channel1}}
+        {{LogicalNodeID}{Channel2}{Name}{Pressure}{Name of Channel2}}
+        {{LogicalNodeID}{Channel2}{ID}{2}{ID of Channel Channel2}}
+
+        Extracted values:
+        Name: Temperature, ID: 1
+        Name: Pressure, ID: 2
+    */
+
+
     std::regex nameRegex(R"(\{(.*?)\}\{(.*?)\}\{Name\}\{(.*?)\})");
     std::regex idRegex(R"(\{(.*?)\}\{(.*?)\}\{ID\}\{(.*?)\})");
 
