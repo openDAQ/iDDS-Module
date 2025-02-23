@@ -56,7 +56,7 @@ int main()
 
     std::cout << "Subscribed to channel ID:6446" << std::endl;
     device.subscribeToChannel(6446);
-    
+
     std::cin.get();
 
     // General.StartOperating

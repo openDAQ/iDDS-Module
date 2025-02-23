@@ -20,6 +20,9 @@ public:
     // Register a callback for a given method
     void registerCallback(const std::string& method, Callback callback);
 
+    // Populate the map with commands
+    void populateCommandsXML();
+
     // Invoke callback
     idds_wrapper_errCode processCommand(const std::string& method, const ParamList& params, std::string& response);
 

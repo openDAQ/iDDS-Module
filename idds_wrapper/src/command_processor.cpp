@@ -1,12 +1,12 @@
 #include <idds_wrapper/command_processor.h>
+#include "idds_xml_error.h"
+#include "idds_xml_request.h"
+#include "idds_xml_params_decode.h"
+#include "idds_xml_params_encode.h"
 
 CommandProcessor::CommandProcessor()
 {
-    // Populate the map with commands - Proper encoding to be added in the future
-    m_mapCommandXML["General.HardReset"] = "<methodCall> <methodName>General.HardReset</methodName> <params /> </methodCall>";
-    m_mapCommandXML["General.StopOperating"] = "<methodCall> <methodName>General.StopOperating</methodName> <params /> </methodCall>";
-    m_mapCommandXML["General.StartOperating"] = "<methodCall> <methodName>General.StartOperating</methodName> <params /> </methodCall>";
-    m_mapCommandXML["Configuration.GetAttribute"] = "<methodCall> <methodName>Configuration.GetAttribute</methodName> <params> <param> <name>Attribute</name> <value><String>alistv</String></value> </param> </params> </methodCall>";
+    populateCommandsXML();
 }
 
 CommandProcessor::~CommandProcessor()
@@ -16,6 +16,35 @@ CommandProcessor::~CommandProcessor()
 void CommandProcessor::registerCallback(const std::string& method, Callback callback)
 {
     m_mapCommandCallbacks[method] = callback;
+}
+
+// Populate the map with commands
+void CommandProcessor::populateCommandsXML()
+{
+    idds_xml_error err;
+    std::string message;
+    idds_xml_request parser = idds_xml_request();
+
+    // General.HardReset
+    parser.add_method_name("General.HardReset");
+    std::tie(err, message) = parser.build();
+    m_mapCommandXML["General.HardReset"] = message;
+
+    // General.StopOperating
+    parser.add_method_name("General.StopOperating");
+    std::tie(err, message) = parser.build();
+    m_mapCommandXML["General.StopOperating"] = message;
+
+    // Configuration.StartOperating
+    parser.add_method_name("General.StartOperating");
+    std::tie(err, message) = parser.build();
+    m_mapCommandXML["General.StartOperating"] = message;
+
+    // Configuration.GetAttribute
+    parser.add_method_name("Configuration.GetAttribute");
+    parser.add_param(idds_xml_params_encode<std::string>("Attribute", "alistv").get_parsed_string());
+    std::tie(err, message) = parser.build();
+    m_mapCommandXML["Configuration.GetAttribute"] = message;
 }
 
 idds_wrapper_errCode CommandProcessor::processCommand(const std::string& method, const ParamList& params, std::string& response)
