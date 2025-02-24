@@ -128,7 +128,7 @@ TEST(idds_xml_request, valid_xml_retrieve_several_params)
     EXPECT_EQ(floatName, "Pi");
     auto [floatValueErr, floatValue] = floatDecode.get_value();
     EXPECT_EQ(floatValueErr, idds_xml_error::ok);
-    EXPECT_FLOAT_EQ(floatValue, 3.14);
+    EXPECT_FLOAT_EQ(floatValue, 3.14f);
 
     idds_xml_params_decode<std::string> stringDecode(parser.get_params()[1]);
     auto [nameErr, name] = stringDecode.get_name();
