@@ -16,7 +16,7 @@ struct IddsDeviceInfo
 
 enum class IddsWrapperErrCode {
     OK,
-    ERROR,
+    NOK,
     CALLBACK_NOT_FOUND,
     CALLBACK_NOT_REGISTERED,
     CALLBACK_ALREADY_REGISTERED,

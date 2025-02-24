@@ -160,7 +160,7 @@ IddsWrapperErrCode CommandHandler::sendIDDSMessage(const std::string destination
     catch (const dds::core::Exception& e)
     {
         std::cerr << "[iDDS_Wrapper] Exception: " << e.what() << std::endl;
-        return IddsWrapperErrCode::ERROR;
+        return IddsWrapperErrCode::NOK;
     }
 }
 
@@ -298,7 +298,7 @@ IddsReturnCode CommandHandler::translateReturnCode(const IddsWrapperErrCode retu
     {
     case IddsWrapperErrCode::OK:
         return IddsReturnCode::OK;
-    case IddsWrapperErrCode::ERROR:
+    case IddsWrapperErrCode::NOK:
     case IddsWrapperErrCode::CALLBACK_NOT_FOUND:
     default:
         return IddsReturnCode::CommandNotSupported;
