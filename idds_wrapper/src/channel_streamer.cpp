@@ -298,6 +298,6 @@ IddsWrapperErrCode ChannelStreamer::sendSample(const std::string& channel, const
     catch (const dds::core::Exception& e)
     {
         std::cerr << "[iDDS_Wrapper] Exception: " << e.what() << std::endl;
-        return IddsWrapperErrCode::NOK;
+        return IddsWrapperErrCode::ERROR;
     }
 }

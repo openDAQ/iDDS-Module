@@ -107,7 +107,7 @@ IddsWrapperErrCode iDDSDevice::publishCommand(const std::string& targetLogicalNo
     auto strCommandXml = m_commandHandler.getCommandXML(command);
 
     if(strCommandXml.empty())
-        return IddsWrapperErrCode::NOK;
+        return IddsWrapperErrCode::ERROR;
     else
     {
         m_commandHandler.publishCommandAndWaitForReply(targetLogicalNodeID, strCommandXml);
