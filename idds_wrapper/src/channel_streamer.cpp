@@ -59,7 +59,7 @@ ChannelStreamer::ChannelStreamer(dds::domain::DomainParticipant& participant,
             , m_streamReader(m_streamSubscriber, m_streamTopic, getParameterDataSeriesReaderQoSFlags(m_streamTopic))
             , m_streamPublisher(publisher)
             , m_streamWriter(m_streamPublisher, m_streamTopic, getParameterDataSeriesWriterQoSFlags(m_streamTopic))
-            , m_SubsribedChannel(-1)
+            , m_SubsribedChannel(static_cast<ParameterID>(-1))
             , m_bStreamEnabled(true) //Streaming is enabled by default for now
 {
     // Initialize channels
