@@ -47,13 +47,13 @@ public:
     std::string getChannelInfo();
 
     //Add discovered channels
-    idds_wrapper_errCode addDiscoverableChannel(const std::string channelName, const int channelParamID);
+    idds_wrapper_errCode addDiscoverableChannel(const std::string& channelName, const int& channelParamID);
 
     // Get discoverable signal name and ID
     std::map<std::string, ParameterID> getDiscoverableSignalNameAndID() { return m_mapDiscoverableSignalIDs; }
 private:
     /// Send sample
-    idds_wrapper_errCode sendSample(const std::string channel, const double value);
+    idds_wrapper_errCode sendSample(const std::string& channel, const double& value);
 
 private:
     std::thread m_channelStreamerThread;

@@ -13,9 +13,9 @@ CommandProcessor::~CommandProcessor()
 {
 }
 
-void CommandProcessor::registerCallback(const std::string& method, Callback callback)
+void CommandProcessor::registerCallback(const std::string& method, Callback&& callback)
 {
-    m_mapCommandCallbacks[method] = callback;
+    m_mapCommandCallbacks[method] = std::move(callback);
 }
 
 // Populate the map with commands
@@ -73,7 +73,7 @@ std::vector<std::string> CommandProcessor::getSupportedCommands()
 }
 
 // Get command XML for a given command
-std::string CommandProcessor::getCommandXML(std::string command)
+std::string CommandProcessor::getCommandXML(const std::string& command)
 {
     if (m_mapCommandXML.find(command) != m_mapCommandXML.end())
     {

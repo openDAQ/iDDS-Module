@@ -34,7 +34,7 @@ public:
     void stop();
 
     /// Send iDDS message to a specific nodeID
-    idds_wrapper_errCode sendIDDSMessage(const std::string destination_node_id, const std::string message_);
+    idds_wrapper_errCode sendIDDSMessage(const std::string destination_node_id, const std::string& message);
 
     /// Get Received IDDSMessages
     std::vector<Message> getReceivedIDDSMessages() { return m_veciDDSMessages; }
@@ -43,10 +43,10 @@ public:
     std::vector<std::string> getSupportedCommands() { return m_commandProcessor.getSupportedCommands(); }
 
     // Get command XML
-    std::string getCommandXML(std::string command) { return m_commandProcessor.getCommandXML(command); }
+    std::string getCommandXML(const std::string& command) { return m_commandProcessor.getCommandXML(command); }
 
     /// Publishes a command and waits for a reply or timeout
-    idds_wrapper_errCode publishCommandAndWaitForReply(const std::string &destination_node_id, const std::string &message_);
+    idds_wrapper_errCode publishCommandAndWaitForReply(const std::string& destination_node_id, const std::string& message);
 
 private:
     /// Parse incoming idds messages
@@ -68,7 +68,7 @@ private:
     idds_returnCode translateReturnCode(const idds_wrapper_errCode returnCode);
 
     /// Prepare XML response to be sent back after GetAttribute command
-    std::string prepareXMLResponse(std::string value);
+    std::string prepareXMLResponse(const std::string& value);
 
     // Helper method to extract channel name and ID from the reply
     void extractChannelNameAndID(const std::string& input);

@@ -131,7 +131,7 @@ void CommandHandler::BeginMessageParser()
 }
 
 // sendIDDSMessage method
-idds_wrapper_errCode CommandHandler::sendIDDSMessage(const std::string destination_node_id, const std::string message_)
+idds_wrapper_errCode CommandHandler::sendIDDSMessage(const std::string destination_node_id, const std::string& message)
 {
     LogicalNodeID sourceLogicalNodeID{m_device_info.logical_node_id};
     LogicalNodeID targetLogicalNodeID{destination_node_id};
@@ -145,7 +145,7 @@ idds_wrapper_errCode CommandHandler::sendIDDSMessage(const std::string destinati
         Message msg(
             targetLogicalNodeID,            // TargetLogicalNodeID
             sourceLogicalNodeID,            // SourceLogicalNodeID
-            message_,                       // Message Body
+            message,                        // Message Body
             0,                              // MyReferenceNumber
             0,                              // YourReferenceNumber
             time,                           // Time
@@ -205,7 +205,7 @@ void CommandHandler::registerCallbacks()
         std::string value;
         idds_xml_error result;
 
-        for (auto param : params)
+        for (auto& param : params)
         {
             idds_xml_params_decode<std::string> idds_param = idds_xml_params_decode<std::string>(param);
             std::tie(result, value) = idds_param.get_name();
@@ -275,7 +275,7 @@ void CommandHandler::prepareReply(std::string& reply, const idds_returnCode retu
 {
     idds_xml_response parser = idds_xml_response();
     parser.add_code(static_cast<int>(returnCode));
-    for (auto p : param)
+    for (auto& p : param)
     {
         parser.add_param(p);
     }
@@ -306,7 +306,7 @@ idds_returnCode CommandHandler::translateReturnCode(const idds_wrapper_errCode r
 }
 
 /// Prepare XML response to be sent back after GetAttribute command
-std::string CommandHandler::prepareXMLResponse(std::string value)
+std::string CommandHandler::prepareXMLResponse(const std::string& value)
 {
     std::string strParam = "<param><name>Attribute</name><value><String>";
     strParam += value;
@@ -323,13 +323,13 @@ void CommandHandler::setReplyAvailable()
 }
 
 // Publishes a command and waits for a reply or timeout
-idds_wrapper_errCode CommandHandler::publishCommandAndWaitForReply(const std::string &destination_node_id, const std::string &message_)
+idds_wrapper_errCode CommandHandler::publishCommandAndWaitForReply(const std::string& destination_node_id, const std::string& message)
 {
     std::unique_lock<std::mutex> lock(mtx);
     m_bReplyAvailable = false; // Reset flag before sending message
 
     // Send message
-    auto errCode = sendIDDSMessage(destination_node_id, message_);
+    auto errCode = sendIDDSMessage(destination_node_id, message);
     if (errCode != idds_wrapper_errCode::OK)
     {
         std::cerr << "Failed to send message!" << std::endl;

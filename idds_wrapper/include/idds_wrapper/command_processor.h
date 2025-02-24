@@ -18,7 +18,7 @@ public:
     ~CommandProcessor();
 
     // Register a callback for a given method
-    void registerCallback(const std::string& method, Callback callback);
+    void registerCallback(const std::string& method, Callback&& callback);
 
     // Populate the map with commands
     void populateCommandsXML();
@@ -30,7 +30,7 @@ public:
     std::vector<std::string> getSupportedCommands();
 
     // Get command XML
-    std::string getCommandXML(std::string command);
+    std::string getCommandXML(const std::string& command);
 
     private:
         std::unordered_map<std::string, Callback> m_mapCommandCallbacks;

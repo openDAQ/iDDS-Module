@@ -199,13 +199,13 @@ void ChannelStreamer::startStreamReader()
 void ChannelStreamer::subscribeToChannel(const std::string channelName)
 {
     // Check if the channel exists
-    if(m_mapSignalIds.find(channelName) == m_mapSignalIds.end())
+    if(auto it = m_mapSignalIds.find(channelName); it != m_mapSignalIds.end())
     {
-        std::cerr << "[iDDS_Wrapper] Error: Subscription failed - channel does not exist." << std::endl;
+        m_SubsribedChannel = it->second;
         return;
     }
-    else
-        m_SubsribedChannel = m_mapSignalIds[channelName];
+
+    std::cerr << "[iDDS_Wrapper] Error: Subscription failed - channel does not exist." << std::endl;
 }
 
 // Subscribe to a channel
@@ -249,22 +249,21 @@ std::string ChannelStreamer::getChannelInfo()
     return strChannelInfo;
 }
 
-//Add discovered channels
-idds_wrapper_errCode ChannelStreamer::addDiscoverableChannel(const std::string channelName, const int channelParamID)
+// Add discovered channels
+idds_wrapper_errCode ChannelStreamer::addDiscoverableChannel(const std::string& channelName, const int& channelParamID)
 {
-    // Check if the channel exists
-    if(m_mapDiscoverableSignalIDs.find(channelName) != m_mapDiscoverableSignalIDs.end())
+    auto result = m_mapDiscoverableSignalIDs.emplace(channelName, channelParamID);
+    if (!result.second)
     {
         std::cerr << "[iDDS_Wrapper] Error: Channel already exists." << std::endl;
         return idds_wrapper_errCode::CHANNEL_ALREADY_EXISTS;
     }
 
-    m_mapDiscoverableSignalIDs[channelName] = channelParamID;
     return idds_wrapper_errCode::OK;
 }
 
 // Send sample method
-idds_wrapper_errCode ChannelStreamer::sendSample(const std::string channel, const double value)
+idds_wrapper_errCode ChannelStreamer::sendSample(const std::string& channel, const double& value)
 {
     try
     {
