@@ -1,4 +1,5 @@
-#include <idds_wrapper/iDDSDevice.h>
+#pragma once
+#include <idds_wrapper/idds_device_impl.h>
 
 class iDDSDeviceBuilder
 {

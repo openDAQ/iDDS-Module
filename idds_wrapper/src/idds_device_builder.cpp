@@ -1,4 +1,4 @@
-#include <idds_wrapper/iDDSDeviceBuilder.h>
+#include <idds_wrapper/idds_device_builder.h>
 
 iDDSDeviceBuilder& iDDSDeviceBuilder::setManufacturer(const std::string& manufacturer)
 {

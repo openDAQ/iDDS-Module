@@ -19,7 +19,7 @@ iDDSServerImpl::iDDSServerImpl(const DevicePtr& rootDevice,
                  .build())
     , context(context)
 {
-    iDDSServer.StartServer();
+    iDDSServer.startServer();
 }
 
 iDDSServerImpl::~iDDSServerImpl()
@@ -36,7 +36,7 @@ ServerTypePtr iDDSServerImpl::createType()
 
 void iDDSServerImpl::onStopServer()
 {
-    iDDSServer.StopServer();
+    iDDSServer.stopServer();
 }
 
 OPENDAQ_DEFINE_CLASS_FACTORY_WITH_INTERFACE(

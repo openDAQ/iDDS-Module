@@ -20,8 +20,8 @@
 #include <opendaq/server.h>
 #include <opendaq/server_impl.h>
 #include <coretypes/intfs.h>
-#include <idds_wrapper/iDDSDevice.h>
-#include <idds_wrapper/iDDSDeviceBuilder.h>
+#include <idds_wrapper/idds_device_impl.h>
+#include <idds_wrapper/idds_device_builder.h>
 
 BEGIN_NAMESPACE_OPENDAQ_IDDS_SERVER_MODULE
 
