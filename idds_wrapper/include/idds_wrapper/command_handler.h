@@ -22,7 +22,7 @@ class CommandHandler
 {
 public:
     CommandHandler(dds::domain::DomainParticipant& participant,
-                   const idds_device_info& device_info,
+                   const IddsDeviceInfo& device_info,
                    ChannelStreamer& channelStreamer);
 
     ~CommandHandler();
@@ -34,7 +34,7 @@ public:
     void stop();
 
     /// Send iDDS message to a specific nodeID
-    idds_wrapper_errCode sendIDDSMessage(const std::string destination_node_id, const std::string& message);
+    IddsWrapperErrCode sendIDDSMessage(const std::string destination_node_id, const std::string& message);
 
     /// Get Received IDDSMessages
     std::vector<Message> getReceivedIDDSMessages() { return m_veciDDSMessages; }
@@ -46,11 +46,11 @@ public:
     std::string getCommandXML(const std::string& command) { return m_commandProcessor.getCommandXML(command); }
 
     /// Publishes a command and waits for a reply or timeout
-    idds_wrapper_errCode publishCommandAndWaitForReply(const std::string& destination_node_id, const std::string& message);
+    IddsWrapperErrCode publishCommandAndWaitForReply(const std::string& destination_node_id, const std::string& message);
 
 private:
     /// Parse incoming idds messages
-    idds_wrapper_errCode parseMessage(const Message& msg, std::string& response);
+    IddsWrapperErrCode parseMessage(const Message& msg, std::string& response);
 
     /// Reply was received
     void setReplyAvailable();
@@ -59,13 +59,13 @@ private:
     void registerCallbacks();
 
     /// Prepare reply message
-    void prepareReply(std::string& reply, const idds_returnCode returnCode);
+    void prepareReply(std::string& reply, const IddsReturnCode returnCode);
 
     /// Prepare reply message with params
-    void prepareReply(std::string& reply, const idds_returnCode returnCode, std::vector<std::string> params);
+    void prepareReply(std::string& reply, const IddsReturnCode returnCode, std::vector<std::string> params);
 
-    /// Translate idds-return_code to idds_wrapper_errCode
-    idds_returnCode translateReturnCode(const idds_wrapper_errCode returnCode);
+    /// Translate idds-return_code to IddsWrapperErrCode
+    IddsReturnCode translateReturnCode(const IddsWrapperErrCode returnCode);
 
     /// Prepare XML response to be sent back after GetAttribute command
     std::string prepareXMLResponse(const std::string& value);
@@ -82,7 +82,7 @@ private:
     std::mutex mtx;
     std::condition_variable cv;
 
-    idds_device_info m_device_info;
+    IddsDeviceInfo m_device_info;
 
     dds::domain::DomainParticipant& m_participant;
     //Message Topic

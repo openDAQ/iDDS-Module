@@ -24,7 +24,7 @@ public:
     void populateCommandsXML();
 
     // Invoke callback
-    idds_wrapper_errCode processCommand(const std::string& method, const ParamList& params, std::string& response);
+    IddsWrapperErrCode processCommand(const std::string& method, const ParamList& params, std::string& response);
 
     // Get supported commands
     std::vector<std::string> getSupportedCommands();

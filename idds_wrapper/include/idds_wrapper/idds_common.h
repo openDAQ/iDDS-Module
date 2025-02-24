@@ -3,7 +3,7 @@
 #include "dds/dds.hpp"
 #include "iDDS.hpp"
 
-struct idds_device_info
+struct IddsDeviceInfo
 {
     std::string logical_node_id;
     std::string manufacturer;
@@ -14,7 +14,7 @@ struct idds_device_info
     std::string ipAddress;
 };
 
-enum class idds_wrapper_errCode {
+enum class IddsWrapperErrCode {
     OK,
     NOK,
     CALLBACK_NOT_FOUND,
@@ -24,7 +24,7 @@ enum class idds_wrapper_errCode {
     CHANNEL_ALREADY_EXISTS
 };
 
-enum class idds_returnCode {
+enum class IddsReturnCode {
     OK = 0,
     CommandNotSupported,
     ParametersIncorrect,

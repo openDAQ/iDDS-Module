@@ -28,7 +28,7 @@ dds::sub::qos::DataReaderQos getMessageReaderQoSFlags(dds::topic::Topic<Message>
 }
 
 CommandHandler::CommandHandler(dds::domain::DomainParticipant& participant,
-                               const idds_device_info& device_info,
+                               const IddsDeviceInfo& device_info,
                                ChannelStreamer& channelStreamer)
     : m_participant(participant)
     , m_bRunning(false)
@@ -116,7 +116,7 @@ void CommandHandler::BeginMessageParser()
                         }
                         else
                         {
-                            if(parseMessage(msg, response) != idds_wrapper_errCode::OK)
+                            if(parseMessage(msg, response) != IddsWrapperErrCode::OK)
                             {
                                 std::cerr << "[iDDS_Wrapper] Error processing message" << std::endl;
                             }
@@ -131,7 +131,7 @@ void CommandHandler::BeginMessageParser()
 }
 
 // sendIDDSMessage method
-idds_wrapper_errCode CommandHandler::sendIDDSMessage(const std::string destination_node_id, const std::string& message)
+IddsWrapperErrCode CommandHandler::sendIDDSMessage(const std::string destination_node_id, const std::string& message)
 {
     LogicalNodeID sourceLogicalNodeID{m_device_info.logical_node_id};
     LogicalNodeID targetLogicalNodeID{destination_node_id};
@@ -155,17 +155,17 @@ idds_wrapper_errCode CommandHandler::sendIDDSMessage(const std::string destinati
 
         //write message
         m_MessageWriter.write(msg);
-        return idds_wrapper_errCode::OK;
+        return IddsWrapperErrCode::OK;
     }
     catch (const dds::core::Exception& e)
     {
         std::cerr << "[iDDS_Wrapper] Exception: " << e.what() << std::endl;
-        return idds_wrapper_errCode::NOK;
+        return IddsWrapperErrCode::NOK;
     }
 }
 
 /// Parse incoming messages
-idds_wrapper_errCode CommandHandler::parseMessage(const Message& msg, std::string& response)
+IddsWrapperErrCode CommandHandler::parseMessage(const Message& msg, std::string& response)
 {
     idds_xml_request parser(msg.messageBody());
 
@@ -173,8 +173,8 @@ idds_wrapper_errCode CommandHandler::parseMessage(const Message& msg, std::strin
     {
         std::cout << "Method name: " << parser.get_method_name() << std::endl;
 
-        idds_wrapper_errCode errCode = m_commandProcessor.processCommand(parser.get_method_name(), parser.get_params(), response);
-        if (errCode != idds_wrapper_errCode::OK)
+        IddsWrapperErrCode errCode = m_commandProcessor.processCommand(parser.get_method_name(), parser.get_params(), response);
+        if (errCode != IddsWrapperErrCode::OK)
         {
             std::cout << "[iDDS_Wrapper] Error processing command " << parser.get_method_name() << std::endl;
             prepareReply(response, translateReturnCode(errCode));
@@ -186,7 +186,7 @@ idds_wrapper_errCode CommandHandler::parseMessage(const Message& msg, std::strin
         std::cout << "[iDDS_Wrapper] Error parsing xml commands" << std::endl;
     }
 
-    return idds_wrapper_errCode::OK;
+    return IddsWrapperErrCode::OK;
 }
 
 /// Register callbacks in the command processor
@@ -195,7 +195,7 @@ void CommandHandler::registerCallbacks()
     // General.HardReset
     m_commandProcessor.registerCallback("General.HardReset", [this](const ParamList& params, std::string& response) {
         // Do nothing - TBD
-        prepareReply(response, idds_returnCode::OK);
+        prepareReply(response, IddsReturnCode::OK);
     });
 
     // Configuration.GetAttribute
@@ -221,12 +221,12 @@ void CommandHandler::registerCallbacks()
 
             // Prepare channel information response
             std::string strParam = prepareXMLResponse( m_channelStreamer.getChannelInfo());
-            prepareReply(response, idds_returnCode::OK, {strParam});
+            prepareReply(response, IddsReturnCode::OK, {strParam});
         }
         else
         {
             // Anything else is not supported at this moment
-            prepareReply(response, idds_returnCode::CommandNotSupported);
+            prepareReply(response, IddsReturnCode::CommandNotSupported);
         }
     });
 
@@ -238,7 +238,7 @@ void CommandHandler::registerCallbacks()
         IDDSStateMachine::getInstance().setState(OperationalStatus::OpStatusOperating);
         std::cout << "State: " << IDDSStateMachine::getInstance().getState() << std::endl;
 
-        prepareReply(response, idds_returnCode::OK);
+        prepareReply(response, IddsReturnCode::OK);
     });
 
     // General.StopOperating
@@ -249,12 +249,12 @@ void CommandHandler::registerCallbacks()
         IDDSStateMachine::getInstance().setState(OperationalStatus::OpStatusReady);
         std::cout << "State: " << IDDSStateMachine::getInstance().getState() << std::endl;
 
-        prepareReply(response, idds_returnCode::OK);
+        prepareReply(response, IddsReturnCode::OK);
     });
 }
 
 /// Prepare reply
-void CommandHandler::prepareReply(std::string& reply, const idds_returnCode returnCode)
+void CommandHandler::prepareReply(std::string& reply, const IddsReturnCode returnCode)
 {
     idds_xml_response parser = idds_xml_response();
     parser.add_code(static_cast<int>(returnCode));
@@ -271,7 +271,7 @@ void CommandHandler::prepareReply(std::string& reply, const idds_returnCode retu
 }
 
 /// Prepare reply and include parameters in the response
-void CommandHandler::prepareReply(std::string& reply, const idds_returnCode returnCode, std::vector<std::string> param)
+void CommandHandler::prepareReply(std::string& reply, const IddsReturnCode returnCode, std::vector<std::string> param)
 {
     idds_xml_response parser = idds_xml_response();
     parser.add_code(static_cast<int>(returnCode));
@@ -291,17 +291,17 @@ void CommandHandler::prepareReply(std::string& reply, const idds_returnCode retu
     }
 }
 
-// Translate idds-return_code to idds_wrapper_errCode
-idds_returnCode CommandHandler::translateReturnCode(const idds_wrapper_errCode returnCode)
+// Translate idds-return_code to IddsWrapperErrCode
+IddsReturnCode CommandHandler::translateReturnCode(const IddsWrapperErrCode returnCode)
 {
     switch (returnCode)
     {
-    case idds_wrapper_errCode::OK:
-        return idds_returnCode::OK;
-    case idds_wrapper_errCode::NOK:
-    case idds_wrapper_errCode::CALLBACK_NOT_FOUND:
+    case IddsWrapperErrCode::OK:
+        return IddsReturnCode::OK;
+    case IddsWrapperErrCode::NOK:
+    case IddsWrapperErrCode::CALLBACK_NOT_FOUND:
     default:
-        return idds_returnCode::CommandNotSupported;
+        return IddsReturnCode::CommandNotSupported;
     }
 }
 
@@ -323,14 +323,14 @@ void CommandHandler::setReplyAvailable()
 }
 
 // Publishes a command and waits for a reply or timeout
-idds_wrapper_errCode CommandHandler::publishCommandAndWaitForReply(const std::string& destination_node_id, const std::string& message)
+IddsWrapperErrCode CommandHandler::publishCommandAndWaitForReply(const std::string& destination_node_id, const std::string& message)
 {
     std::unique_lock<std::mutex> lock(mtx);
     m_bReplyAvailable = false; // Reset flag before sending message
 
     // Send message
     auto errCode = sendIDDSMessage(destination_node_id, message);
-    if (errCode != idds_wrapper_errCode::OK)
+    if (errCode != IddsWrapperErrCode::OK)
     {
         std::cerr << "Failed to send message!" << std::endl;
         return errCode;
@@ -366,10 +366,10 @@ idds_wrapper_errCode CommandHandler::publishCommandAndWaitForReply(const std::st
     else
     {
         std::cerr << "[iDDS_Wrapper] Timeout error: No reply received!" << std::endl;
-        return idds_wrapper_errCode::RESPONSE_TIMEOUT;
+        return IddsWrapperErrCode::RESPONSE_TIMEOUT;
     }
 
-    return idds_wrapper_errCode::OK;
+    return IddsWrapperErrCode::OK;
 }
 
 // Helper method to extract channel name and ID from the reply. Method also adds the channel to the channel streamer

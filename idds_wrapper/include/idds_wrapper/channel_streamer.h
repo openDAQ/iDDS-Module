@@ -14,7 +14,7 @@ class ChannelStreamer
 {
 public:
     ChannelStreamer(dds::domain::DomainParticipant& participant,
-                    const idds_device_info& device_info,
+                    const IddsDeviceInfo& device_info,
                     const dds::pub::Publisher& publisher,
                     const dds::sub::Subscriber& subscriber);
     ~ChannelStreamer();
@@ -47,13 +47,13 @@ public:
     std::string getChannelInfo();
 
     //Add discovered channels
-    idds_wrapper_errCode addDiscoverableChannel(const std::string& channelName, const int& channelParamID);
+    IddsWrapperErrCode addDiscoverableChannel(const std::string& channelName, const int& channelParamID);
 
     // Get discoverable signal name and ID
     std::map<std::string, ParameterID> getDiscoverableSignalNameAndID() { return m_mapDiscoverableSignalIDs; }
 private:
     /// Send sample
-    idds_wrapper_errCode sendSample(const std::string& channel, const double& value);
+    IddsWrapperErrCode sendSample(const std::string& channel, const double& value);
 
 private:
     std::thread m_channelStreamerThread;
@@ -65,7 +65,7 @@ private:
     bool m_bStreamEnabled;
     bool m_bRunningReader;
 
-    idds_device_info m_device_info;
+    IddsDeviceInfo m_device_info;
 
     dds::domain::DomainParticipant& m_participant;
     //ParameterDataSeries Topic

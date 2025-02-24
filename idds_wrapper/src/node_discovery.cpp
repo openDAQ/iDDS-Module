@@ -7,7 +7,7 @@ static const char c_node_advertiser_topic[] = "AboutNode";
 
 NodeDiscovery::NodeDiscovery(dds::domain::DomainParticipant& participant,
                              dds::sub::DataReader<AboutNode>& reader,
-                             const idds_device_info& device_info)
+                             const IddsDeviceInfo& device_info)
     : m_bRunning(false)
     , m_participant(participant)
     , m_device_info(device_info)

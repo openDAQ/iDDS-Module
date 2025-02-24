@@ -96,22 +96,22 @@ std::vector<std::string> iDDSDevice::getAvailableIDDSDevices()
 }
 
 // sendIDDSMessage method
-idds_wrapper_errCode iDDSDevice::sendIDDSMessage(const std::string& destination_node_id, const std::string& message)
+IddsWrapperErrCode iDDSDevice::sendIDDSMessage(const std::string& destination_node_id, const std::string& message)
 {
     return m_commandHandler.sendIDDSMessage(destination_node_id, message);
 }
 
 // Request command
-idds_wrapper_errCode iDDSDevice::publishCommand(const std::string& targetLogicalNodeID, const std::string& command)
+IddsWrapperErrCode iDDSDevice::publishCommand(const std::string& targetLogicalNodeID, const std::string& command)
 {
     auto strCommandXml = m_commandHandler.getCommandXML(command);
 
     if(strCommandXml.empty())
-        return idds_wrapper_errCode::NOK;
+        return IddsWrapperErrCode::NOK;
     else
     {
         m_commandHandler.publishCommandAndWaitForReply(targetLogicalNodeID, strCommandXml);
-        return idds_wrapper_errCode::OK;
+        return IddsWrapperErrCode::OK;
     }
 }
 

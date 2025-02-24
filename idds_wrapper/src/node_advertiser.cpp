@@ -8,7 +8,7 @@ static const char c_node_advertiser_topic[] = "AboutNode";
 static const int c_nStreamingDomainID = -1; //Set to -1 (minus one) if not currently known.
 static const int c_nAdveritisementInterval = 5; // seconds
 
-NodeAdvertiser::NodeAdvertiser(dds::pub::DataWriter<AboutNode>& writer, const idds_device_info& device_info)
+NodeAdvertiser::NodeAdvertiser(dds::pub::DataWriter<AboutNode>& writer, const IddsDeviceInfo& device_info)
     : m_bRunning(false)
     , m_device_info(device_info)
     , m_writer(writer)

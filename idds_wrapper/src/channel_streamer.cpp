@@ -48,7 +48,7 @@ dds::pub::qos::DataWriterQos getParameterDataSeriesWriterQoSFlags(dds::topic::To
 }
 
 ChannelStreamer::ChannelStreamer(dds::domain::DomainParticipant& participant,
-                                 const idds_device_info& device_info,
+                                 const IddsDeviceInfo& device_info,
                                  const dds::pub::Publisher& publisher,
                                  const dds::sub::Subscriber& subscriber)
             : m_participant(participant)
@@ -250,20 +250,20 @@ std::string ChannelStreamer::getChannelInfo()
 }
 
 // Add discovered channels
-idds_wrapper_errCode ChannelStreamer::addDiscoverableChannel(const std::string& channelName, const int& channelParamID)
+IddsWrapperErrCode ChannelStreamer::addDiscoverableChannel(const std::string& channelName, const int& channelParamID)
 {
     auto result = m_mapDiscoverableSignalIDs.emplace(channelName, channelParamID);
     if (!result.second)
     {
         std::cerr << "[iDDS_Wrapper] Error: Channel already exists." << std::endl;
-        return idds_wrapper_errCode::CHANNEL_ALREADY_EXISTS;
+        return IddsWrapperErrCode::CHANNEL_ALREADY_EXISTS;
     }
 
-    return idds_wrapper_errCode::OK;
+    return IddsWrapperErrCode::OK;
 }
 
 // Send sample method
-idds_wrapper_errCode ChannelStreamer::sendSample(const std::string& channel, const double& value)
+IddsWrapperErrCode ChannelStreamer::sendSample(const std::string& channel, const double& value)
 {
     try
     {
@@ -293,11 +293,11 @@ idds_wrapper_errCode ChannelStreamer::sendSample(const std::string& channel, con
 
         //write message
         m_streamWriter.write(dataSeries);
-        return idds_wrapper_errCode::OK;
+        return IddsWrapperErrCode::OK;
     }
     catch (const dds::core::Exception& e)
     {
         std::cerr << "[iDDS_Wrapper] Exception: " << e.what() << std::endl;
-        return idds_wrapper_errCode::NOK;
+        return IddsWrapperErrCode::NOK;
     }
 }

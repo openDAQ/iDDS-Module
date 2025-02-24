@@ -14,7 +14,7 @@ class NodeDiscovery
 public:
     NodeDiscovery(dds::domain::DomainParticipant& participant,
                   dds::sub::DataReader<AboutNode>& reader,
-                  const idds_device_info& device_info);
+                  const IddsDeviceInfo& device_info);
 
     ~NodeDiscovery();
 
@@ -32,7 +32,7 @@ private:
     bool m_bRunning;
     dds::domain::DomainParticipant& m_participant;
 
-    idds_device_info m_device_info;
+    IddsDeviceInfo m_device_info;
 
     //AboutNode Topic
     dds::sub::DataReader<AboutNode> m_reader;
