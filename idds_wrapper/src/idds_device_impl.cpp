@@ -115,7 +115,6 @@ IddsWrapperErrCode iDDSDevice::publishCommand(const std::string& targetLogicalNo
     }
 }
 
-
 /// Get Available Signal Name and ID
 std::map<std::string, ParameterID> iDDSDevice::getDiscoverableSignalNameAndID()
 {

@@ -116,12 +116,17 @@ void CommandHandler::BeginMessageParser()
                         }
                         else
                         {
-                            if(parseMessage(msg, response) != IddsWrapperErrCode::OK)
+                            auto err = parseMessage(msg, response);
+                            if(err != IddsWrapperErrCode::OK)
                             {
                                 std::cerr << "[iDDS_Wrapper] Error processing message" << std::endl;
                             }
 
-                            sendIDDSMessage(msg.sourceLogicalNodeID(), response);
+                            if(err != IddsWrapperErrCode::INVALID_XML_COMMAND)
+                            {
+                                //Don't reply to invalid messages
+                                sendIDDSMessage(msg.sourceLogicalNodeID(), response);
+                            }
                         }
                     }
                 }
@@ -184,6 +189,7 @@ IddsWrapperErrCode CommandHandler::parseMessage(const Message& msg, std::string&
     else
     {
         std::cout << "[iDDS_Wrapper] Error parsing xml commands" << std::endl;
+        return IddsWrapperErrCode::INVALID_XML_COMMAND;
     }
 
     return IddsWrapperErrCode::OK;

@@ -44,7 +44,7 @@ public:
     void subscribeToChannel(const int channelParamID);
 
     // Get channel information
-    std::string getChannelInfo();
+    virtual std::string getChannelInfo();
 
     //Add discovered channels
     IddsWrapperErrCode addDiscoverableChannel(const std::string& channelName, const int& channelParamID);

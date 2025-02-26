@@ -1,6 +1,8 @@
 set(TEST_APP test_idds_wrapper)
 
 set(TEST_SOURCES test_app.cpp
+                 test_idds_device.cpp
+                 test_command_handler.cpp
                  test_command_processor.cpp
 )
 

@@ -13,6 +13,7 @@
 #include <idds_wrapper/node_discovery.h>
 #include <idds_wrapper/command_handler.h>
 #include <idds_wrapper/channel_streamer.h>
+#include <idds_wrapper/idds_state_machine.h>
 #include "dds/dds.hpp"
 #include "iDDS.hpp"
 
@@ -52,6 +53,9 @@ public:
 
     /// Get suppoprt idds commands
     std::vector<std::string> getSupportedIDDSCommands() { return m_commandHandler.getSupportedCommands(); }
+
+    /// Get Current Device State
+    OperationalStatus getCurrentDeviceState() { return IDDSStateMachine::getInstance().getState(); }
 
     /// Request command
     IddsWrapperErrCode publishCommand(const std::string& targetLogicalNodeID, const std::string& command);
