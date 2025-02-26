@@ -17,8 +17,9 @@ int main()
         std::cout << " - " << id << std::endl;
     }
 
-    std::cout << "Publish Command: Configuration.GetAttribute" << std::endl;
     std::cin.get();
+    std::cout << "Publish Command: Configuration.GetAttribute" << std::endl;
+
 
     // Configuration.GetAttribute
     device.publishCommand(devices[0], "Configuration.GetAttribute");
