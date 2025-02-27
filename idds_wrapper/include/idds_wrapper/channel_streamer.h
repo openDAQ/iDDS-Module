@@ -77,4 +77,6 @@ private:
 
     std::map<std::string, ParameterID> m_mapSignalIds;
     std::map<std::string, ParameterID> m_mapDiscoverableSignalIDs;
+
+    uint32_t m_InstanceValue;
 };

@@ -61,6 +61,7 @@ ChannelStreamer::ChannelStreamer(dds::domain::DomainParticipant& participant,
             , m_streamWriter(m_streamPublisher, m_streamTopic, getParameterDataSeriesWriterQoSFlags(m_streamTopic))
             , m_SubsribedChannel(static_cast<ParameterID>(-1))
             , m_bStreamEnabled(true) //Streaming is enabled by default for now
+            , m_InstanceValue(0)
 {
     // Initialize channels
     m_mapSignalIds["Channel.1"] = c_nParameterID_channel1;
@@ -289,7 +290,8 @@ IddsWrapperErrCode ChannelStreamer::sendSample(const std::string& channel, const
         dataSeries.qualityFlags(0);
 
         //instanceValue
-        dataSeries.instanceValue(0);
+        dataSeries.instanceValue(m_InstanceValue);
+        m_InstanceValue++;
 
         //write message
         m_streamWriter.write(dataSeries);

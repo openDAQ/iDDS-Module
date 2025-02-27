@@ -25,6 +25,8 @@ iDDS is an embedded application protocol for data acquisition and control instru
 - **Configurable QoS** for flexible integration
 - **Client/Server openDAQ modules** to streamline test system development
 
+For details on the idds_wrapper and iDDS topics please refer to [idds_wrapper README](idds_wrapper/README.md).
+
 ---
 
 ## Folder Structure
@@ -103,7 +105,7 @@ On another terminal instance:
 ---
 
 ## iDDS Network and Nodes
-Nodes in an iDDS network advertise their presence and nature using periodic advertisement messages every 5 seconds. A network host can support multiple nodes, each identified by a **system-wide unique node identifier** (e.g., `<mac>-<application>`). Nodes can also have logical identifiers and are referenced in control messages using their unique identifiers.
+Nodes in an iDDS network advertise their presence and nature using periodic advertisement messages every 5 seconds. A network host can support multiple nodes, each identified by a **system-wide unique node identifier** (e.g., `<manufacturer><productType><serialNumber>`). Nodes can also have logical identifiers and are referenced in control messages using their unique identifiers.
 
 ### Wrapper Implementation Details
 The iDDS wrapper currently implements **three DDS topics**:
