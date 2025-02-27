@@ -10,7 +10,7 @@
 
 # iDDS Modules for openDAQ
 
-An open-source implementation of iDDS (Instrumentation Data Distribution Service) developed using CycloneDDS for openDAQ ([CycloneDDS C++ Binding](https://github.com/eclipse-cyclonedds/cyclonedds-cxx)).
+An open-source implementation of iDDS (Instrumentation Data Distribution Service) developed using CycloneDDS ([CycloneDDS C++ Binding](https://github.com/eclipse-cyclonedds/cyclonedds-cxx)) for openDAQ.
 
 iDDS is an embedded application protocol for data acquisition and control instruments. It uses Data Distribution Service (DDS), a widely adopted data communications protocol that follows a data-centric model.
 
