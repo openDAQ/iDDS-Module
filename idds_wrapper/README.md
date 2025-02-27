@@ -26,7 +26,7 @@ struct AboutNode {
 | buildStandard    | hardwareVersion = "1.0", softwareVersion = "1.0" |
 | operationalStatus | OpStatusOperating |
 | OpStatusFaulted  | "no errors" |
-| logicalNodeID    | "PX000034" |
+| logicalNodeID    | "node1" |
 | domainID         | 2 |
 | ipAddress        | "127.0.0.1" |
 | time            | seconds = 1740618440, nanoseconds = 17406184758031 |
