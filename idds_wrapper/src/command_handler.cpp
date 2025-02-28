@@ -1,6 +1,6 @@
 #include <idds_wrapper/command_handler.h>
 #include <idds_wrapper/idds_state_machine.h>
-
+#include <chrono>
 #include <tuple>
 #include <regex>
 
@@ -12,30 +12,26 @@ static constexpr int c_timeout_ms   = 10000;             // Timeout for reply (m
 //--------------------------------------------------------------------------------------------------
 
 
-dds::sub::qos::DataReaderQos getMessageReaderQoSFlags(dds::topic::Topic<Message>& topic)
+dds::sub::qos::DataReaderQos getMessageReaderQoSFlags(dds::topic::Topic<Message>& topic,
+                                                      const QoSConfig& config)
 {
     dds::sub::qos::DataReaderQos currQos = topic.qos();
-
-    std::vector<dds::core::policy::DataRepresentationId> reprs;
-    reprs.push_back(dds::core::policy::DataRepresentationId::XCDR1);
-    currQos << dds::core::policy::DataRepresentation(reprs);
-
-    currQos << dds::core::policy::LatencyBudget(dds::core::Duration(0, 100000));
-
-    currQos << dds::core::policy::Reliability(dds::core::policy::ReliabilityKind_def::RELIABLE, dds::core::Duration(0, 100000000));
-
+    currQos << dds::core::policy::DataRepresentation(config.dataRepresentation);
+    currQos << dds::core::policy::LatencyBudget(config.latencyBudget);
+    currQos << config.reliability;
     return currQos;
 }
 
 CommandHandler::CommandHandler(dds::domain::DomainParticipant& participant,
                                const IddsDeviceInfo& device_info,
-                               ChannelStreamer& channelStreamer)
+                               ChannelStreamer& channelStreamer,
+                               const QoSConfig& messageReaderQoS)
     : m_participant(participant)
     , m_bRunning(false)
     , m_device_info(device_info)
     , m_MessageTopic(participant, c_message_topic)
     , m_MessageSubscriber(participant)
-    , m_MessageReader(m_MessageSubscriber, m_MessageTopic, getMessageReaderQoSFlags(m_MessageTopic))
+    , m_MessageReader(m_MessageSubscriber, m_MessageTopic, getMessageReaderQoSFlags(m_MessageTopic, messageReaderQoS))
     , m_MessagePublisher(participant)
     , m_MessageWriter(m_MessagePublisher, m_MessageTopic)
     , m_commandProcessor()
@@ -116,12 +112,17 @@ void CommandHandler::BeginMessageParser()
                         }
                         else
                         {
-                            if(parseMessage(msg, response) != IddsWrapperErrCode::OK)
+                            auto err = parseMessage(msg, response);
+                            if(err != IddsWrapperErrCode::OK)
                             {
                                 std::cerr << "[iDDS_Wrapper] Error processing message" << std::endl;
                             }
 
-                            sendIDDSMessage(msg.sourceLogicalNodeID(), response);
+                            if(err != IddsWrapperErrCode::INVALID_XML_COMMAND)
+                            {
+                                //Don't reply to invalid messages
+                                sendIDDSMessage(msg.sourceLogicalNodeID(), response);
+                            }
                         }
                     }
                 }
@@ -184,6 +185,7 @@ IddsWrapperErrCode CommandHandler::parseMessage(const Message& msg, std::string&
     else
     {
         std::cout << "[iDDS_Wrapper] Error parsing xml commands" << std::endl;
+        return IddsWrapperErrCode::INVALID_XML_COMMAND;
     }
 
     return IddsWrapperErrCode::OK;

@@ -16,51 +16,41 @@ static const int c_nParameterID_channel1 = 6445;
 static const int c_nParameterID_channel2 = 6446;
 //--------------------------------------------------------------------------------------------------
 
-dds::sub::qos::DataReaderQos getParameterDataSeriesReaderQoSFlags(dds::topic::Topic<ParameterDataSeries>& topic)
+dds::sub::qos::DataReaderQos getParameterDataSeriesReaderQoSFlags(dds::topic::Topic<ParameterDataSeries>& topic, const QoSConfig& config)
 {
     dds::sub::qos::DataReaderQos currQos = topic.qos();
-
-    std::vector<dds::core::policy::DataRepresentationId> reprs;
-    reprs.push_back(dds::core::policy::DataRepresentationId::XCDR1);
-    currQos << dds::core::policy::DataRepresentation(reprs);
-
-    currQos << dds::core::policy::LatencyBudget(dds::core::Duration(25, 0));
-
+    currQos << dds::core::policy::DataRepresentation(config.dataRepresentation);
+    currQos << dds::core::policy::LatencyBudget(config.latencyBudget);
+    currQos << config.reliability;
     return currQos;
 }
 
-dds::pub::qos::DataWriterQos getParameterDataSeriesWriterQoSFlags(dds::topic::Topic<ParameterDataSeries>& topic)
+dds::pub::qos::DataWriterQos getParameterDataSeriesWriterQoSFlags(dds::topic::Topic<ParameterDataSeries>& topic, const QoSConfig& config)
 {
     dds::pub::qos::DataWriterQos currQos = topic.qos();
-
-    // Policy.DataRepresentation(use_cdrv0_representation=True, use_xcdrv2_representation=False)
-    std::vector<dds::core::policy::DataRepresentationId> reprs;
-    reprs.push_back(dds::core::policy::DataRepresentationId::XCDR1);
-    currQos << dds::core::policy::DataRepresentation(reprs);
-
-    // Policy.Reliability.Reliable(max_blocking_time=100000000)
-    currQos << dds::core::policy::Reliability(dds::core::policy::ReliabilityKind_def::RELIABLE, dds::core::Duration(0, 100000000));
-
-    // Policy.LatencyBudget(budget=2500000)
-    currQos << dds::core::policy::LatencyBudget(dds::core::Duration(0, 1500000));
-
+    currQos << dds::core::policy::DataRepresentation(config.dataRepresentation);
+    currQos << dds::core::policy::LatencyBudget(config.latencyBudget);
+    currQos << config.reliability;
     return currQos;
 }
 
 ChannelStreamer::ChannelStreamer(dds::domain::DomainParticipant& participant,
                                  const IddsDeviceInfo& device_info,
                                  const dds::pub::Publisher& publisher,
-                                 const dds::sub::Subscriber& subscriber)
+                                 const dds::sub::Subscriber& subscriber,
+                                 const QoSConfig& readerQoSConfig,
+                                 const QoSConfig& writerQoSConfig)
             : m_participant(participant)
             , m_bRunning(false)
             , m_device_info(device_info)
             , m_streamTopic(m_participant, stream_topic)
             , m_streamSubscriber(subscriber)
-            , m_streamReader(m_streamSubscriber, m_streamTopic, getParameterDataSeriesReaderQoSFlags(m_streamTopic))
+            , m_streamReader(m_streamSubscriber, m_streamTopic, getParameterDataSeriesReaderQoSFlags(m_streamTopic, readerQoSConfig))
             , m_streamPublisher(publisher)
-            , m_streamWriter(m_streamPublisher, m_streamTopic, getParameterDataSeriesWriterQoSFlags(m_streamTopic))
+            , m_streamWriter(m_streamPublisher, m_streamTopic, getParameterDataSeriesWriterQoSFlags(m_streamTopic, writerQoSConfig))
             , m_SubsribedChannel(static_cast<ParameterID>(-1))
             , m_bStreamEnabled(true) //Streaming is enabled by default for now
+            , m_InstanceValue(0)
 {
     // Initialize channels
     m_mapSignalIds["Channel.1"] = c_nParameterID_channel1;
@@ -289,7 +279,8 @@ IddsWrapperErrCode ChannelStreamer::sendSample(const std::string& channel, const
         dataSeries.qualityFlags(0);
 
         //instanceValue
-        dataSeries.instanceValue(0);
+        dataSeries.instanceValue(m_InstanceValue);
+        m_InstanceValue++;
 
         //write message
         m_streamWriter.write(dataSeries);

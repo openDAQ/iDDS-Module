@@ -16,7 +16,9 @@ public:
     ChannelStreamer(dds::domain::DomainParticipant& participant,
                     const IddsDeviceInfo& device_info,
                     const dds::pub::Publisher& publisher,
-                    const dds::sub::Subscriber& subscriber);
+                    const dds::sub::Subscriber& subscriber,
+                    const QoSConfig& readerQoSConfig,
+                    const QoSConfig& writerQoSConfig);
     ~ChannelStreamer();
 
     /// Start the channel streamer thread
@@ -44,7 +46,7 @@ public:
     void subscribeToChannel(const int channelParamID);
 
     // Get channel information
-    std::string getChannelInfo();
+    virtual std::string getChannelInfo();
 
     //Add discovered channels
     IddsWrapperErrCode addDiscoverableChannel(const std::string& channelName, const int& channelParamID);
@@ -77,4 +79,6 @@ private:
 
     std::map<std::string, ParameterID> m_mapSignalIds;
     std::map<std::string, ParameterID> m_mapDiscoverableSignalIDs;
+
+    uint32_t m_InstanceValue;
 };

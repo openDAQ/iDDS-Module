@@ -7,3 +7,4 @@ inline std::string strip_whitespace(const std::string& input) {
     return result;
 }
 
+ 

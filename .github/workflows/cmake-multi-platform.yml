@@ -21,7 +21,7 @@ jobs:
 
       matrix:
         os: [ubuntu-latest]
-        build_type: [Release]
+        build_type: [Release, Debug]
         c_compiler: [gcc, clang]
         include:
           - os: ubuntu-latest
@@ -106,12 +106,16 @@ jobs:
 
       matrix:
         os: [windows-latest]
-        build_type: [Release]
-        c_compiler: [cl]
+        build_type: [Release, Debug]
+        c_compiler: [cl, clang]
         include:
           - os: windows-latest
             c_compiler: cl
             cpp_compiler: cl
+            cpack: zip
+          - os: windows-latest
+            c_compiler: clang
+            cpp_compiler: clang-cl
             cpack: zip
 
     steps:
