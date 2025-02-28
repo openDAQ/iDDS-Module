@@ -16,8 +16,8 @@ class MockChannelStreamer : public ChannelStreamer
 {
 public:
     MockChannelStreamer(dds::domain::DomainParticipant& participant, const IddsDeviceInfo& device_info,
-                        dds::pub::Publisher& publisher, dds::sub::Subscriber& subscriber)
-        : ChannelStreamer(participant, device_info, publisher, subscriber) {}
+                        dds::pub::Publisher& publisher, dds::sub::Subscriber& subscriber, const QoSConfig& readerQoSConfig, const QoSConfig& writerQoSConfig)
+        : ChannelStreamer(participant, device_info, publisher, subscriber, readerQoSConfig, writerQoSConfig) {}
 
     MOCK_METHOD(std::string, getChannelInfo, (), (override));
 };
@@ -37,12 +37,12 @@ protected:
           device_info{"node_id", "manufacturer", "productType", "serialNumber", "hwVersion", "swVersion", "ipAddress"},
           subscriber(dds::sub::Subscriber(participant, participant.default_subscriber_qos() << dds::core::policy::Partition("default"))),
           publisher(dds::pub::Publisher(participant, participant.default_publisher_qos() << dds::core::policy::Partition("default"))),
-          channelStreamer(participant, device_info, publisher, subscriber)
+          channelStreamer(participant, device_info, publisher, subscriber, QoSConfig::DefaultParameterDataSeriesReaderQoS(), QoSConfig::DefaultParameterDataSeriesWriterQoS())
     {
     }
 
     void SetUp() override {
-        commandHandler = new CommandHandler(participant, device_info, channelStreamer);
+        commandHandler = new CommandHandler(participant, device_info, channelStreamer, QoSConfig::DefaultMessageReaderQoS());
     }
 
     void TearDown() override {
@@ -80,7 +80,8 @@ TEST_F(CommandHandlerTest, PublishCommandAndWaitForReply_GetAttribute)
     commandHandler->start();
 
     std::string destination_node_id = "node_id";
-    std::string message = "<methodCall><methodName>Configuration.GetAttribute</methodName><params><param><name>Attribute</name><value><String>alistv</String></value></param></params></methodCall>";
+    std::string message = "<methodCall><methodName>Configuration.GetAttribute</methodName><params><param><name>Attribute</name>" \
+                          "<value><String>alistv</String></value></param></params></methodCall>";
 
     EXPECT_CALL(channelStreamer, getChannelInfo()).WillOnce(Return("{{LOGICAL-ID}{SECTION}{NAME}{VALUE}{R/W}{DESCRIPTION}}"                 \
                                                                     "{{OpenDaqDevice1}{Channel.1}{Name}{ChannelName1}{Name of Channel 1}}"  \
@@ -93,8 +94,8 @@ TEST_F(CommandHandlerTest, PublishCommandAndWaitForReply_GetAttribute)
 
     ASSERT_EQ(static_cast<int>(result), static_cast<int>(IddsWrapperErrCode::OK));
     EXPECT_EQ(receivedMessages[1].messageBody(), "<methodResponse><code>0</code><message /><params><param><name>Attribute</name>" \
-                        "<value><String>{{LOGICAL-ID}{SECTION}{NAME}{VALUE}{R/W}{DESCRIPTION}}"          \
-                        "{{OpenDaqDevice1}{Channel.1}{Name}{ChannelName1}{Name of Channel 1}}"           \
+                        "<value><String>{{LOGICAL-ID}{SECTION}{NAME}{VALUE}{R/W}{DESCRIPTION}}"                                   \
+                        "{{OpenDaqDevice1}{Channel.1}{Name}{ChannelName1}{Name of Channel 1}}"                                    \
                         "{{OpenDaqDevice1}{Channel.1}{ID}{6445}{ID of Channel 1}}</String></value></param></params></methodResponse>");
 
     // Stop MessageReader

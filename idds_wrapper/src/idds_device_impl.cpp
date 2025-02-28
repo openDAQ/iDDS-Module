@@ -15,7 +15,8 @@ static const char rtps_file[] = "rtps.ini";
 
 iDDSDevice::iDDSDevice(const std::string node_id, const std::string manufacturer, const std::string productType,
                        const std::string serialNumber, const std::string hwVersion, const std::string swVersion,
-                       const std::string ipAddress)
+                       const std::string ipAddress, const QoSConfig& messageReaderQoS, const QoSConfig& parameterDataSeriesReaderQoS,
+                       const QoSConfig& parameterDataSeriesWriterQoS)
                        : m_idds_device_info{node_id, manufacturer, productType,
                                 serialNumber, hwVersion, swVersion, ipAddress}
                        // cycloneDDS specific initialization
@@ -30,8 +31,8 @@ iDDSDevice::iDDSDevice(const std::string node_id, const std::string manufacturer
                        , m_ParameterDataSeriesPublisher(m_streamParticipant, m_streamParticipant.default_publisher_qos() << dds::core::policy::Partition("default"))
                        , m_nodeAdvertiser(m_aboutNodewriter, m_idds_device_info)
                        , m_nodeDiscovery(m_participant, m_aboutNodeReader, m_idds_device_info)
-                       , m_channelStreamer(m_streamParticipant, m_idds_device_info, m_ParameterDataSeriesPublisher, m_ParameterDataSeriesSubscriber)
-                       , m_commandHandler(m_participant, m_idds_device_info, m_channelStreamer)
+                       , m_channelStreamer(m_streamParticipant, m_idds_device_info, m_ParameterDataSeriesPublisher, m_ParameterDataSeriesSubscriber, parameterDataSeriesReaderQoS, parameterDataSeriesWriterQoS)
+                       , m_commandHandler(m_participant, m_idds_device_info, m_channelStreamer, messageReaderQoS)
 {
 }
 

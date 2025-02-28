@@ -16,7 +16,9 @@ public:
     ChannelStreamer(dds::domain::DomainParticipant& participant,
                     const IddsDeviceInfo& device_info,
                     const dds::pub::Publisher& publisher,
-                    const dds::sub::Subscriber& subscriber);
+                    const dds::sub::Subscriber& subscriber,
+                    const QoSConfig& readerQoSConfig,
+                    const QoSConfig& writerQoSConfig);
     ~ChannelStreamer();
 
     /// Start the channel streamer thread
