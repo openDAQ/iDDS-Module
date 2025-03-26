@@ -10,7 +10,7 @@ protected:
 
     void SetUp() override {
         // Register a sample callback for testing
-        commandProcessor.registerCallback("TestCommand", [](const ParamList& params, std::string& response) {
+        commandProcessor.registerCallback("TestCommand", [](const ParamList& /* params*/, std::string& response) {
             response = "Callback executed";
         });
     }
