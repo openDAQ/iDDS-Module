@@ -23,7 +23,8 @@ class CommandHandler
 public:
     CommandHandler(dds::domain::DomainParticipant& participant,
                    const IddsDeviceInfo& device_info,
-                   ChannelStreamer& channelStreamer);
+                   ChannelStreamer& channelStreamer,
+                   const QoSConfig& messageReaderQoS);
 
     ~CommandHandler();
 

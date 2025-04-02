@@ -13,6 +13,7 @@
 #include <idds_wrapper/node_discovery.h>
 #include <idds_wrapper/command_handler.h>
 #include <idds_wrapper/channel_streamer.h>
+#include <idds_wrapper/idds_state_machine.h>
 #include "dds/dds.hpp"
 #include "iDDS.hpp"
 
@@ -24,7 +25,9 @@ public:
     /// Constructor
     explicit iDDSDevice(const std::string node_id, const std::string manufacturer = "openDAQ", const std::string productType = "model",
                         const std::string serialNumber = "serial_number", const std::string hwVersion = "", const std::string swVersion = "",
-                        const std::string ipAddress = "127.0.0.1");
+                        const std::string ipAddress = "127.0.0.1", const QoSConfig& messageReaderQoS = QoSConfig::DefaultMessageReaderQoS(),
+                        const QoSConfig& parameterDataSeriesReaderQoS = QoSConfig::DefaultParameterDataSeriesReaderQoS(),
+                        const QoSConfig& parameterDataSeriesWriterQoS = QoSConfig::DefaultParameterDataSeriesWriterQoS());
 
     /// Destructor
     ~iDDSDevice();
@@ -52,6 +55,9 @@ public:
 
     /// Get suppoprt idds commands
     std::vector<std::string> getSupportedIDDSCommands() { return m_commandHandler.getSupportedCommands(); }
+
+    /// Get Current Device State
+    OperationalStatus getCurrentDeviceState() { return IDDSStateMachine::getInstance().getState(); }
 
     /// Request command
     IddsWrapperErrCode publishCommand(const std::string& targetLogicalNodeID, const std::string& command);
